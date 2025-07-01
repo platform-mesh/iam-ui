@@ -1,0 +1,28 @@
+{
+  "name": "iam-wc",
+  "luigiConfigFragment": {
+    "data": {
+      "nodes": [
+        {
+          "entityType": "project.overview::compound",
+          "pathSegment": "members-sidebar",
+          "urlSuffix": "/main.js#members-sidebar",
+          "layoutConfig": {
+            "slot": "sidebar",
+            "order": 10
+          },
+          "webcomponent": {
+            "selfRegistered": true
+          },
+          "id": "members-sidebar"
+        }
+      ],
+      "texts": [
+        {
+          "locale": "",
+          "textDictionary": {}
+        }
+      ]
+    }
+  }
+}

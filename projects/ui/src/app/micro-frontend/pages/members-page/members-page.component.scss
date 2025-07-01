@@ -1,0 +1,43 @@
+.action-column-alignment {
+  text-align: right;
+}
+
+#edit-member-role-selection {
+  padding: 0.5rem 0;
+  width: 100%;
+}
+
+#members-page-user-info {
+  padding: 0;
+}
+
+.loading-indicator {
+  display: block;
+}
+
+:host ::ng-deep .fd-popover-custom {
+  width: 100%;
+}
+
+.member-extra-information {
+  color: var(--sapNeutralTextColor);
+}
+
+.members-filter-group {
+  align-items: flex-end;
+  display: flex;
+  gap: 1rem;
+}
+
+.members-filter-group-search-term,
+.members-filter-group-roles {
+  width: 25rem;
+  max-width: 100%;
+}
+
+:host ::ng-deep .fd-table--no-outer-border {
+  td.fd-table__cell.is-last-child,
+  .fdp-table__header .fd-table__cell {
+    border-left-style: none;
+  }
+}

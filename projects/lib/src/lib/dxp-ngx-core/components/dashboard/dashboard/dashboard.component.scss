@@ -1,0 +1,16 @@
+.dashboard {
+  height: 100%;
+  width: 100%;
+}
+
+::ng-deep .header-hidden {
+  display: none !important;
+}
+
+::ng-deep .fd-flexible-column-layout__column:first-child {
+  border-right: none !important;
+}
+
+::ng-deep .fd-flexible-column-layout__separator {
+  display: none !important;
+}

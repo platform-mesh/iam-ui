@@ -1,0 +1,76 @@
+<dxp-dashboard-sidebar-item
+  [title]="'Members'"
+  [loading]="loading"
+  [rolesAllowedForCallback]="rolesAllowedForEdit"
+  (editCallback)="navigateToMembers()"
+>
+  <div class="members">
+    <fd-avatar-group [size]="'xs'" overflowPopoverTitle="Members2">
+      @for (member of members; track member.userId) {
+        <iam-avatar
+          *fdAvatarGroupItem="
+            details;
+            title: member.firstName + ' ' + member.lastName
+          "
+          size="xs"
+          [user]="member"
+          [disablePopover]="true"
+        ></iam-avatar>
+
+        <ng-template #details>
+          <fd-quick-view [id]="member.userId">
+            <fd-quick-view-subheader
+              [id]="member.userId + '-popover-subheader'"
+              style="display: block; padding-top: 1rem"
+            >
+              <fd-avatar
+                [circle]="true"
+                size="xs"
+                [clickable]="true"
+                (avatarClicked)="navigateToUser(member.userId)"
+                role="img"
+                [image]="'https://avatars.wdf.sap.corp/avatar/' + member.userId"
+                [colorAccent]="6"
+                alterIcon="content|default-icon"
+                [title]="member.firstName + ' ' + member.lastName"
+                [label]="member.firstName + ' ' + member.lastName"
+                [ariaLabel]="
+                  member.firstName + ' ' + member.lastName + ' avatar'
+                "
+              ></fd-avatar>
+              <fd-quick-view-subheader-title
+                ><span
+                  (click)="navigateToUser(member.userId)"
+                  style="cursor: pointer"
+                  >{{ member.firstName }} {{ member.lastName }}</span
+                ></fd-quick-view-subheader-title
+              >
+            </fd-quick-view-subheader>
+
+            <fd-quick-view-group
+              [attr.aria-labelledby]="member.userId + '-group-title'"
+              style="display: block; padding: 1rem"
+            >
+              <fd-quick-view-group-title [id]="member.userId + '-group-title'"
+                >Contact Details
+              </fd-quick-view-group-title>
+
+              @if (member.email) {
+                <fd-quick-view-group-item>
+                  <fd-quick-view-group-item-label
+                    >Email</fd-quick-view-group-item-label
+                  >
+                  <fd-quick-view-group-item-content>
+                    <a fd-link [href]="'mailto:' + member.email">{{
+                      member.email
+                    }}</a>
+                  </fd-quick-view-group-item-content>
+                </fd-quick-view-group-item>
+              }
+            </fd-quick-view-group>
+          </fd-quick-view>
+        </ng-template>
+      }
+    </fd-avatar-group>
+  </div>
+</dxp-dashboard-sidebar-item>

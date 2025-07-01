@@ -1,0 +1,46 @@
+@if (!disablePopover) {
+  <dxp-user-quick-view [user]="user">
+    <ng-container *ngTemplateOutlet="avatarTemplate"></ng-container>
+  </dxp-user-quick-view>
+}
+
+@if (disablePopover) {
+  <ng-container *ngTemplateOutlet="avatarTemplate"></ng-container>
+}
+
+<ng-template #avatarTemplate>
+  @switch (avatarMode) {
+    @case (allAvatarModes.Image) {
+      <fd-avatar
+        [size]="size"
+        [image]="imageUrl"
+        [circle]="true"
+        [colorAccent]="6"
+      >
+      </fd-avatar>
+    }
+
+    @case (allAvatarModes.Name) {
+      <fd-avatar
+        [size]="size"
+        [circle]="true"
+        [colorAccent]="6"
+        label="{{ user?.firstName?.toUpperCase() }} {{
+          user?.lastName?.toUpperCase()
+        }}"
+      >
+      </fd-avatar>
+    }
+
+    @case (allAvatarModes.GlyphIcon) {
+      <fd-avatar
+        [size]="size"
+        [placeholder]="true"
+        glyph="person-placeholder"
+        [circle]="true"
+        [colorAccent]="6"
+      >
+      </fd-avatar>
+    }
+  }
+</ng-template>

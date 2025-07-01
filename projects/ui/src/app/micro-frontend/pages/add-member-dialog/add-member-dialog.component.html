@@ -1,0 +1,319 @@
+<fd-dynamic-page>
+  <fd-dynamic-page-header />
+  <fd-dynamic-page-content id="basic" cdkScrollable>
+    <label i18n="description for the user search input">
+      Enter the names or email addresses of the users you want to add to the
+      {{ currentEntity }}.
+    </label>
+    <br /><br />
+
+    <div fd-form-item>
+      <label
+        fd-form-label
+        [colon]="true"
+        i18n="user|Label for the user search input"
+        [inlineHelpContent]="
+          emailDomains.length > 0
+            ? 'You can only add users with @' +
+              emailDomains.join(', @') +
+              ' email addresses.'
+            : null
+        "
+        inlineHelpGlyph="message-information"
+        inlineHelpBodyPlacement="right"
+      >
+        User</label
+      >
+      <div fd-form-item>
+        <fd-combobox
+          fdkInitialFocus
+          placeholder="Enter name or email address"
+          [dropdownValues]="dropDownValues"
+          [state]="hasError() ? 'error' : undefined"
+          [itemTemplate]="dropDownTemplate"
+          (itemClicked)="itemClicked($event.item)"
+          [displayFn]="displayFunc"
+          [filterFn]="fakeFilterFunc"
+          [isSearch]="true"
+          [(ngModel)]="currentInput"
+          (inputTextChange)="inputChange($event)"
+          [autoComplete]="false"
+          [byline]="showByline"
+          fillControlMode="equal"
+          data-testid="dxp-iam-member-add-dialog-user-search-input"
+          fdCompact="true"
+        >
+          @if (filteredUsersCollectionLength) {
+            <li fd-list-message type="information">
+              {{ filteredUsersCollectionLength }}
+              {{ filteredUsersCollectionLength > 1 ? 'users' : 'user' }} found
+            </li>
+          }
+        </fd-combobox>
+
+        @if (hasError()) {
+          <fd-form-message type="error">
+            <span
+              i18n="
+                No user was selected|Error when adding no users through the add
+                members dialog
+              "
+            >
+              Specify at least one user to be added to your {{ currentEntity }}
+            </span>
+          </fd-form-message>
+        }
+      </div>
+    </div>
+
+    <ng-template #dropDownTemplate let-dropDownValue>
+      @let user = dropDownValue.user;
+      @if (user) {
+        <span fd-list-thumbnail>
+          <iam-avatar
+            class="add-member-avatar"
+            size="s"
+            [user]="user"
+          ></iam-avatar>
+        </span>
+        <div
+          fd-list-content
+          [attr.data-testid]="
+            'dxp-iam-member-add-dialog-user-' + user.userId + '-entity'
+          "
+        >
+          <div fd-list-title>
+            {{ user.firstName }} {{ user.lastName }}
+            @if (!user.lastName) {
+              <span>{{ user.userId }}</span>
+            }
+          </div>
+          @if (user.lastName) {
+            <div fd-list-byline>
+              {{ user.userId }}
+            </div>
+          }
+        </div>
+      }
+      @if (dropDownValue.noData) {
+        <div fd-list-content>
+          <div fd-list-title class="center">No user found</div>
+          <div fd-list-byline class="center">
+            Enter an email to invite people to Hyperspace Portal
+          </div>
+        </div>
+      }
+      @if (dropDownValue.email) {
+        <span fd-list-thumbnail>
+          <fd-avatar
+            glyph="paper-plane"
+            [circle]="true"
+            [transparent]="true"
+            size="s"
+          ></fd-avatar>
+        </span>
+        <div fd-list-content>
+          <div fd-list-title><b>Invite</b> {{ dropDownValue.email }}</div>
+        </div>
+      }
+    </ng-template>
+
+    <br />
+    <br />
+    <table fd-table [noBorderY]="true" fdCompact="true">
+      <thead fd-table-header>
+        <tr fd-table-row>
+          <th fd-table-cell [fitContent]="true"></th>
+          <th fd-table-cell i18n="User|Column title of a table for user names">
+            User
+          </th>
+          <th fd-table-cell i18n="Role|Column title of a table for user role">
+            Role
+          </th>
+          <th
+            fd-table-cell
+            [fitContent]="true"
+            i18n="actions|Column title of a table for possible actions"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <ng-container>
+        @if (selectedMembers.length || selectedInvitees.length) {
+          <tbody fd-table-body>
+            @if (selectedMembers.length && selectedInvitees.length) {
+              <tr fd-table-row>
+                <td fd-table-cell colspan="4" class="group-header">
+                  <b>Invite</b>
+                </td>
+              </tr>
+            }
+            @for (invitee of selectedInvitees; track invitee.user.userId) {
+              <tr fd-table-row>
+                <td fd-table-cell>
+                  <fd-avatar
+                    glyph="paper-plane"
+                    [circle]="true"
+                    [transparent]="true"
+                    size="s"
+                  ></fd-avatar>
+                </td>
+                <td fd-table-cell>
+                  <ul fd-list [noBorder]="true" [compact]="true">
+                    <li fd-list-item>
+                      <div fd-list-content>
+                        <div fd-list-title>
+                          {{ invitee.user.email }}
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </td>
+                <td fd-table-cell>
+                  <!-- TODO remove $any -->
+                  <fd-multi-combobox
+                    placeholder=""
+                    [dataSource]="availableRoles"
+                    displayKey="displayName"
+                    lookupKey="technicalName"
+                    [selectedItems]="invitee.roles"
+                    (selectionChange)="onRoleChange($event, invitee)"
+                    [attr.data-testid]="
+                      invitee.user
+                        ? 'dxp-iam-member-add-dialog-user-' +
+                          invitee.user.userId +
+                          '-role-select'
+                        : 'dxp-iam-member-add-dialog-team-' +
+                          $any(invitee).team?.name +
+                          '-role-select'
+                    "
+                  ></fd-multi-combobox>
+                </td>
+                <td fd-table-cell class="actions">
+                  <button
+                    fd-button
+                    glyph="sys-cancel"
+                    fdType="transparent"
+                    (click)="deleteInviteeFromList(invitee.user.email)"
+                  ></button>
+                </td>
+              </tr>
+            }
+            @if (selectedMembers.length && selectedInvitees.length) {
+              <tr fd-table-row>
+                <td fd-table-cell colspan="4" class="group-header">
+                  <b>Add</b>
+                </td>
+              </tr>
+            }
+            @for (member of selectedMembers; track member.user.userId) {
+              <tr fd-table-row>
+                <td fd-table-cell>
+                  <iam-avatar size="s" [user]="member.user"></iam-avatar>
+                </td>
+                <td fd-table-cell>
+                  <ul
+                    fd-list
+                    [byline]="true"
+                    [noBorder]="true"
+                    [compact]="true"
+                  >
+                    <li fd-list-item id="add-member-dialog-user-info">
+                      <div fd-list-content>
+                        <div fd-list-title>
+                          {{ member.user.firstName }}
+                          {{ member.user.lastName }}
+                          @if (!member.user.lastName) {
+                            <span>{{ member.user.userId }}</span>
+                          }
+                        </div>
+                        @if (member.user.lastName) {
+                          <div fd-list-byline>
+                            {{ member.user.userId }}
+                          </div>
+                        }
+                      </div>
+                    </li>
+                  </ul>
+                </td>
+                <td fd-table-cell>
+                  <!-- TODO remove $any -->
+                  <fd-multi-combobox
+                    placeholder=""
+                    [dataSource]="availableRoles"
+                    displayKey="displayName"
+                    lookupKey="technicalName"
+                    [selectedItems]="member.roles"
+                    (selectionChange)="onRoleChange($event, member)"
+                    [attr.data-testid]="
+                      member.user
+                        ? 'dxp-iam-member-add-dialog-user-' +
+                          member.user.userId +
+                          '-role-select'
+                        : 'dxp-iam-member-add-dialog-team-' +
+                          $any(member).team?.name +
+                          '-role-select'
+                    "
+                  ></fd-multi-combobox>
+                </td>
+                <td fd-table-cell class="actions">
+                  <button
+                    fd-button
+                    glyph="sys-cancel"
+                    fdType="transparent"
+                    (click)="deleteMemberFromList(member.user.userId)"
+                  ></button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        } @else {
+          <tbody fd-table-body>
+            <tr fd-table-row>
+              <td
+                fd-table-cell
+                colspan="4"
+                id="emptyTableMessage"
+                i18n="
+                  No new members added yet|text when no members are selected to
+                  be added
+                "
+              >
+                No new members added yet
+              </td>
+            </tr>
+          </tbody>
+        }
+      </ng-container>
+    </table>
+  </fd-dynamic-page-content>
+
+  <fd-dynamic-page-footer>
+    <div fd-bar>
+      <div fd-bar-right>
+        <fd-bar-element>
+          <button
+            fd-button
+            fdType="emphasized"
+            data-testid="dxp-iam-member-add-dialog-add-button"
+            i18n-label="add button|Add button text on the add member dialog"
+            label="Add"
+            (click)="addMembers()"
+          ></button>
+        </fd-bar-element>
+        <fd-bar-element>
+          <button
+            fd-button
+            fdType="transparent"
+            i18n-label="
+              cancel button|Cancel button text on the add member dialog
+            "
+            label="Cancel"
+            (click)="closeDialogError()"
+          ></button>
+        </fd-bar-element>
+      </div>
+    </div>
+  </fd-dynamic-page-footer>
+</fd-dynamic-page>

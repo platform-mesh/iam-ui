@@ -1,0 +1,120 @@
+<fd-dynamic-page class="header" #dynamicPage>
+  <fd-dynamic-page-header
+    [title]="header.title"
+    [subtitle]="header.subtitle"
+    [titleWrap]="wrapTitle"
+    [subtitleWrap]="wrapTitle"
+    (click)="titleClicked($event)"
+    #pageHeader
+    data-testid="dxp-page-header-title-text"
+  >
+    @if (header.keyInfo) {
+      <fd-dynamic-page-title-content>
+        <fd-info-label
+          data-testid="dxp-page-header-key-info"
+          [label]="header.keyInfo.text"
+          [color]="header.keyInfo.color"
+          [title]="header.keyInfo.text"
+        ></fd-info-label>
+      </fd-dynamic-page-title-content>
+    }
+
+    @if (header.statusInfo) {
+      <fd-dynamic-page-title-content>
+        <app-dxp-status-info-popover
+          [statusInfo]="header.statusInfo || { items: [] }"
+          (click)="$event.stopPropagation()"
+        >
+        </app-dxp-status-info-popover>
+      </fd-dynamic-page-title-content>
+    }
+
+    <fd-dynamic-page-global-actions>
+      <fd-toolbar fdType="transparent" [clearBorder]="true">
+        <ng-container
+          *dxpRequiredPolicies="manageRequiredPolicies; operator: 'or'"
+        >
+          @if (showStandardEditButton(showEditButton, secondaryButtonText)) {
+            <fdp-button
+              fdCompact
+              buttonType="emphasized"
+              (click)="editButtonClicked()"
+              label="Edit"
+              title="Edit"
+              data-testid="dxp-page-header-edit-button"
+            ></fdp-button>
+          }
+
+          @if (
+            showEditWithSecondaryButton(showEditButton, secondaryButtonText)
+          ) {
+            <fd-split-button
+              fdCompact
+              [mainAction]="{ mainActionTitle: 'Edit', keepMainAction: true }"
+              fdType="emphasized"
+              (primaryButtonClicked)="editButtonClicked()"
+              data-testid="dxp-page-header-edit-with-secondary-button"
+            >
+              <fd-menu>
+                <li fd-menu-item (click)="secondaryEditButtonClicked()">
+                  <div
+                    fd-menu-interactive
+                    data-testid="dxp-page-header-secondary-button"
+                  >
+                    <span fd-menu-title>{{ secondaryButtonText }}</span>
+                  </div>
+                </li>
+              </fd-menu>
+            </fd-split-button>
+          }
+
+          @if (showAutomateButton) {
+            <fdp-button
+              fdCompact
+              buttonType="emphasized"
+              (click)="automateButtonClicked()"
+              label="Automate"
+              title="Automate"
+              data-testid="dxp-page-header-automate-button"
+            ></fdp-button>
+          }
+
+          @if (showDeleteButton) {
+            <fdp-button
+              fdCompact
+              buttonType="standard"
+              (click)="deleteButtonClicked()"
+              label="Delete"
+              title="Delete"
+              data-testid="dxp-page-header-delete-button"
+            ></fdp-button>
+          }
+
+          @for (customButton of customButtons; track customButton.label) {
+            @if (customButton.show | async) {
+              <fdp-button
+                fdCompact
+                [buttonType]="customButton.type"
+                (click)="customButton.callback.emit()"
+                [label]="customButton.label"
+                [title]="customButton.label"
+                [attr.data-testid]="customButton.testId"
+              ></fdp-button>
+            }
+          }
+        </ng-container>
+      </fd-toolbar>
+    </fd-dynamic-page-global-actions>
+  </fd-dynamic-page-header>
+
+  <fd-dynamic-page-subheader
+    [pinnable]="true"
+    [collapsible]="true"
+    [collapsed]="false"
+    #subHeader
+  >
+    <div class="page-subheader">
+      <ng-content></ng-content>
+    </div>
+  </fd-dynamic-page-subheader>
+</fd-dynamic-page>

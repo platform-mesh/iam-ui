@@ -1,0 +1,19 @@
+.fd-illustrated-message__container {
+  flex-direction: column !important;
+
+  .fd-illustrated-message__illustration {
+    margin-bottom: 0.5rem !important;
+  }
+}
+
+a {
+  gap: 12px;
+}
+
+:host
+  ::ng-deep
+  .fd-illustrated-message--dot
+  > .fd-illustrated-message__container {
+  display: flex !important;
+  flex-direction: column !important;
+}

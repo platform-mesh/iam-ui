@@ -1,0 +1,39 @@
+::ng-deep .fd-dynamic-page__title-area {
+  display: none !important;
+}
+
+#emptyTableMessage {
+  text-align: center;
+}
+::ng-deep .fd-scrollbar {
+  display: contents;
+}
+
+#add-member-dialog-user-info {
+  padding: 0;
+}
+
+fd-combobox,
+fd-form-message {
+  max-width: 50%;
+}
+
+.actions {
+  text-align: right;
+}
+
+fd-select {
+  width: 100px;
+}
+
+::ng-deep .add-member-avatar fd-popover {
+  display: inherit !important;
+}
+
+.group-header {
+  background-color: var(--fdTable_Group_Header_Background);
+}
+
+.center {
+  text-align: center;
+}

@@ -1,0 +1,21 @@
+.gridContainer {
+  height: 100%;
+  width: 100%;
+
+  h2 {
+    padding: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-auto-flow: row dense;
+    padding: 1rem 0 1rem 0;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, 330px);
+    grid-template-rows: [first] 1fr [last];
+  }
+
+  .grid-section {
+    padding: 0;
+  }
+}

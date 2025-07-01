@@ -1,0 +1,105 @@
+@if (user) {
+  <dxp-page-header [header]="header" [showEditButton]="false">
+    <fd-facet-group>
+      <fd-facet type="image">
+        <iam-avatar size="l" [user]="user"></iam-avatar>
+      </fd-facet>
+
+      <fd-facet type="custom">
+        <div class="user-name" data-testid="dxp-user-header-name">
+          {{ getFirsLastNameOrUserId(user) }}
+        </div>
+        <div>
+          <span>
+            <fdp-button
+              fdCompact
+              (click)="chatWithUserViaTeams(user.email)"
+              buttonType="transparent"
+              glyph="post"
+              name="chat-button"
+              title="Start a chat"
+              data-testid="dxp-user-header-chat-button"
+            ></fdp-button>
+            <fdp-button
+              fdCompact
+              (click)="emailUser(user.email)"
+              buttonType="transparent"
+              glyph="email"
+              name="email-button"
+              title="Send email"
+              data-testid="dxp-user-header-email-button"
+            ></fdp-button>
+            <fdp-button
+              fdCompact
+              (click)="callUserViaTeams(user.email)"
+              buttonType="transparent"
+              glyph="call"
+              name="call-button"
+              title="Start an audio call"
+              data-testid="dxp-user-header-call-button"
+            ></fdp-button>
+          </span>
+        </div>
+      </fd-facet>
+
+      <fd-facet type="form" facetTitle="">
+        <fd-facet-content>
+          <fd-text [text]="getUserContactsHeaderText()"></fd-text>
+        </fd-facet-content>
+        <fd-facet-content>
+          <div
+            class="contact-links"
+            data-testid="dxp-user-header-contact-links"
+          >
+            <div>
+              <a
+                fd-link
+                [href]="'https://people.wdf.sap.corp/profiles/' + user.userId"
+                target="_blank"
+              >
+                <img alt="logo" src="/assets/sap_logo.svg" width="24px" />
+                People&#64;SAP
+              </a>
+            </div>
+            <div>
+              <a fd-link href="https://sap.stackenterprise.co/" target="_blank">
+                <img
+                  alt="stackoverflow logo"
+                  width="24px"
+                  style="position: relative; top: 5px; left: -5px"
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
+AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB2lBMVEUAAAD/AADygyH0gCP2
+giT0gCP1gCP0gCPxgBz1gSL1gCPzgCP1gCLzhiT0gCP0gCP1giTzgCX0gCP0gCPriSf/kiTzgiT1
+gCL0gCPzgCP0gCLzgCL/gAD0gCT0gCP0gSL0gCP0gCT0hSH0gCPzgCT2giX0gCP0gCP/jhz0gCT0
+gCP0gCP2hCP0gCLzgCPzgST0gCP0gCP1giL/gED1gCP0gSL0gCX0gCP2gCT0gCP1gCf0gCP1gCL0
+gCP/gCD0gCL/gBr0gCL0gCP3gyf0gCLygCL1gSL/gCv1gCP0gCP1gCL1gCL4gCb0gCP1gCPwhx70
+gCP/mTP0giH0gCTzgCT/iy70gSP0gCPzgCP0gCTzgCT0gCP0gSTzgSL1gCP0gCP1gCP0gCP1gST0
+gCT0gCPzgyXzgSLzgCP1gCL1gCT1gCLxgyLzgCP0gCP0gCPygiH0gSH1hR/zgCPzgCP0gSL0gCTq
+gCv0gCP0gCPzgCTzgCP0gCTzgCPzgCP0gCT0gCT1gCP0gCK8vLy9urq2trbtgCT0gCLzgCO8vLyz
+s7O8u7u7u7v0gCP1gSS8u7u9vb30gCP1giP1gCT0gCLygCP0gCO8u7u8u7u/t7e8vLy/v7/0gCO8
+u7v///8Vemp8AAAAm3RSTlMAASfLOV7z4RJLqrFoFeT3MT782g0HK36im/RSArpgd/6IF+YqN/2m
+CUbSzh2GmVX15TUEw1sw4hzrGspK0QijCo6QIbI8fwZQkUw0IvDEEdMFL1xUC3PfbMmBi11p3Op8
+p02z+SlThKuslSWa+Lw9RRlurm/tDO+7gBbXg91ypducVFkODt6FVwryKexP/R/2MzJEOtn6+SAi
+BITI0ywAAAABYktHRJ0Gu/KxAAAAB3RJTUUH5AIOCy85mlKI4wAAAhtJREFUWMNjYBgFIwcwUqif
+iZmFIv2sbLPZOSjQzzkbCLgoCQBukAk8FJjAywc0gF+AAhMEhYAmCIuQoVNUDEKLgzwhQYYBklLS
+YFpGFmSCHMn65WfPVlAEJyIlZaABUiok6ldVA9mrrgFia4LYWhokxp882ARtHRBHF8TUI9UP+gYg
+bYZGQKaxCYhpSqoJZuYgbfwgfRaWQBYbE6kmWFmDTFBQlGFgsFEAsmztSDXBzn42OC84MDA4ghhO
+ROpzdnGFBaUbyObZzFYM7iDXKHgQZ4Dn7NkmXozIQcnnzeDjC6T9iNLvzwbSE8AaCOYFsYODMpgh
+BJigQ4kyIGw2BIRHOICDMhIclFGM0THEBl1sHNSI+AR/IF8jcTap+UkmKRJqBJunDjRVKpCYjlyT
+oUakSKQyMKRJzU4nOTt6Z6hBjFDLNGIQyJIho0TIzsmFOiMvn3hdBXIqCMsKFX0hJhQRb0AxMOT8
+PFnFoAlJpARUqpaWEW8AH9TV5RWVSVUgAXfW6tk1JOTA2cigNrEuP5RBJkSJeAN86htmowIh20ZO
+IjQ2NTc3t0CYra4lEm0oZrQDRTuACjrxGNA1Z86cbmSvJFUm98AM6AUK9AEV9JNgAMQUfU+/CUAD
+rMg1AAQCJ8aCCyJiDZg0GRNMIcWAitmYYOrQMkCiFhPkMVASCzAwQgyYNh0PmEOEAQTB4DZgxkwi
+wKzRzs8ooAEAAKCrtouUj+k/AAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIwLTAyLTE0VDExOjQ3OjU3
+KzAwOjAwtGSHJQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMC0wMi0xNFQxMTo0Nzo1NyswMDowMMU5
+P5kAAAAASUVORK5CYII="
+                />
+                Stack&#64;SAP
+              </a>
+            </div>
+          </div>
+        </fd-facet-content>
+      </fd-facet>
+    </fd-facet-group>
+  </dxp-page-header>
+}

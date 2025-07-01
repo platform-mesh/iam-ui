@@ -1,0 +1,76 @@
+{
+  "name": "iam-ui",
+  "luigiConfigFragment": {
+    "data": {
+      "nodes": [
+        {
+          "pathSegment": "members",
+          "label": "{{members}}",
+          "icon": "company-view",
+          "entityType": "main",
+          "urlSuffix": "/#/projects/organization/members",
+          "context": {
+            "entityType": "account",
+            "entityContext": {
+              "account": {
+                "policies": ["iamAdmin", "projectAdmin", "projectMember"]
+              }
+            }
+          }
+        },
+        {
+          "pathSegment": "add-members",
+          "entityType": "main",
+          "label": "{{members}}",
+          "hideFromNav": true,
+          "urlSuffix": "/#/projects/organization/add-members",
+          "context": {
+            "entityType": "account"
+          }
+        },
+        {
+          "pathSegment": "members",
+          "label": "{{members}}",
+          "icon": "company-view",
+          "entityType": "main.account",
+          "urlSuffix": "/#/projects/:accountId/members",
+          "context": {
+            "accountId": ":accountId",
+            "entityType": "account"
+          }
+        },
+        {
+          "pathSegment": "add-members",
+          "entityType": "main.account",
+          "label": "{{members}}",
+          "hideFromNav": true,
+          "urlSuffix": "/#/projects/:accountId/add-members",
+          "context": {
+            "accountId": ":accountId",
+            "entityType": "account"
+          }
+        }
+      ],
+      "texts": [
+        {
+          "locale": "",
+          "textDictionary": {
+            "members": "Members"
+          }
+        },
+        {
+          "locale": "en",
+          "textDictionary": {
+            "members": "Members"
+          }
+        },
+        {
+          "locale": "de",
+          "textDictionary": {
+            "members": "Mitglieder"
+          }
+        }
+      ]
+    }
+  }
+}

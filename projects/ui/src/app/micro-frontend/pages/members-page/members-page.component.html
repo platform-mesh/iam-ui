@@ -1,0 +1,340 @@
+<fdp-dynamic-page>
+  <fdp-dynamic-page-title
+    i18n-title="
+      members header|Members text for dynamic page header on the members page
+    "
+    title="Members"
+  >
+    <fdp-dynamic-page-global-actions>
+      <fd-toolbar [clearBorder]="true" fdType="transparent">
+        <button
+          (click)="openAddMembersDialog()"
+          fd-button
+          fdType="emphasized"
+          i18n-label="add button label|Add button text on the members page"
+          id="open-add-members-dialog-button"
+          label="Add"
+          title="Add members"
+          data-testid="dxp-iam-member-list-add-button"
+        ></button>
+      </fd-toolbar>
+    </fdp-dynamic-page-global-actions>
+  </fdp-dynamic-page-title>
+  <fdp-dynamic-page-header [pinnable]="true">
+    <div class="members-filter-group">
+      <div class="members-filter-group-search-term">
+        <fdp-search-field
+          fd-initial-focus
+          contentDensity="compact"
+          placeholder="Search"
+          i18n-placeholder="
+            search field placeholder|Search field on the members page
+          "
+          [disableRefresh]="true"
+          (searchSubmit)="onSearchSubmit($event.text)"
+          (cancelSearch)="onSearchSubmit()"
+          [inputText]="searchTerm"
+          data-testid="dxp-iam-members-list-search-input"
+        ></fdp-search-field>
+      </div>
+      @if (rolesForEntity().length) {
+        <div class="members-filter-group-roles">
+          <div fd-form-item>
+            <label [colon]="true" fd-form-label>Roles</label>
+            <fd-multi-combobox
+              [autoResize]="true"
+              name="Roles"
+              contentDensity="compact"
+              placeholder="All"
+              [dataSource]="rolesForEntity()"
+              displayKey="label"
+              lookupKey="id"
+              (selectionChange)="setRolesFilter($event)"
+            ></fd-multi-combobox>
+          </div>
+        </div>
+      }
+    </div>
+  </fdp-dynamic-page-header>
+  <fdp-dynamic-page-content id="iam-members-content" cdkScrollable>
+    @if (members() && !isLoading) {
+      <fdp-table
+        [dataSource]="members()"
+        [initialSortBy]="initialSortOrder"
+        [noOuterBorders]="true"
+        [noBodyBorders]="true"
+        [noBorderY]="true"
+        [enableDragResize]="false"
+        (sortChange)="sortChange($event)"
+        contentDensity="compact"
+      >
+        <fdp-column width="75px" key="avatar" name="avatar" [applyText]="false">
+          <fdp-table-cell *fdpCellDef="let member">
+            @if (member.user?.invitationOutstanding) {
+              <fd-avatar
+                glyph="paper-plane"
+                [circle]="true"
+                [transparent]="true"
+                size="s"
+              ></fd-avatar>
+            }
+            @if (!!member.user && !member.user.invitationOutstanding) {
+              <iam-avatar
+                title="View Profile"
+                size="s"
+                [user]="member.user"
+              ></iam-avatar>
+            }
+            @if (member.team) {
+              <fd-avatar glyph="group" [circle]="true" size="s"></fd-avatar>
+            }
+          </fdp-table-cell>
+        </fdp-column>
+
+        <fdp-column
+          i18n-label="name table cell|Name table cell text on the members page"
+          key="user"
+          label="User"
+          name="user"
+          [sortable]="true"
+        >
+          <fdp-table-cell
+            *fdpCellDef="let member"
+            data-testid="dxp-iam-member-list-member-row"
+          >
+            <p
+              [attr.data-testid]="
+                'dxp-iam-members-page-' + member.user?.userId ||
+                member.user?.email ||
+                member.team?.name + '-entity'
+              "
+            >
+              @if (member.user) {
+                @if (member.user.invitationOutstanding) {
+                  <strong>{{ member.user.email }}</strong>
+                }
+                @if (!member.user.invitationOutstanding) {
+                  <strong>{{ getUserNameOrId(member) }}</strong>
+                }
+                <br />
+                @if (member.user.invitationOutstanding) {
+                  <span class="member-extra-information">Invitation sent</span>
+                }
+                @if (!member.user.invitationOutstanding) {
+                  <span class="member-extra-information">{{
+                    member.user.userId
+                  }}</span>
+                }
+              }
+            </p>
+          </fdp-table-cell>
+        </fdp-column>
+
+        <fdp-column
+          i18n="contact table cell|Contact table cell text on the members page"
+          key="contact"
+          label="Contact"
+          name="contact"
+        >
+          <fdp-table-cell *fdpCellDef="let member">
+            @if (!!member.user && !equalsCurrentUser(member)) {
+              <button
+                (click)="emailUser(member.user)"
+                fd-button
+                fdType="transparent"
+                glyph="email"
+                name="email-button"
+                title="Send email"
+              ></button>
+              <button
+                (click)="chatWithUserViaTeams(member.user)"
+                fd-button
+                fdType="transparent"
+                glyph="post"
+                i18n-title
+                name="chat-button"
+                title="Start a chat"
+              ></button>
+              <button
+                (click)="callUserViaTeams(member.user)"
+                fd-button
+                fdType="transparent"
+                glyph="call"
+                i18n-title
+                name="call-button"
+                title="Start an audio call"
+              ></button>
+              <button
+                (click)="callUserViaTeams(member.user, true)"
+                fd-button
+                fdType="transparent"
+                glyph="video"
+                i18n-title
+                name="video-button"
+                title="Start a video call"
+              ></button>
+            }
+          </fdp-table-cell>
+        </fdp-column>
+
+        <fdp-column
+          i18n-label="role table cell|Role table cell text on the members page"
+          key="role"
+          label="{{ 'Roles' }}"
+          name="role"
+          width="20rem"
+        >
+          <fdp-table-cell *fdpCellDef="let member">
+            <div *dxpRequiredPolicies="'iamAdmin'">
+              <fd-multi-combobox
+                placeholder=""
+                [dataSource]="rolesForEntity()"
+                displayKey="displayName"
+                lookupKey="technicalName"
+                (selectionChange)="saveMember($event, member)"
+                [selectedItems]="member.roles"
+                [attr.data-testid]="
+                  member.user
+                    ? 'dxp-iam-member-list-user-' +
+                      member.user?.userId +
+                      '-role-select'
+                    : 'dxp-iam-member-list-team-' +
+                      member.team?.name +
+                      '-role-select'
+                "
+              ></fd-multi-combobox>
+            </div>
+            <div *dxpRequiredPolicies="'!iamAdmin'">
+              <ng-container>
+                @for (role of member.roles; track role) {
+                  <span>{{ role.displayName }}</span>
+                  @if (!$last) {
+                    <span>, </span>
+                  }
+                }
+              </ng-container>
+            </div>
+          </fdp-table-cell>
+        </fdp-column>
+        <fdp-column
+          i18n-label="
+            actions table cell|Actions table cell text on the members page
+          "
+          key="actions"
+          label="Actions"
+          name="actions"
+          align="end"
+        >
+          <fdp-table-cell *fdpCellDef="let member">
+            <div *dxpRequiredPolicies="'iamAdmin'">
+              @if (!equalsCurrentUser(member)) {
+                <button
+                  (click)="openRemoveMemberDialog(member)"
+                  fd-button
+                  fdType="transparent"
+                  glyph="sys-cancel"
+                  id="remove-member-button"
+                  title="Remove member"
+                  [attr.data-testid]="
+                    member.user
+                      ? 'dxp-iam-member-list-user-' +
+                        member.user?.userId +
+                        '-remove-button'
+                      : 'dxp-iam-member-list-team-' +
+                        member.team?.name +
+                        '-remove-button'
+                  "
+                ></button>
+              }
+            </div>
+
+            @if (equalsCurrentUser(member)) {
+              <button
+                (click)="openLeaveDialog()"
+                [disabled]="isCurrentUserUniqueOwner()"
+                fd-button
+                fdType="transparent"
+                glyph="visits"
+                [attr.data-testid]="
+                  'dxp-iam-member-list-leave-' + currentEntity + '-button'
+                "
+                title="Leave"
+              ></button>
+            }
+          </fdp-table-cell>
+        </fdp-column>
+        @if (members().length === 0) {
+          <fdp-table-no-data-wrapper>
+            @if (noFiltersApplied()) {
+              <figure
+                [svgConfig]="svgConfig"
+                fd-illustrated-message
+                type="scene"
+              >
+                <figcaption fd-illustrated-message-figcaption>
+                  <h3
+                    fd-illustrated-message-title
+                    i18n="
+                      no members found message strip|No members found text for
+                      the message strip on the members page
+                    "
+                  >
+                    No members found.
+                  </h3>
+                  <p fd-illustrated-message-text>
+                    Are you the owner of this Product/Experiment? You can claim
+                    the Product/Experiment by creating a Jira Change Request
+                    Issue.
+                  </p>
+                </figcaption>
+
+                <fd-illustrated-message-actions>
+                  <button
+                    (click)="claimProject()"
+                    fd-button
+                    i18n-label="
+                      claim project button label|Claim project button text on
+                      the members page
+                    "
+                    label="Claim Project"
+                  ></button>
+                </fd-illustrated-message-actions>
+              </figure>
+            } @else {
+              <figure
+                [svgConfig]="noSearchResults"
+                fd-illustrated-message
+                type="scene"
+              >
+                <figcaption fd-illustrated-message-figcaption>
+                  <h3
+                    fd-illustrated-message-title
+                    i18n="
+                      no members found message strip|No members found text for
+                      the message strip on the members page
+                    "
+                  >
+                    No matching users found.
+                  </h3>
+                  <p fd-illustrated-message-text>Try adjusting your search.</p>
+                </figcaption>
+              </figure>
+            }
+          </fdp-table-no-data-wrapper>
+        }
+      </fdp-table>
+      <fd-pagination
+        (itemsPerPageChange)="itemsPerPageChange($event); itemsPerPage = $event"
+        (pageChangeStart)="newPageClicked($event)"
+        [currentPage]="currentPage"
+        [itemsPerPageOptions]="itemsPerPageOptions"
+        [itemsPerPage]="itemsPerPage"
+        [totalItems]="totalItems()"
+        ariaLabel="Pagination with for the members table"
+        fd-toolbar-item
+      ></fd-pagination>
+    } @else {
+      <fd-busy-indicator [loading]="true" [block]="true"></fd-busy-indicator>
+    }
+  </fdp-dynamic-page-content>
+</fdp-dynamic-page>

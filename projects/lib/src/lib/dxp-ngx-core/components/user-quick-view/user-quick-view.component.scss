@@ -1,0 +1,29 @@
+.quick-view-card {
+  display: inline-block;
+  max-width: 350px;
+}
+
+.group {
+  display: block;
+}
+
+.group-title {
+  font-weight: 700;
+  padding-bottom: 8px;
+
+  &.next {
+    padding-top: 16px;
+  }
+}
+
+.link {
+  cursor: pointer;
+
+  &.name {
+    color: var(--sapLinkColor);
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

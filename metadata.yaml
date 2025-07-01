@@ -1,0 +1,41 @@
+# DXP component metadata file
+# For more information, please see:
+# https://portal.hyperspace.tools.sap/projects/dxp/documentation/User-Guide/Manage-Metadata
+kind: Component
+metadata:
+  displayName: IAM UI
+  description: User Interface to manage users in Hyperspace Portal as part of Identity and Access Management.
+  annotations:
+    techdocs.sap.com: 'component'
+spec:
+  boundedContext: iam
+  type:
+    name: ui
+    lifecycle: production
+    categories:
+      - dxp
+      - angular
+      - luigi
+  jira:
+    componentName: iam-ui
+    projectKey: DXPFRAME
+  dora:
+    identifier: iam-ui
+  team:
+    name: dxp-core-frame
+    productOwner: D058497
+    technicalOwner: I554648
+  ci:
+    pipelineLinks:
+      - name: GitHub Actions
+        url: https://github.tools.sap/dxp/iam-ui/actions
+        icon: .sap-icon--factory
+        description: Link to the pipeline workflow in GitHub Actions
+  links:
+    - name: Sonar
+      url: https://sonar.tools.sap/dashboard?id=sonarqubeproject-iam-ui
+      icon: .sap-icon--radar-chart
+      description: Link to Sonar Project
+    - name: Sentry
+      url: https://sap.sentry.io/projects/iam-ui/?project=4508931443064839
+      icon: .sap-icon--radar-chart

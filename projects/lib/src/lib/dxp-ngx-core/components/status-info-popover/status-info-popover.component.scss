@@ -1,0 +1,31 @@
+$small-padding: 15px;
+
+.header-object-status {
+  margin-right: 5px;
+}
+
+.body-object-status {
+  padding: 1px;
+}
+
+.popover-body-content {
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: $small-padding;
+  max-width: 290px;
+}
+
+::ng-deep .fd-link {
+  cursor: pointer;
+  color: var(--sapLinkColor);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.fd-list__item.status-info-popover-list-item {
+  padding-inline-start: $small-padding;
+}

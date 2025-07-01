@@ -1,0 +1,115 @@
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  ViewEncapsulation,
+} from '@angular/core';
+import {
+  AvatarComponent,
+  DxpContext,
+  DxpLuigiContextService,
+  Header,
+  PageHeaderComponent,
+  User,
+  UserService,
+  UserUtils,
+} from '@dxp/iam-lib';
+import {
+  FacetComponent,
+  FacetContentComponent,
+  FacetGroupComponent,
+} from '@fundamental-ngx/core';
+import { ContentDensityDirective } from '@fundamental-ngx/core/content-density';
+import { LinkComponent } from '@fundamental-ngx/core/link';
+import { TextComponent } from '@fundamental-ngx/core/text';
+import { ButtonComponent } from '@fundamental-ngx/platform/button';
+import { LuigiClient } from '@luigi-project/client/luigi-element';
+
+@Component({
+  encapsulation: ViewEncapsulation.ShadowDom,
+  selector: 'app-user-overview-header',
+  templateUrl: './user-overview-header.component.html',
+  styleUrl: './user-overview-header.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent,
+    FacetGroupComponent,
+    FacetComponent,
+    AvatarComponent,
+    ButtonComponent,
+    ContentDensityDirective,
+    FacetContentComponent,
+    TextComponent,
+    LinkComponent,
+  ],
+})
+export class UserOverviewHeaderComponent implements OnInit {
+  user?: User;
+  header: Header = {
+    title: 'User Profile',
+    subtitle: '',
+  };
+
+  ctx?: DxpContext;
+
+  /**
+   * Set by Luigi itself.
+   */
+  @Input()
+  LuigiClient!: LuigiClient;
+
+  /**
+   * Set by Luigi itself.
+   */
+  @Input()
+  set context(context: DxpContext) {
+    this.ctx = context;
+    this.dxpLuigiContextService.setContext(context);
+  }
+
+  constructor(
+    private dxpLuigiContextService: DxpLuigiContextService,
+    private userService: UserService,
+    private cdRef: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit(): void {
+    this.userService.getUser(this.ctx?.profileUserId ?? '').subscribe({
+      next: (user) => {
+        this.user = user;
+        this.cdRef.detectChanges();
+      },
+    });
+  }
+
+  getFirsLastNameOrUserId(user: User): string {
+    const name = UserUtils.getNameOrDefault(user, '');
+    return name ? `${name} (${user.userId})` : user.userId || '';
+  }
+
+  callUserViaTeams(email: string | undefined, withVideo = false): void {
+    const url = `msteams:/l/call/0/0?users=${email}&withVideo=${withVideo}`;
+    this.openNewWindow(url);
+  }
+
+  chatWithUserViaTeams(email: string | undefined): void {
+    const url = `msteams:/l/chat/0/0?users=${email}`;
+    this.openNewWindow(url);
+  }
+
+  emailUser(email: string | undefined): void {
+    window.location.href = `mailto:${email}`;
+  }
+
+  private openNewWindow(url: string): void {
+    window.open(url, '_blank');
+  }
+
+  getUserContactsHeaderText(): string {
+    return this.user?.firstName
+      ? `See ${this.user.firstName} on:`
+      : 'Check on:';
+  }
+}

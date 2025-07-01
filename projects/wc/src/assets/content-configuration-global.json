@@ -1,0 +1,26 @@
+{
+  "name": "iam-wc-global",
+  "luigiConfigFragment": {
+    "data": {
+      "nodes": [
+        {
+          "entityType": "user.overview::compound",
+          "pathSegment": "user-overview-header",
+          "urlSuffix": "/main.js#user-overview-header",
+          "layoutConfig": {
+            "slot": "header"
+          },
+          "webcomponent": {
+            "selfRegistered": true
+          }
+        }
+      ],
+      "texts": [
+        {
+          "locale": "",
+          "textDictionary": {}
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<fd-dynamic-page>
+  <fd-dynamic-page-header [title]="title">
+    <fd-dynamic-page-layout-actions>
+      <fd-toolbar fdType="transparent" [clearBorder]="true">
+        <button
+          fd-button
+          fdCompact
+          fdType="transparent"
+          ariaLabel="Close"
+          (click)="close()"
+          title="Close"
+        >
+          <i class="sap-icon--decline"></i>
+        </button>
+      </fd-toolbar>
+    </fd-dynamic-page-layout-actions>
+  </fd-dynamic-page-header>
+  <fd-dynamic-page-content>
+    <div class="sidebar">
+      <div class="grid">
+        <slot name="sidebar" (slotchange)="onSlotChange($event)"></slot>
+      </div>
+    </div>
+  </fd-dynamic-page-content>
+</fd-dynamic-page>

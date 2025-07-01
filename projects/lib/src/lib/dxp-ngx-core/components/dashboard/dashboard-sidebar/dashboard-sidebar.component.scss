@@ -1,0 +1,24 @@
+:host ::ng-deep .fd-dynamic-page__title {
+  font-size: var(--fdDynamicPage_Title_Collapsed_Font_Size);
+}
+
+:host ::ng-deep .fd-dynamic-page__breadcrumb-title-container {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  margin: 0.5rem 0;
+}
+
+.fd-dynamic-page__content {
+  padding: 0 !important;
+}
+
+.sidebar {
+  position: relative;
+
+  .grid {
+    display: grid;
+    grid-auto-flow: row dense;
+    grid-template-columns: 100%;
+  }
+}

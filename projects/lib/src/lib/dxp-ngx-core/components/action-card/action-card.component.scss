@@ -1,0 +1,52 @@
+//@import '~@sap-theming/theming-base-content/content/Base/baseLib/sap_horizon/css_variables.css';
+
+img {
+  display: block;
+}
+
+.card-heading,
+.card-content {
+  margin-left: 1rem;
+  margin-right: 1rem;
+  text-align: center;
+}
+
+.svg-fullsize {
+  height: 240px;
+  margin: 0 1rem;
+}
+
+figure[fd-illustrated-message] {
+  margin: 1rem 0;
+}
+
+.card-heading {
+  font-weight: bold;
+  margin-top: 0;
+}
+
+//.card-content-grey {
+//  color: var(--btp-Grey7);
+//  margin-bottom: 0;
+//  margin-top: 0;
+//}
+
+.card-footer {
+  color: var(--btp-Grey5);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.fd-card-actions {
+  margin: 1rem 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  column-gap: 10px;
+}
+
+.helpTooltip {
+  position: absolute;
+  right: 1rem;
+  top: 0.5rem;
+}

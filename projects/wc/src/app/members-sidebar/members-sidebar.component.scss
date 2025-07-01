@@ -1,0 +1,15 @@
+.members {
+  background-color: var(--sapGroup_TitleBackground);
+  padding: 1rem;
+}
+
+.quick-view-group {
+  padding: 1rem;
+}
+
+/* 
+TODO when migrating to Angular 19, set the popover body min width to 10rem
+.fd-popover__body {
+  min-width: 10rem;
+}
+*/

@@ -1,0 +1,133 @@
+import { sapIllusAddPeople } from './svg';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+  ViewEncapsulation,
+} from '@angular/core';
+import {
+  ActionCardComponent,
+  CardAction,
+  DxpContext,
+  DxpLuigiContextService,
+  ExtensionService,
+  ImageType,
+  ScopeType,
+  UpdateExtensionInput,
+} from '@dxp/iam-lib';
+import { ButtonType } from '@fundamental-ngx/core';
+import { LuigiClient } from '@luigi-project/client/luigi-element';
+import { catchError, first, of } from 'rxjs';
+
+@Component({
+  selector: 'app-add-your-team-card',
+  templateUrl: './add-your-team-card.component.html',
+  styleUrl: './add-your-team-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.ShadowDom,
+  standalone: true,
+  imports: [ActionCardComponent],
+})
+export class AddYourTeamCardComponent implements OnInit {
+  imageConfig = {
+    spot: {
+      file: sapIllusAddPeople,
+      id: 'sapIllus-Spot-AddPeople',
+    },
+  };
+  cardButtons: CardAction[] = [
+    {
+      fdType: 'emphasized' as ButtonType,
+      text: 'Connect',
+    },
+  ];
+
+  /**
+   * Set by Luigi itself.
+   */
+  @Input()
+  set context(context: DxpContext) {
+    this.dxpLuigiContextService.setContext(context);
+  }
+
+  /**
+   * Set by Luigi itself.
+   */
+  @Input()
+  LuigiClient!: LuigiClient;
+
+  protected readonly helpLink = {
+    link: 'https://portal.hyperspace.tools.sap/projects/dxp/documentation/User-Guide/Manage-Members',
+  } as const;
+  protected readonly ImageType = ImageType;
+
+  constructor(
+    private dxpLuigiContextService: DxpLuigiContextService,
+    private extensionService: ExtensionService,
+  ) {}
+
+  ngOnInit(): void {
+    this.dxpLuigiContextService
+      .contextObservable()
+      .pipe(first())
+      .subscribe((ctx) => {
+        this.cardButtons = [
+          {
+            fdType: 'emphasized' as ButtonType,
+            clickCallback: this.addNewTeam,
+            text: 'Connect',
+          },
+        ];
+        if (
+          ctx.context.entityContext['project']?.policies.includes(
+            'projectAdmin',
+          )
+        ) {
+          this.cardButtons.push({
+            fdType: 'transparent' as ButtonType,
+            clickCallback: this.skipCard,
+            text: 'Skip',
+          });
+        }
+      });
+  }
+
+  addNewTeam = () => {
+    this.LuigiClient.linkManager()
+      .fromClosestContext()
+      .openAsModal('add-members', {
+        width: '60rem',
+        height: '40rem',
+      });
+  };
+  skipCard = () => {
+    this.extensionService
+      .updateExtensionInstanceInProject({
+        installationData: {
+          skipOnboardingCard: 'true',
+        },
+        instanceId: 'dxp-iam-ui',
+        extensionClass: {
+          id: 'dxp-iam-ui',
+          scope: ScopeType.PROJECT,
+        },
+      } as UpdateExtensionInput)
+      .pipe(
+        first(),
+        catchError(async (error: Error) => {
+          await this.LuigiClient.uxManager().showAlert({
+            text: error.message,
+            type: 'error',
+          });
+          return of(null);
+        }),
+      )
+      .subscribe(() => {
+        window.postMessage({
+          msg: 'custom',
+          data: { id: 'general.frame-entity-changed' },
+        });
+      });
+  };
+}

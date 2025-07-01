@@ -1,0 +1,25 @@
+.fd-form-label {
+  text-overflow: initial !important;
+}
+
+.fd-overflow-layout {
+  justify-content: normal !important;
+}
+
+fd-facet h1 {
+  color: var(--sapContent_LabelColor) !important;
+  font-size: var(--sapFontSize) !important;
+}
+
+fd-facet h1.fd-margin-bottom--sm {
+  margin-bottom: 0 !important;
+}
+
+.user-name {
+  font-size: 20px;
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+}

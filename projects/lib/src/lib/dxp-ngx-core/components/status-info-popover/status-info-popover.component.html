@@ -1,0 +1,68 @@
+<fd-popover [noArrow]="false" placement="right-start">
+  <fd-popover-control>
+    <span
+      fd-object-status
+      [glyph]="glyph"
+      [status]="status"
+      [label]="label"
+      [inverted]="true"
+    ></span>
+  </fd-popover-control>
+
+  <ng-template fdPopoverBody>
+    @if (selectedItem) {
+      <div fd-popover-body-header>
+        <div fd-bar size="s" barDesign="header">
+          <div fd-bar-left>
+            @if (statusInformation.items.length > 1) {
+              <fd-bar-element>
+                <fd-button-bar
+                  glyph="navigation-left-arrow"
+                  fdType="transparent"
+                  ariaLabel="Back"
+                  (click)="showItemList()"
+                ></fd-button-bar>
+              </fd-bar-element>
+            }
+            <fd-bar-element>
+              <span
+                fd-object-status
+                class="header-object-status"
+                [status]="selectedItem.status"
+                [glyph]="selectedItem.glyph"
+              ></span>
+              <h5 fd-title>{{ selectedItem.header }}</h5>
+            </fd-bar-element>
+          </div>
+        </div>
+      </div>
+
+      <div class="popover-body-content">
+        <div [innerHTML]="selectedItem.content"></div>
+      </div>
+    } @else {
+      <div class="body-object-status">
+        <ul fd-list fdCompact [selection]="true">
+          @for (item of statusInformation.items; track item.header) {
+            <li
+              class="status-info-popover-list-item"
+              fd-list-item
+              (click)="selectItem(item)"
+            >
+              <span
+                fd-object-status
+                class="header-object-status"
+                [status]="item.status"
+                [glyph]="item.glyph"
+              ></span>
+              <span fd-list-title>
+                {{ item.header }}
+              </span>
+              <i fd-list-icon glyph="navigation-right-arrow"></i>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </ng-template>
+</fd-popover>

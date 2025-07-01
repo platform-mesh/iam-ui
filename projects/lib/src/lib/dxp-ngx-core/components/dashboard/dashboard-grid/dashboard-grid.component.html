@@ -1,0 +1,22 @@
+<div class="gridContainer">
+  @for (section of sections; track section.id) {
+    <div>
+      <ng-container>
+        @if (showSection.get(section.id)) {
+          <h2>{{ section.displayName }}</h2>
+        }
+        <div class="grid grid-section">
+          <slot
+            (slotchange)="sectionSlotchange($event, section.id)"
+            name="{{ section.id }}"
+            class="slot"
+          ></slot>
+        </div>
+      </ng-container>
+    </div>
+  }
+
+  <div class="grid">
+    <slot (slotchange)="slotchange($event)" name="content" class="slot"></slot>
+  </div>
+</div>

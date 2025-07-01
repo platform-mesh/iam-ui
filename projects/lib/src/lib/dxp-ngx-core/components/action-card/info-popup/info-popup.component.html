@@ -1,0 +1,22 @@
+<fd-popover
+  (isOpenChange)="isOpenChange($event)"
+  [noArrow]="false"
+  [focusAutoCapture]="true"
+  [triggers]="['mouseenter', 'mouseleave']"
+  placement="bottom"
+>
+  <fd-popover-control>
+    <ng-content select=".popupcontrol"></ng-content>
+
+    @if (helpIcon) {
+      <a fd-link>
+        <fd-icon glyph="sys-help"></fd-icon>
+      </a>
+    }
+  </fd-popover-control>
+  <fd-popover-body>
+    <div>
+      <ng-content select=".popupcontent"></ng-content>
+    </div>
+  </fd-popover-body>
+</fd-popover>

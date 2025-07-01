@@ -1,0 +1,93 @@
+<fd-popover
+  (isOpenChange)="isOpenChange($event)"
+  [noArrow]="false"
+  [focusAutoCapture]="true"
+  placement="bottom"
+>
+  <fd-popover-control>
+    <ng-content></ng-content>
+  </fd-popover-control>
+  <ng-template fdPopoverBody>
+    <div class="quick-view-card">
+      <fd-card cardType="quickView">
+        <fd-card-content>
+          <fd-quick-view>
+            <fd-quick-view-subheader>
+              <fd-avatar
+                size="s"
+                [circle]="true"
+                [image]="getUserAvatarImgUrl()"
+                alterIcon="content|default-icon"
+                >{{ getUserFullName() }}
+              </fd-avatar>
+              <fd-quick-view-subheader-title>
+                <a fd-link (click)="navigateToUserProfile(user.userId)">
+                  {{ getUserFullName() }}
+                </a>
+              </fd-quick-view-subheader-title>
+              <fd-quick-view-subheader-subtitle>
+                <span class="link" (click)="navigateToUserProfile(user.userId)">
+                  {{ user.userId }}
+                </span>
+              </fd-quick-view-subheader-subtitle>
+            </fd-quick-view-subheader>
+
+            @if (user.userId) {
+              <fd-quick-view-group class="group">
+                <div class="group-title">User Profiles</div>
+                <a fd-link [href]="getGithubURL()" target="_blank">
+                  GitHub Profile
+                  <fd-icon glyph="inspect"></fd-icon>
+                </a>
+              </fd-quick-view-group>
+            }
+
+            @if (user.email) {
+              <fd-quick-view-group class="group">
+                <div class="group-title next">Contact</div>
+                <div>
+                  <button
+                    (click)="emailUser(user.email)"
+                    fd-button
+                    fdType="transparent"
+                    glyph="email"
+                    i18n-title
+                    name="email-button"
+                    title="Send email"
+                  ></button>
+                  <button
+                    (click)="chatWithUserViaTeams(user.email)"
+                    fd-button
+                    fdType="transparent"
+                    glyph="post"
+                    i18n-title
+                    name="chat-button"
+                    title="Start a chat"
+                  ></button>
+                  <button
+                    (click)="callUserViaTeams(user.email)"
+                    fd-button
+                    fdType="transparent"
+                    glyph="call"
+                    i18n-title
+                    name="call-button"
+                    title="Start an audio call"
+                  ></button>
+                  <button
+                    (click)="callUserViaTeams(user.email, true)"
+                    fd-button
+                    fdType="transparent"
+                    glyph="video"
+                    i18n-title
+                    name="video-button"
+                    title="Start a video call"
+                  ></button>
+                </div>
+              </fd-quick-view-group>
+            }
+          </fd-quick-view>
+        </fd-card-content>
+      </fd-card>
+    </div>
+  </ng-template>
+</fd-popover>

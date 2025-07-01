@@ -1,0 +1,36 @@
+dist/
+dist-lib/
+coverage/
+main
+
+node_modules
+__debug_bin
+/bin
+.vscode/
+.eslintcache
+.nx 
+
+# IDE - IntelliJ
+.idea/
+*.iml
+.DS_Store
+
+
+*.pnp.*
+
+# misc
+**/.angular/*
+
+# local env config
+**/.env
+**/.secrets
+
+iam-ui.tar.gz
+iam-wc.tar.gz
+
+# yalc
+/.yalc/
+/yalc.lock
+
+
+TEST-frontend.xml
