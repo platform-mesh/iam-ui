@@ -15,7 +15,7 @@
           "label": "{{members}}",
           "icon": "company-view",
           "hideFromNav": false,
-          "urlSuffix": "/#/entity/:entityId/members",
+          "urlSuffix": "/#/:projectId/members",
           "order": 3,
           "dxpOrder": 3
         },
@@ -24,7 +24,7 @@
           "pathSegment": "add-members",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/entity/:entityId/add-members"
+          "urlSuffix": "/#/:projectId/add-members"
         },
         {
           "entityType": "team",
@@ -32,7 +32,7 @@
           "label": "{{members}}",
           "icon": "company-view",
           "hideFromNav": false,
-          "urlSuffix": "/#/entity/:entityId/members",
+          "urlSuffix": "/#/:teamId/members",
           "dxpOrder": 3,
           "order": 3
         },
@@ -41,7 +41,7 @@
           "pathSegment": "add-members",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/entity/:entityId/add-members"
+          "urlSuffix": "/#/:teamId/add-members"
         }
       ],
       "texts": [

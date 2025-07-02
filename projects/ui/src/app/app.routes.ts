@@ -9,11 +9,11 @@ export const routes: Routes = [
     component: LuigiPreloadComponent,
   },
   {
-    path: 'entity/:entityId/members',
+    path: ':entityId/members',
     component: MembersPageComponent,
   },
   {
-    path: 'entity/:entityId/add-members',
+    path: ':entityId/add-members',
     component: AddMemberDialogComponent,
   },
 ];
