@@ -8,7 +8,7 @@
           "label": "{{members}}",
           "icon": "company-view",
           "entityType": "main",
-          "urlSuffix": "/#/projects/organization/members",
+          "urlSuffix": "/#/organization/members",
           "context": {
             "entityType": "account",
             "entityContext": {
@@ -23,7 +23,7 @@
           "entityType": "main",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/projects/organization/add-members",
+          "urlSuffix": "/#/organization/add-members",
           "context": {
             "entityType": "account"
           }
@@ -33,7 +33,7 @@
           "label": "{{members}}",
           "icon": "company-view",
           "entityType": "main.account",
-          "urlSuffix": "/#/projects/:accountId/members",
+          "urlSuffix": "/#/:accountId/members",
           "context": {
             "accountId": ":accountId",
             "entityType": "account"
@@ -44,7 +44,7 @@
           "entityType": "main.account",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/projects/:accountId/add-members",
+          "urlSuffix": "/#/:accountId/add-members",
           "context": {
             "accountId": ":accountId",
             "entityType": "account"

@@ -1,4 +1,3 @@
-import { Policies } from '../../../../../../lib/src/lib/models/policies';
 import { ConfirmationMessagesService } from '../../services/confirmation-messages/confirmation-messages.service';
 import {
   ConfirmationDialogDecision,
@@ -26,6 +25,7 @@ import {
   Member,
   MemberService,
   NotificationService,
+  Policy,
   PolicyDirective,
   Role,
   User,
@@ -185,6 +185,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         this.memberService.currentEntity(),
         this.luigiContextService.contextObservable(),
       ]).subscribe(([entity, context]) => {
+        console.log(context);
         this.currentEntity = entity;
         this.currentUserId = context.context.userid;
 
@@ -192,9 +193,10 @@ export class MembersPageComponent implements OnInit, OnDestroy {
           this.scopeDisplayName =
             context.context.entityContext[entity].displayName ||
             context.context.entityContext[entity].id;
-          this.currentUserIsOwner = context.context.entityContext[
-            entity
-          ].policies?.includes(Policies.IAM_ADMIN);
+          this.currentUserIsOwner =
+            context.context.entityContext[entity].policies?.includes(
+              'iamAdmin',
+            );
         }
       }),
     );
