@@ -185,7 +185,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         this.memberService.currentEntity(),
         this.luigiContextService.contextObservable(),
       ]).subscribe(([entity, context]) => {
-        console.log(context);
         this.currentEntity = entity;
         this.currentUserId = context.context.userid;
 
@@ -233,19 +232,21 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.readMembers();
   }
 
-  isCurrentUserUniqueOwner = (): boolean =>
-    !!this.currentUserIsOwner && (this.countOwners ?? 0) < 2;
+  isCurrentUserUniqueOwner(): boolean {
+    return !!this.currentUserIsOwner && (this.countOwners ?? 0) < 2;
+  }
 
-  equalsCurrentUser = (member: Member): boolean =>
-    member.user && this.currentUserId === member.user.userId;
+  equalsCurrentUser(member: Member): boolean {
+    return member.user && this.currentUserId === member.user.userId;
+  }
 
-  getUserNameOrId = (member: Member): string => {
+  getUserNameOrId(member: Member): string {
     const postFix = this.equalsCurrentUser(member)
       ? ` (${$localize`You`})`
       : '';
     const userName = UserUtils.getNameOrId(member.user);
     return `${userName}${postFix}`;
-  };
+  }
 
   readMembers() {
     this.memberService

@@ -3,21 +3,19 @@ import { AccountRole, ProjectType } from '../../models/search/account';
 import { AccountSearchResponse } from '../../models/search/dxp-response';
 import { TestUtils } from '../../test';
 import { AccountSearchService } from './account-search.service';
+import { SearchBaseService } from './search-base.service';
 import { TestBed, fakeAsync } from '@angular/core/testing';
+import { mock } from 'jest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { of } from 'rxjs';
 
 describe('ProjectSearchService', () => {
-  let searchService: SearchService;
+  let searchBaseService: jest.Mocked<SearchBaseService>;
   let accountSearchService: AccountSearchService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [MockProvider(SearchService)],
-    });
-
-    searchService = TestBed.inject(SearchService);
-    accountSearchService = TestBed.inject(AccountSearchService);
+    searchBaseService = mock();
+    accountSearchService = new AccountSearchService(searchBaseService);
   });
 
   describe('search', () => {
@@ -66,9 +64,7 @@ describe('ProjectSearchService', () => {
         status: 0,
       };
 
-      accountSearchService.search = jest
-        .fn()
-        .mockReturnValue(of(searchResponse));
+      searchBaseService.search = jest.fn().mockReturnValue(of(searchResponse));
 
       const searchResult = TestUtils.getLastValue(
         accountSearchService.search(
@@ -90,7 +86,7 @@ describe('ProjectSearchService', () => {
         ),
       );
 
-      expect(accountSearchService.search).toHaveBeenCalledWith(
+      expect(searchBaseService.search).toHaveBeenCalledWith(
         query,
         currentPage,
         itemsPerPage,

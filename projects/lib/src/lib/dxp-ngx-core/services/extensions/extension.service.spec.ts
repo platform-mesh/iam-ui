@@ -27,7 +27,7 @@ const extClassForScopeRequest = mock<Apollo>({
 });
 
 const context = {
-  frameContext: undefined,
+  portalContext: undefined,
   tenantid: '1',
   projectId: 'project',
   token: '2',
