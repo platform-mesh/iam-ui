@@ -12,6 +12,12 @@ describe('InviteService', () => {
   const mockContext = mock<DxpContext>({
     tenantid: 'tenantId',
     projectId: 'projectId',
+    portalContext: {
+      iamEntityConfig: `{
+      "team": { "contextProperty": "teamId" },
+      "project": { "contextProperty": "projectId" }
+    }`,
+    },
   });
   it('should be created', () => {
     expect(service).toBeTruthy();

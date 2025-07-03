@@ -31,7 +31,7 @@ export class AppModule {}
 export const environment = {
    production: false,
    luigiContextOverwrite: {
-      frameContext: {
+       portalContext: {
          githubServiceApiUrl: 'http://localhost:9000/query',
       },
    },

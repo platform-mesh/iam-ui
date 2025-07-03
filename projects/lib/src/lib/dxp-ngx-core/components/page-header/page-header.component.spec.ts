@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { PolicyAdapter } from '../../authorization/policy-adapter.service';
 import { Header } from '../../models';
 import { PageHeaderComponent } from './page-header.component';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { mock } from 'jest-mock-extended';
+import { of } from 'rxjs';
 
 import spyOn = jest.spyOn;
 
@@ -17,11 +20,15 @@ describe('PageHeaderComponent', () => {
   const mouseEvent = { preventDefault: () => {} } as MouseEvent;
   const header: Header = { title: 'title', subtitle: 'subtitle' };
   let component: PageHeaderComponent;
+  let policyAdapter: jest.Mocked<PolicyAdapter>;
   let fixture: ComponentFixture<PageHeaderComponent>;
 
   beforeEach(async () => {
+    policyAdapter = mock();
+    policyAdapter.getPolicies.mockReturnValue(of({}));
     await TestBed.configureTestingModule({
       imports: [PageHeaderComponent],
+      providers: [{ provide: PolicyAdapter, useValue: policyAdapter }],
     }).compileComponents();
   });
 

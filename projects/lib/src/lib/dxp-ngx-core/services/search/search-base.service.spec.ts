@@ -8,7 +8,7 @@ import { of } from 'rxjs';
 
 const luigiContext = {
   context: {
-    frameContext: {
+    portalContext: {
       accountSearchServiceApiUrl: 'https://endpointApiUrl/search',
     },
     token: 'token',
@@ -45,7 +45,7 @@ describe('SearchService', () => {
 
       expect(actualResponse).toEqual(httpResponse);
       expect(httpClient.get).toHaveBeenCalledWith(
-        luigiContext.context.frameContext.accountSearchServiceApiUrl,
+        luigiContext.context.portalContext.accountSearchServiceApiUrl,
         expect.objectContaining({}),
       );
     }));
@@ -81,7 +81,7 @@ describe('SearchService', () => {
       tick();
 
       expect(httpClient.get).toHaveBeenCalledWith(
-        luigiContext.context.frameContext.accountSearchServiceApiUrl,
+        luigiContext.context.portalContext.accountSearchServiceApiUrl,
         expect.objectContaining({
           params: new HttpParams()
             .set('q', 'test')
@@ -125,7 +125,7 @@ describe('SearchService', () => {
       tick();
 
       expect(httpClient.get).toHaveBeenCalledWith(
-        luigiContext.context.frameContext.accountSearchServiceApiUrl,
+        luigiContext.context.portalContext.accountSearchServiceApiUrl,
         expect.objectContaining({
           params: new HttpParams()
             .set('q', 'test')

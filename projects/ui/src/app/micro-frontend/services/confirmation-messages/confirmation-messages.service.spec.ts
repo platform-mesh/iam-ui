@@ -1,6 +1,5 @@
 import { ConfirmationMessagesService } from './confirmation-messages.service';
 import { TestBed } from '@angular/core/testing';
-import { Entity } from '@dxp/iam-lib';
 
 describe('ConfirmationMessagesService', () => {
   let service: ConfirmationMessagesService;
@@ -47,7 +46,7 @@ describe('ConfirmationMessagesService', () => {
       it(`should return ${expected.toString()}`, () => {
         const message = service.getAddedMembersMessage(
           addMembersData,
-          Entity.PROJECT,
+          'project',
         );
 
         expect(message).toEqual(expected);

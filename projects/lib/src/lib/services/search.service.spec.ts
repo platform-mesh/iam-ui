@@ -34,7 +34,7 @@ const mockContext = {
   tenantid: 'tenantid',
   teamId: 'teamId',
   projectId: 'projectId',
-  frameContext: {
+  portalContext: {
     userSuggestSearchServiceApiUrl: 'https://usersearch.service.url/suggest',
   },
 } as any as DxpContext;

@@ -172,13 +172,19 @@ describe('MembersPageComponent', () => {
       }),
     );
 
-    userIsOwnerSubject.next(true);
+    luigiContextSubject.next({
+      context: {
+        entityContext: {
+          project: { policies: ['iamAdmin'], id: 'id', displayName: 'dM' },
+        },
+      },
+    } as any);
 
     tick();
     expect(component.members).toBeDefined();
     expect(component.currentUserIsOwner).toBeTruthy();
     expect(component.countOwners).toEqual(1);
-    expect(component.rolesForEntity).toEqual(allAvailableRoles);
+    expect(component.rolesForEntity()).toEqual(allAvailableRoles);
     expect(component.scopeDisplayName).toBeDefined();
     expect(memberService.usersOfEntity).toHaveBeenCalledWith({
       limit: 10,
@@ -197,6 +203,18 @@ describe('MembersPageComponent', () => {
     confirmationServiceMock.showRemoveMemberDialog.mockReturnValue(
       Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
     );
+
+    luigiContextSubject.next({
+      context: {
+        entityContext: {
+          project: {
+            policies: ['iamAdmin'],
+            id: 'id',
+            displayName: 'Display Name',
+          },
+        },
+      },
+    } as any);
 
     component.openRemoveMemberDialog(mockMemberUser);
     tick();
@@ -272,6 +290,18 @@ describe('MembersPageComponent', () => {
       Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
     );
 
+    luigiContextSubject.next({
+      context: {
+        entityContext: {
+          project: {
+            policies: ['iamAdmin'],
+            id: 'id',
+            displayName: 'Display Name',
+          },
+        },
+      },
+    } as any);
+
     component.openLeaveDialog();
     tick();
     mockLeaveEntitySubject.next();
@@ -326,6 +356,7 @@ describe('MembersPageComponent', () => {
 
   const rolesTechnicalNames = (roles: Role[]) =>
     roles.flatMap((r) => r.technicalName).join();
+
   describe.each([
     {
       members: mockTwoMemberOwners,
@@ -361,7 +392,18 @@ describe('MembersPageComponent', () => {
           users: members,
           pageInfo: { totalCount: members.length, ownerCount: 1 },
         });
-        userIsOwnerSubject.next(isUserOwner);
+
+        luigiContextSubject.next({
+          context: {
+            entityContext: {
+              project: {
+                policies: [`${isUserOwner ? 'iamAdmin' : ''}`],
+                id: 'id',
+                displayName: 'dM',
+              },
+            },
+          },
+        } as any);
         component.countOwners = countOwners;
 
         const isCurrentUserUniqueOwner = component.isCurrentUserUniqueOwner();
@@ -376,6 +418,9 @@ describe('MembersPageComponent', () => {
       mock<DxpIContextMessage>({
         context: mock<DxpContext>({
           userid: mockMemberUser.user.userId,
+          entityContext: {
+            project: { policies: ['iamAdmin'], id: 'id', displayName: 'dM' },
+          },
         }),
       }),
     );
@@ -419,10 +464,15 @@ describe('MembersPageComponent', () => {
             addedMembers,
             error: undefined,
           },
+          entityContext: {
+            project: { policies: ['iamAdmin'], id: 'id', displayName: 'dM' },
+          },
         }),
       }),
     );
+
     tick();
+
     expect(
       luigiClient.linkManager().fromParent().openAsModal,
     ).toHaveBeenCalledWith('add-members', {
@@ -455,6 +505,9 @@ describe('MembersPageComponent', () => {
         context: mock<DxpContext>({
           goBackContext: {
             error,
+          },
+          entityContext: {
+            project: { policies: ['iamAdmin'], id: 'id', displayName: 'dM' },
           },
         }),
       }),

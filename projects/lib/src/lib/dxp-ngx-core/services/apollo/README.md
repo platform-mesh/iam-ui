@@ -44,7 +44,7 @@ export class WaasApolloClientService extends BaseApolloClientService {
   }
 
   protected getApiUrl(
-    frameContext: FrameContext,
+    portalContext: FrameContext,
     serviceProviderConfig: Record<string, string>,
   ): string {
     return serviceProviderConfig.waasApiUrl;

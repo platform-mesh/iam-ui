@@ -11,6 +11,7 @@ const jestConfig: Config = {
   transformIgnorePatterns: ['/node_modules/?!@angular'],
   moduleNameMapper: {
     '^lodash-es(.*)': 'lodash',
+    '\\.(css|scss)$': 'identity-obj-proxy',
   },
 };
 

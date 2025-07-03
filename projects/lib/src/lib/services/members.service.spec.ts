@@ -23,7 +23,12 @@ import { of } from 'rxjs';
 
 const mockContext = {
   parentNavigationContexts: ['project', 'projects'],
-
+  portalContext: {
+    iamEntityConfig: `{
+      "team": { "contextProperty": "teamId" },
+      "project": { "contextProperty": "projectId" }
+    }`,
+  },
   token: 'some-token',
   tenantid: 'tenantId',
   projectId: 'projectId',

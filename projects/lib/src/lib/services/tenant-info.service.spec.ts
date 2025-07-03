@@ -17,7 +17,8 @@ describe('TenantInfoService', () => {
     TestBed.configureTestingModule({
       providers: [
         MockProvider(DxpLuigiContextService, {
-          contextObservable: () => of({} as DxpIContextMessage),
+          contextObservable: () =>
+            of({ context: { tenantid: 'tenantid' } } as DxpIContextMessage),
         }),
         MockProvider(IamApolloClientService),
       ],
@@ -38,6 +39,11 @@ describe('TenantInfoService', () => {
     const result = TestUtils.getLastValue(service.tenantInfo());
 
     expect(result).toEqual({ emailDomains });
-    expect(query).toHaveBeenCalledWith({ query: GET_TENANT_INFO });
+    expect(query).toHaveBeenCalledWith({
+      query: GET_TENANT_INFO,
+      variables: {
+        tenantId: 'tenantid',
+      },
+    });
   }));
 });

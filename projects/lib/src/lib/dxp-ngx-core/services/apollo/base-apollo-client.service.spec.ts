@@ -87,7 +87,7 @@ describe('BaseApolloClientService', () => {
       of({
         context: {
           token: token,
-          frameContext: {},
+          portalContext: {},
         },
       }),
     );
