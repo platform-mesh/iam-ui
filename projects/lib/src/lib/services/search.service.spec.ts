@@ -1,9 +1,6 @@
-import { GrantedUsers } from '../dxp-ngx-core/authorization';
-import { DxpContext } from '../dxp-ngx-core/models';
-import {
-  DxpIContextMessage,
-  DxpLuigiContextService,
-} from '../dxp-ngx-core/services';
+import { GrantedUsers } from '../authorization';
+import { NodeContext } from '../models';
+import { DxpIContextMessage, IamLuigiContextService } from '../services';
 import { MemberService } from './member.service';
 import {
   SearchService,
@@ -37,7 +34,7 @@ const mockContext = {
   portalContext: {
     userSuggestSearchServiceApiUrl: 'https://usersearch.service.url/suggest',
   },
-} as any as DxpContext;
+} as any as NodeContext;
 
 const suggestSearchResponse: SuggestedUserResponse = {
   docs: [mock<SuggestedUser>(mockUserA), mock<SuggestedUser>(mockUserB)],
@@ -65,7 +62,7 @@ describe('SearchService', () => {
         MockProvider(MemberService, {
           usersOfEntity: jest.fn().mockReturnValue(usersOfEntitySubject),
         }),
-        MockProvider(DxpLuigiContextService, {
+        MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContextSubject,
         }),
         MockProvider(HttpClient, {

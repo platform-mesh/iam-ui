@@ -1,4 +1,4 @@
-<dxp-dashboard-sidebar-item
+<app-dashboard-sidebar-item
   [title]="'Members'"
   [loading]="loading"
   [rolesAllowedForCallback]="rolesAllowedForEdit"
@@ -18,7 +18,7 @@
         ></iam-avatar>
 
         <ng-template #details>
-          <fd-quick-view [id]="member.userId">
+          <fd-quick-view [id]="member.userId!">
             <fd-quick-view-subheader
               [id]="member.userId + '-popover-subheader'"
               style="display: block; padding-top: 1rem"
@@ -27,7 +27,7 @@
                 [circle]="true"
                 size="xs"
                 [clickable]="true"
-                (avatarClicked)="navigateToUser(member.userId)"
+                (avatarClicked)="navigateToUser(member.userId!)"
                 role="img"
                 [image]="'https://avatars.wdf.sap.corp/avatar/' + member.userId"
                 [colorAccent]="6"
@@ -40,7 +40,7 @@
               ></fd-avatar>
               <fd-quick-view-subheader-title
                 ><span
-                  (click)="navigateToUser(member.userId)"
+                  (click)="navigateToUser(member.userId!)"
                   style="cursor: pointer"
                   >{{ member.firstName }} {{ member.lastName }}</span
                 ></fd-quick-view-subheader-title
@@ -73,4 +73,4 @@
       }
     </fd-avatar-group>
   </div>
-</dxp-dashboard-sidebar-item>
+</app-dashboard-sidebar-item>

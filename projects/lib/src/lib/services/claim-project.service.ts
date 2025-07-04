@@ -1,11 +1,11 @@
-import { DxpLuigiContextService } from '../dxp-ngx-core/services/luigi';
+import { IamLuigiContextService } from '../services/luigi';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ClaimProjectService {
-  constructor(private luigiContextService: DxpLuigiContextService) {}
+  constructor(private luigiContextService: IamLuigiContextService) {}
 
   public claimProject(): void {
     const projectId = this.luigiContextService.getContext().projectId;

@@ -16,8 +16,7 @@
           "icon": "company-view",
           "hideFromNav": false,
           "urlSuffix": "/#/:projectId/members",
-          "order": 3,
-          "dxpOrder": 3
+          "order": 3
         },
         {
           "entityType": "project",
@@ -33,7 +32,6 @@
           "icon": "company-view",
           "hideFromNav": false,
           "urlSuffix": "/#/:teamId/members",
-          "dxpOrder": 3,
           "order": 3
         },
         {

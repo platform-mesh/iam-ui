@@ -2,9 +2,7 @@ import {
   ConfirmationDialogDecision,
   ConfirmationService,
 } from './confirmation.service';
-import { MemberService } from '@dxp/iam-lib';
-import { User } from '@dxp/ngx-core/common';
-import { LuigiClient } from '@dxp/ngx-core/luigi';
+import { LuigiClient, MemberService, User } from '@platform-mesh/iam-lib';
 import { mock } from 'jest-mock-extended';
 import { of } from 'rxjs';
 

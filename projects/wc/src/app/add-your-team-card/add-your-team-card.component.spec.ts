@@ -1,10 +1,10 @@
 import { AddYourTeamCardComponent } from './add-your-team-card.component';
-import {
-  DxpLuigiContextService,
-  ExtensionService,
-  ScopeType,
-} from '@dxp/iam-lib';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
+import {
+  ExtensionService,
+  IamLuigiContextService,
+  ScopeType,
+} from '@platform-mesh/iam-lib';
 import { mock } from 'jest-mock-extended';
 import { MockService } from 'ng-mocks';
 import { of } from 'rxjs';
@@ -15,7 +15,7 @@ describe('AddYourTeamCardComponent', () => {
   beforeEach(() => {
     extensionService = MockService(ExtensionService);
     component = new AddYourTeamCardComponent(
-      MockService(DxpLuigiContextService),
+      MockService(IamLuigiContextService),
       extensionService,
     );
   });
@@ -56,9 +56,9 @@ describe('AddYourTeamCardComponent', () => {
       installationData: {
         skipOnboardingCard: 'true',
       },
-      instanceId: 'dxp-iam-ui',
+      instanceId: 'app-iam-ui',
       extensionClass: {
-        id: 'dxp-iam-ui',
+        id: 'app-iam-ui',
         scope: ScopeType.PROJECT,
       },
     });

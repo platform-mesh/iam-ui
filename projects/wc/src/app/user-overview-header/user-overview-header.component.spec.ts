@@ -1,6 +1,6 @@
 import { UserOverviewHeaderComponent } from './user-overview-header.component';
 import { ChangeDetectorRef } from '@angular/core';
-import { DxpLuigiContextService, UserService } from '@dxp/iam-lib';
+import { IamLuigiContextService, UserService } from '@platform-mesh/iam-lib';
 import { MockService } from 'ng-mocks';
 
 describe('UserOverviewHeaderComponent', () => {
@@ -8,7 +8,7 @@ describe('UserOverviewHeaderComponent', () => {
 
   beforeEach(() => {
     component = new UserOverviewHeaderComponent(
-      MockService(DxpLuigiContextService),
+      MockService(IamLuigiContextService),
       MockService(UserService),
       MockService(ChangeDetectorRef),
     );

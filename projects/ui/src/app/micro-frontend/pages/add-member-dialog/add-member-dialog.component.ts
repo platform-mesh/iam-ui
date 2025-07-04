@@ -11,18 +11,6 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  AvatarComponent as IAMAvatarComponent,
-  LuigiClient,
-  Member,
-  MemberService,
-  NotificationService,
-  Role,
-  SearchService,
-  SuggestedUser,
-  TenantInfoService,
-  User,
-} from '@dxp/iam-lib';
-import {
   ComboboxComponent,
   ContentDensityDirective,
   InitialFocusDirective,
@@ -64,6 +52,18 @@ import {
   TableHeaderDirective,
   TableRowDirective,
 } from '@fundamental-ngx/core/table';
+import {
+  AvatarComponent as IAMAvatarComponent,
+  LuigiClient,
+  Member,
+  MemberService,
+  NotificationService,
+  Role,
+  SearchService,
+  SuggestedUser,
+  TenantInfoService,
+  User,
+} from '@platform-mesh/iam-lib';
 import { BehaviorSubject, Subscription, debounceTime, take } from 'rxjs';
 
 export type DropDownValue =

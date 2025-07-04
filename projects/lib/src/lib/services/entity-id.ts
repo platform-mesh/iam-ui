@@ -1,6 +1,6 @@
-import { DxpContext, EntityConfig } from '@dxp/iam-lib';
+import { EntityConfig, NodeContext } from '@platform-mesh/iam-lib';
 
-export const getEntityId = (entity: string, ctx: DxpContext): string => {
+export const getEntityId = (entity: string, ctx: NodeContext): string => {
   const iamEntityConfig = JSON.parse(
     ctx.portalContext.iamEntityConfig,
   ) as Record<string, EntityConfig>;

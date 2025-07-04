@@ -1,0 +1,189 @@
+<div class="dashboard">
+  @if (sidebarEnabled) {
+    <fd-flexible-column-layout
+      [layout]="layout"
+      [smBreakPoint]="1"
+      (layoutChange)="layoutChange($event)"
+    >
+      <ng-template #startColumn>
+        <ng-container *ngTemplateOutlet="dynamicPage"></ng-container>
+      </ng-template>
+      <ng-template #midColumn>
+        <app-dashboard-sidebar
+          [title]="sidebarTitle"
+          (closeSidebar)="closeSidebar()"
+        ></app-dashboard-sidebar>
+      </ng-template>
+    </fd-flexible-column-layout>
+  } @else {
+    <ng-container *ngTemplateOutlet="dynamicPage"></ng-container>
+  }
+
+  <ng-template #dynamicPage>
+    <fd-dynamic-page>
+      <fd-dynamic-page-header
+        [class.header-hidden]="!header"
+        [title]="header ? header.title : ''"
+        [subtitle]="header ? header.subtitle : ''"
+        data-testid="app-page-header-title-text"
+      >
+        <!-- Ideally, the header would be extracted to an own component, but it's not possible.
+          A feature request for this has been opened at https://github.com/SAP/fundamental-ngx/issues/11948 -->
+        @if (header && header.keyInfo) {
+          <fd-dynamic-page-title-content>
+            <fd-info-label
+              [label]="header.keyInfo.text"
+              [color]="header.keyInfo.color"
+              [title]="header.keyInfo.text"
+              data-testid="app-page-header-key-info"
+            ></fd-info-label>
+          </fd-dynamic-page-title-content>
+        }
+
+        @if (header?.statusInfo) {
+          <fd-dynamic-page-title-content>
+            <app-status-info-popover
+              [statusInfo]="header.statusInfo || { items: [] }"
+              (click)="$event.stopPropagation()"
+            >
+            </app-status-info-popover>
+          </fd-dynamic-page-title-content>
+        }
+
+        @if (header) {
+          <fd-dynamic-page-global-actions>
+            <fd-toolbar fdType="transparent" [clearBorder]="true">
+              <ng-container
+                *requiredPolicies="manageRequiredPolicies; operator: 'or'"
+              >
+                @if (
+                  showStandardEditButton(showEditButton, secondaryButtonText)
+                ) {
+                  <button
+                    fd-button
+                    fdCompact
+                    fdType="emphasized"
+                    (click)="editClicked.emit()"
+                    label="Edit"
+                    title="Edit"
+                    data-testid="app-page-header-edit-button"
+                  ></button>
+                }
+
+                @if (
+                  showEditWithSecondaryButton(
+                    showEditButton,
+                    secondaryButtonText
+                  )
+                ) {
+                  <fd-split-button
+                    fdCompact
+                    [mainAction]="{
+                      mainActionTitle: 'Edit',
+                      keepMainAction: true,
+                    }"
+                    fdType="emphasized"
+                    (primaryButtonClicked)="editClicked.emit()"
+                    data-testid="app-page-header-edit-with-secondary-button"
+                  >
+                    <fd-menu>
+                      <li fd-menu-item (click)="secondaryButtonClicked.emit()">
+                        <div
+                          fd-menu-interactive
+                          data-testid="app-page-header-secondary-button"
+                        >
+                          <span fd-menu-title>{{ secondaryButtonText }}</span>
+                        </div>
+                      </li>
+                    </fd-menu>
+                  </fd-split-button>
+                }
+
+                @if (showAutomateButton) {
+                  <button
+                    fd-button
+                    fdCompact
+                    fdType="emphasized"
+                    (click)="automateClicked.emit()"
+                    label="Automate"
+                    title="Automate"
+                    data-testid="app-page-header-automate-button"
+                  ></button>
+                }
+
+                <button
+                  fd-button
+                  fdCompact
+                  fdType="emphasized"
+                  [disabled]="!showDeleteButton"
+                  (click)="deleteClicked.emit()"
+                  label="Delete"
+                  [title]="
+                    showDeleteButton ? deletionToolTip : noDeletionToolTip
+                  "
+                  data-testid="app-page-header-delete-button"
+                ></button>
+
+                @for (customButton of customButtons; track customButton.label) {
+                  @if (customButton.show | async) {
+                    <button
+                      fd-button
+                      fdCompact
+                      [fdType]="customButton.type"
+                      (click)="customButton.callback.emit()"
+                      [label]="customButton.label"
+                      [title]="customButton.label"
+                      [attr.data-testid]="customButton.testId"
+                    ></button>
+                  }
+                }
+              </ng-container>
+
+              @if (!isLayoutFullscreen() && sidebarEnabled) {
+                <button
+                  fd-button
+                  fdCompact
+                  fdType="standard"
+                  (click)="layoutChange('TwoColumnsMidExpanded')"
+                  label="Hide Info Panel"
+                  title="Hide Info Panel"
+                  data-testid="app-page-header-hide-side-panel-button"
+                ></button>
+              }
+
+              @if (isLayoutFullscreen() && sidebarEnabled) {
+                <button
+                  fd-button
+                  fdCompact
+                  fdType="standard"
+                  (click)="layoutChange('TwoColumnsStartExpanded')"
+                  label="Show Info Panel"
+                  title="Show Info Panel"
+                  data-testid="app-page-header-show-side-panel-button"
+                ></button>
+              }
+
+              <!-- When there is no other element which loads Fundamental Icons, they are missing. 
+             This forces them to load and the fd-icon element is not visible when no glyph property is defined -->
+              <fd-icon></fd-icon>
+            </fd-toolbar>
+          </fd-dynamic-page-global-actions>
+        }
+      </fd-dynamic-page-header>
+
+      @if (header) {
+        <fd-dynamic-page-subheader
+          [pinnable]="true"
+          [collapsible]="true"
+          [collapsed]="false"
+          #subHeader
+        >
+          <ng-content></ng-content>
+        </fd-dynamic-page-subheader>
+      }
+      <fd-dynamic-page-content>
+        <app-dashboard-grid></app-dashboard-grid>
+      </fd-dynamic-page-content>
+    </fd-dynamic-page>
+  </ng-template>
+</div>

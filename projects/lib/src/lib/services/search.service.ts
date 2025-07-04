@@ -1,4 +1,4 @@
-import { DxpLuigiContextService } from '../dxp-ngx-core/services/luigi';
+import { IamLuigiContextService } from '../services/luigi';
 import { MemberService } from './member.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -29,7 +29,7 @@ export class SearchService {
 
   constructor(
     private httpClient: HttpClient,
-    private luigiContextService: DxpLuigiContextService,
+    private luigiContextService: IamLuigiContextService,
     private memberService: MemberService,
   ) {
     this.luigiContextService

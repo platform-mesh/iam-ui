@@ -1,7 +1,7 @@
-import { IamApolloClientService } from '../dxp-ngx-core/services/apollo';
-import { DxpLuigiContextService } from '../dxp-ngx-core/services/luigi';
 import { TenantInfo } from '../models/tenant-info';
 import { GET_TENANT_INFO } from '../queries/iam-queries';
+import { IamApolloClientService } from '../services/apollo';
+import { IamLuigiContextService } from '../services/luigi';
 import { Injectable } from '@angular/core';
 import { Observable, combineLatest, first, map, mergeMap } from 'rxjs';
 
@@ -15,7 +15,7 @@ interface TenantInfoResponse {
 export class TenantInfoService {
   constructor(
     private apolloClientService: IamApolloClientService,
-    private luigiContextService: DxpLuigiContextService,
+    private luigiContextService: IamLuigiContextService,
   ) {}
 
   tenantInfo(): Observable<TenantInfo> {

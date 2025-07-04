@@ -5,7 +5,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@dxp/iam-lib": ["./projects/lib/src/public-api.ts"]
+      "@platform-mesh/iam-lib": ["./projects/lib/src/public-api.ts"]
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

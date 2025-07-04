@@ -1,11 +1,5 @@
-import { GrantedUsers, Member, Role } from '../dxp-ngx-core/authorization';
-import { User } from '../dxp-ngx-core/models';
-import {
-  DxpLuigiContextService,
-  IamApolloClientService,
-  LuigiClient,
-} from '../dxp-ngx-core/services';
-import { TestUtils } from '../dxp-ngx-core/test';
+import { GrantedUsers, Member, Role } from '../authorization';
+import { User } from '../models';
 import {
   ASSIGN_ROLE_BINDINGS,
   DELETE_INVITE,
@@ -14,6 +8,12 @@ import {
   REMOVE_FROM_ENTITY,
   USERS_OF_ENTITY,
 } from '../queries/iam-queries';
+import {
+  IamApolloClientService,
+  IamLuigiContextService,
+  LuigiClient,
+} from '../services';
+import { TestUtils } from '../test';
 import { MemberService } from './member.service';
 import { TeamService } from './team.service';
 import { TestBed, fakeAsync } from '@angular/core/testing';
@@ -40,7 +40,7 @@ describe('MemberService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        MockProvider(DxpLuigiContextService, {
+        MockProvider(IamLuigiContextService, {
           contextObservable: jest
             .fn()
             .mockReturnValue(of({ context: mockContext })),

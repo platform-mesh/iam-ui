@@ -7,16 +7,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import {
-  AvatarComponent,
-  DxpContext,
-  DxpLuigiContextService,
-  Header,
-  PageHeaderComponent,
-  User,
-  UserService,
-  UserUtils,
-} from '@dxp/iam-lib';
-import {
   FacetComponent,
   FacetContentComponent,
   FacetGroupComponent,
@@ -26,6 +16,16 @@ import { LinkComponent } from '@fundamental-ngx/core/link';
 import { TextComponent } from '@fundamental-ngx/core/text';
 import { ButtonComponent } from '@fundamental-ngx/platform/button';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
+import {
+  AvatarComponent,
+  Header,
+  IamLuigiContextService,
+  NodeContext,
+  PageHeaderComponent,
+  User,
+  UserService,
+  UserUtils,
+} from '@platform-mesh/iam-lib';
 
 @Component({
   encapsulation: ViewEncapsulation.ShadowDom,
@@ -52,7 +52,7 @@ export class UserOverviewHeaderComponent implements OnInit {
     subtitle: '',
   };
 
-  ctx?: DxpContext;
+  ctx?: NodeContext;
 
   /**
    * Set by Luigi itself.
@@ -64,13 +64,13 @@ export class UserOverviewHeaderComponent implements OnInit {
    * Set by Luigi itself.
    */
   @Input()
-  set context(context: DxpContext) {
+  set context(context: NodeContext) {
     this.ctx = context;
-    this.dxpLuigiContextService.setContext(context);
+    this.luigiContextService.setContext(context);
   }
 
   constructor(
-    private dxpLuigiContextService: DxpLuigiContextService,
+    private luigiContextService: IamLuigiContextService,
     private userService: UserService,
     private cdRef: ChangeDetectorRef,
   ) {}

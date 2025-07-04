@@ -6,18 +6,18 @@ import {
   OnInit,
   ViewEncapsulation,
 } from '@angular/core';
+import { ButtonType } from '@fundamental-ngx/core';
+import { LuigiClient } from '@luigi-project/client/luigi-element';
 import {
   ActionCardComponent,
   CardAction,
-  DxpContext,
-  DxpLuigiContextService,
   ExtensionService,
+  IamLuigiContextService,
   ImageType,
+  NodeContext,
   ScopeType,
   UpdateExtensionInput,
-} from '@dxp/iam-lib';
-import { ButtonType } from '@fundamental-ngx/core';
-import { LuigiClient } from '@luigi-project/client/luigi-element';
+} from '@platform-mesh/iam-lib';
 import { catchError, first, of } from 'rxjs';
 
 @Component({
@@ -47,8 +47,8 @@ export class AddYourTeamCardComponent implements OnInit {
    * Set by Luigi itself.
    */
   @Input()
-  set context(context: DxpContext) {
-    this.dxpLuigiContextService.setContext(context);
+  set context(context: NodeContext) {
+    this.luigiContextService.setContext(context);
   }
 
   /**
@@ -63,12 +63,12 @@ export class AddYourTeamCardComponent implements OnInit {
   protected readonly ImageType = ImageType;
 
   constructor(
-    private dxpLuigiContextService: DxpLuigiContextService,
+    private luigiContextService: IamLuigiContextService,
     private extensionService: ExtensionService,
   ) {}
 
   ngOnInit(): void {
-    this.dxpLuigiContextService
+    this.luigiContextService
       .contextObservable()
       .pipe(first())
       .subscribe((ctx) => {
@@ -107,9 +107,9 @@ export class AddYourTeamCardComponent implements OnInit {
         installationData: {
           skipOnboardingCard: 'true',
         },
-        instanceId: 'dxp-iam-ui',
+        instanceId: 'app-iam-ui',
         extensionClass: {
-          id: 'dxp-iam-ui',
+          id: 'app-iam-ui',
           scope: ScopeType.PROJECT,
         },
       } as UpdateExtensionInput)

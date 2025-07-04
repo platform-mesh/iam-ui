@@ -20,7 +20,7 @@ import {
   TenantInfoService,
   User,
   UserService,
-} from '@dxp/iam-lib';
+} from '@platform-mesh/iam-lib';
 import { MockProvider } from 'ng-mocks';
 import { Subject, Subscription, of } from 'rxjs';
 

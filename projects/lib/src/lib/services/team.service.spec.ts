@@ -1,12 +1,12 @@
-import { DxpContext } from '../dxp-ngx-core/models';
-import { AccountSearchResultItem } from '../dxp-ngx-core/models/search/account-search-result.item';
-import { SearchResult } from '../dxp-ngx-core/models/search/search.result';
+import { NodeContext } from '../models';
+import { AccountSearchResultItem } from '../models/search/account-search-result.item';
+import { SearchResult } from '../models/search/search.result';
 import {
   DxpIContextMessage,
-  DxpLuigiContextService,
   IamApolloClientService,
-} from '../dxp-ngx-core/services';
-import { AccountSearchService } from '../dxp-ngx-core/services/search/account-search.service';
+  IamLuigiContextService,
+} from '../services';
+import { AccountSearchService } from '../services/search/account-search.service';
 import { TeamService } from './team.service';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ILuigiContextTypes } from '@luigi-project/client-support-angular';
@@ -20,7 +20,7 @@ const mockContext = {
   tenantid: 'tenantid',
   teamId: 'teamId',
   projectId: 'projectId',
-} as DxpContext;
+} as NodeContext;
 
 describe('TeamService', () => {
   let teamService: TeamService;
@@ -48,7 +48,7 @@ describe('TeamService', () => {
         MockProvider(IamApolloClientService, {
           apollo: () => iamApolloSubject,
         }),
-        MockProvider(DxpLuigiContextService, {
+        MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContextSubject,
         }),
       ],
