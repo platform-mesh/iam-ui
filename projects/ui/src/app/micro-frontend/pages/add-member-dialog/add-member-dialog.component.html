@@ -40,7 +40,7 @@
           [autoComplete]="false"
           [byline]="showByline"
           fillControlMode="equal"
-          data-testid="dxp-iam-member-add-dialog-user-search-input"
+          data-testid="app-iam-member-add-dialog-user-search-input"
           fdCompact="true"
         >
           @if (filteredUsersCollectionLength) {
@@ -79,7 +79,7 @@
         <div
           fd-list-content
           [attr.data-testid]="
-            'dxp-iam-member-add-dialog-user-' + user.userId + '-entity'
+            'app-iam-member-add-dialog-user-' + user.userId + '-entity'
           "
         >
           <div fd-list-title>
@@ -181,10 +181,10 @@
                     (selectionChange)="onRoleChange($event, invitee)"
                     [attr.data-testid]="
                       invitee.user
-                        ? 'dxp-iam-member-add-dialog-user-' +
+                        ? 'app-iam-member-add-dialog-user-' +
                           invitee.user.userId +
                           '-role-select'
-                        : 'dxp-iam-member-add-dialog-team-' +
+                        : 'app-iam-member-add-dialog-team-' +
                           $any(invitee).team?.name +
                           '-role-select'
                     "
@@ -248,10 +248,10 @@
                     (selectionChange)="onRoleChange($event, member)"
                     [attr.data-testid]="
                       member.user
-                        ? 'dxp-iam-member-add-dialog-user-' +
+                        ? 'app-iam-member-add-dialog-user-' +
                           member.user.userId +
                           '-role-select'
-                        : 'dxp-iam-member-add-dialog-team-' +
+                        : 'app-iam-member-add-dialog-team-' +
                           $any(member).team?.name +
                           '-role-select'
                     "
@@ -296,7 +296,7 @@
           <button
             fd-button
             fdType="emphasized"
-            data-testid="dxp-iam-member-add-dialog-add-button"
+            data-testid="app-iam-member-add-dialog-add-button"
             i18n-label="add button|Add button text on the add member dialog"
             label="Add"
             (click)="addMembers()"

@@ -1,4 +1,4 @@
-import { DxpContext, User } from '../dxp-ngx-core/models';
+import { NodeContext, User } from '../models';
 import { DELETE_INVITE, INVITE_USER } from '../queries/iam-queries';
 import { getEntityId } from './entity-id';
 import { Injectable } from '@angular/core';
@@ -15,7 +15,7 @@ interface DeleteInviteResponse {
 export class InviteService {
   invite(
     apollo: ApolloBase,
-    context: DxpContext,
+    context: NodeContext,
     entity: string,
     user: User,
     roles: string[],
@@ -42,7 +42,7 @@ export class InviteService {
 
   deleteInvite(
     apollo: ApolloBase,
-    context: DxpContext,
+    context: NodeContext,
     entity: string,
     user: User,
   ): Observable<boolean> {

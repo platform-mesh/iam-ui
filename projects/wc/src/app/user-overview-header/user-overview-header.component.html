@@ -1,12 +1,12 @@
 @if (user) {
-  <dxp-page-header [header]="header" [showEditButton]="false">
+  <app-page-header [header]="header" [showEditButton]="false">
     <fd-facet-group>
       <fd-facet type="image">
         <iam-avatar size="l" [user]="user"></iam-avatar>
       </fd-facet>
 
       <fd-facet type="custom">
-        <div class="user-name" data-testid="dxp-user-header-name">
+        <div class="user-name" data-testid="app-user-header-name">
           {{ getFirsLastNameOrUserId(user) }}
         </div>
         <div>
@@ -18,7 +18,7 @@
               glyph="post"
               name="chat-button"
               title="Start a chat"
-              data-testid="dxp-user-header-chat-button"
+              data-testid="app-user-header-chat-button"
             ></fdp-button>
             <fdp-button
               fdCompact
@@ -27,7 +27,7 @@
               glyph="email"
               name="email-button"
               title="Send email"
-              data-testid="dxp-user-header-email-button"
+              data-testid="app-user-header-email-button"
             ></fdp-button>
             <fdp-button
               fdCompact
@@ -36,7 +36,7 @@
               glyph="call"
               name="call-button"
               title="Start an audio call"
-              data-testid="dxp-user-header-call-button"
+              data-testid="app-user-header-call-button"
             ></fdp-button>
           </span>
         </div>
@@ -49,7 +49,7 @@
         <fd-facet-content>
           <div
             class="contact-links"
-            data-testid="dxp-user-header-contact-links"
+            data-testid="app-user-header-contact-links"
           >
             <div>
               <a
@@ -101,5 +101,5 @@ P5kAAAAASUVORK5CYII="
         </fd-facet-content>
       </fd-facet>
     </fd-facet-group>
-  </dxp-page-header>
+  </app-page-header>
 }

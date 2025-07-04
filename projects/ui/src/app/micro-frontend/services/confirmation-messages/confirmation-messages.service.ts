@@ -1,6 +1,6 @@
 import { AddMembersData } from '../../pages/members-page/members-page.component';
 import { Injectable } from '@angular/core';
-import { UserUtils } from '@dxp/iam-lib';
+import { UserUtils } from '@platform-mesh/iam-lib';
 
 @Injectable()
 export class ConfirmationMessagesService {

@@ -15,7 +15,7 @@
           id="open-add-members-dialog-button"
           label="Add"
           title="Add members"
-          data-testid="dxp-iam-member-list-add-button"
+          data-testid="app-iam-member-list-add-button"
         ></button>
       </fd-toolbar>
     </fdp-dynamic-page-global-actions>
@@ -34,7 +34,7 @@
           (searchSubmit)="onSearchSubmit($event.text)"
           (cancelSearch)="onSearchSubmit()"
           [inputText]="searchTerm"
-          data-testid="dxp-iam-members-list-search-input"
+          data-testid="app-iam-members-list-search-input"
         ></fdp-search-field>
       </div>
       @if (rolesForEntity().length) {
@@ -100,11 +100,11 @@
         >
           <fdp-table-cell
             *fdpCellDef="let member"
-            data-testid="dxp-iam-member-list-member-row"
+            data-testid="app-iam-member-list-member-row"
           >
             <p
               [attr.data-testid]="
-                'dxp-iam-members-page-' + member.user?.userId ||
+                'app-iam-members-page-' + member.user?.userId ||
                 member.user?.email ||
                 member.team?.name + '-entity'
               "
@@ -185,7 +185,7 @@
           width="20rem"
         >
           <fdp-table-cell *fdpCellDef="let member">
-            <div *dxpRequiredPolicies="'iamAdmin'">
+            <div *requiredPolicies="'iamAdmin'">
               <fd-multi-combobox
                 placeholder=""
                 [dataSource]="rolesForEntity()"
@@ -195,16 +195,16 @@
                 [selectedItems]="member.roles"
                 [attr.data-testid]="
                   member.user
-                    ? 'dxp-iam-member-list-user-' +
+                    ? 'app-iam-member-list-user-' +
                       member.user?.userId +
                       '-role-select'
-                    : 'dxp-iam-member-list-team-' +
+                    : 'app-iam-member-list-team-' +
                       member.team?.name +
                       '-role-select'
                 "
               ></fd-multi-combobox>
             </div>
-            <div *dxpRequiredPolicies="'!iamAdmin'">
+            <div *requiredPolicies="'!iamAdmin'">
               <ng-container>
                 @for (role of member.roles; track role) {
                   <span>{{ role.displayName }}</span>
@@ -226,7 +226,7 @@
           align="end"
         >
           <fdp-table-cell *fdpCellDef="let member">
-            <div *dxpRequiredPolicies="'iamAdmin'">
+            <div *requiredPolicies="'iamAdmin'">
               @if (!equalsCurrentUser(member)) {
                 <button
                   (click)="openRemoveMemberDialog(member)"
@@ -237,10 +237,10 @@
                   title="Remove member"
                   [attr.data-testid]="
                     member.user
-                      ? 'dxp-iam-member-list-user-' +
+                      ? 'app-iam-member-list-user-' +
                         member.user?.userId +
                         '-remove-button'
-                      : 'dxp-iam-member-list-team-' +
+                      : 'app-iam-member-list-team-' +
                         member.team?.name +
                         '-remove-button'
                   "
@@ -256,7 +256,7 @@
                 fdType="transparent"
                 glyph="visits"
                 [attr.data-testid]="
-                  'dxp-iam-member-list-leave-' + currentEntity + '-button'
+                  'app-iam-member-list-leave-' + currentEntity + '-button'
                 "
                 title="Leave"
               ></button>

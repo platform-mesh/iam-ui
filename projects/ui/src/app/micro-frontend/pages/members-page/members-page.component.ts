@@ -17,21 +17,6 @@ import {
   signal,
 } from '@angular/core';
 import {
-  ClaimProjectService,
-  DxpLuigiContextService,
-  GrantedUsers,
-  AvatarComponent as IAMAvatarComponent,
-  LuigiClient,
-  Member,
-  MemberService,
-  NotificationService,
-  Policy,
-  PolicyDirective,
-  Role,
-  User,
-  UserUtils,
-} from '@dxp/iam-lib';
-import {
   FormItemComponent,
   FormLabelComponent,
   MultiComboboxComponent,
@@ -75,6 +60,21 @@ import {
   FdpTableCell,
   TableInitialStateDirective,
 } from '@fundamental-ngx/platform/table-helpers';
+import {
+  ClaimProjectService,
+  GrantedUsers,
+  AvatarComponent as IAMAvatarComponent,
+  IamLuigiContextService,
+  LuigiClient,
+  Member,
+  MemberService,
+  NotificationService,
+  Policy,
+  PolicyDirective,
+  Role,
+  User,
+  UserUtils,
+} from '@platform-mesh/iam-lib';
 import { Subscription, combineLatest, filter } from 'rxjs';
 
 export interface AddMembersData {
@@ -174,7 +174,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private confirmationService: ConfirmationService,
     private luigiClient: LuigiClient,
-    private luigiContextService: DxpLuigiContextService,
+    private luigiContextService: IamLuigiContextService,
     private claimProjectService: ClaimProjectService,
     private confirmationMessagesService: ConfirmationMessagesService,
   ) {}

@@ -1,10 +1,10 @@
+import { GET_TENANT_INFO } from '../queries/iam-queries';
 import {
   DxpIContextMessage,
-  DxpLuigiContextService,
   IamApolloClientService,
-} from '../dxp-ngx-core/services';
-import { TestUtils } from '../dxp-ngx-core/test';
-import { GET_TENANT_INFO } from '../queries/iam-queries';
+  IamLuigiContextService,
+} from '../services';
+import { TestUtils } from '../test';
 import { TenantInfoService } from './tenant-info.service';
 import { TestBed, fakeAsync } from '@angular/core/testing';
 import { MockProvider } from 'ng-mocks';
@@ -16,7 +16,7 @@ describe('TenantInfoService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        MockProvider(DxpLuigiContextService, {
+        MockProvider(IamLuigiContextService, {
           contextObservable: () =>
             of({ context: { tenantid: 'tenantid' } } as DxpIContextMessage),
         }),

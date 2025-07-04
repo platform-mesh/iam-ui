@@ -10,21 +10,21 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
+import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
+import { LinkManager } from '@luigi-project/client';
 import {
   ClaimProjectService,
-  DxpContext,
   DxpIContextMessage,
-  DxpLuigiContextService,
   GrantedUsers,
+  IamLuigiContextService,
   LuigiClient,
   Member,
   MemberService,
+  NodeContext,
   NotificationService,
   Role,
   User,
-} from '@dxp/iam-lib';
-import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
-import { LinkManager } from '@luigi-project/client';
+} from '@platform-mesh/iam-lib';
 import { mock } from 'jest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { Subject, Subscription, of, throwError } from 'rxjs';
@@ -116,7 +116,7 @@ describe('MembersPageComponent', () => {
           openSuccessToast: jest.fn(),
           openErrorStrip: jest.fn(),
         }),
-        MockProvider(DxpLuigiContextService, {
+        MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContextSubject,
         }),
         MockProvider(ConfirmationMessagesService),
@@ -416,7 +416,7 @@ describe('MembersPageComponent', () => {
   it('should check current  user', fakeAsync(() => {
     luigiContextSubject.next(
       mock<DxpIContextMessage>({
-        context: mock<DxpContext>({
+        context: mock<NodeContext>({
           userid: mockMemberUser.user.userId,
           entityContext: {
             project: { policies: ['iamAdmin'], id: 'id', displayName: 'dM' },
@@ -459,7 +459,7 @@ describe('MembersPageComponent', () => {
 
     luigiContextSubject.next(
       mock<DxpIContextMessage>({
-        context: mock<DxpContext>({
+        context: mock<NodeContext>({
           goBackContext: {
             addedMembers,
             error: undefined,
@@ -502,7 +502,7 @@ describe('MembersPageComponent', () => {
 
     luigiContextSubject.next(
       mock<DxpIContextMessage>({
-        context: mock<DxpContext>({
+        context: mock<NodeContext>({
           goBackContext: {
             error,
           },

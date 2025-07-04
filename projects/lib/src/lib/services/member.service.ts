@@ -1,11 +1,5 @@
-import { GrantedUsers, Member, Role } from '../dxp-ngx-core/authorization';
-import { User } from '../dxp-ngx-core/models';
-import { IamApolloClientService } from '../dxp-ngx-core/services/apollo';
-import {
-  DxpIContextMessage,
-  DxpLuigiContextService,
-  LuigiClient,
-} from '../dxp-ngx-core/services/luigi';
+import { GrantedUsers, Member, Role } from '../authorization';
+import { User } from '../models';
 import {
   ASSIGN_ROLE_BINDINGS,
   GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
@@ -13,6 +7,12 @@ import {
   REMOVE_FROM_ENTITY,
   USERS_OF_ENTITY,
 } from '../queries/iam-queries';
+import { IamApolloClientService } from '../services/apollo';
+import {
+  DxpIContextMessage,
+  IamLuigiContextService,
+  LuigiClient,
+} from '../services/luigi';
 import { getEntityId } from './entity-id';
 import { InviteService } from './invite.service';
 import { Injectable } from '@angular/core';
@@ -37,7 +37,7 @@ export class MemberService {
   constructor(
     private apolloClientService: IamApolloClientService,
     private luigiClient: LuigiClient,
-    private luigiContextService: DxpLuigiContextService,
+    private luigiContextService: IamLuigiContextService,
     private inviteService: InviteService,
   ) {
     this.entity = this.luigiContextService.contextObservable().pipe(

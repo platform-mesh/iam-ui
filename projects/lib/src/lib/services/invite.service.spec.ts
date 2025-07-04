@@ -1,6 +1,6 @@
-import { DxpContext, User } from '../dxp-ngx-core/models';
-import { TestUtils } from '../dxp-ngx-core/test';
+import { NodeContext, User } from '../models';
 import { DELETE_INVITE, INVITE_USER } from '../queries/iam-queries';
+import { TestUtils } from '../test';
 import { InviteService } from './invite.service';
 import { fakeAsync } from '@angular/core/testing';
 import { ApolloBase } from 'apollo-angular';
@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 
 describe('InviteService', () => {
   const service: InviteService = new InviteService();
-  const mockContext = mock<DxpContext>({
+  const mockContext = mock<NodeContext>({
     tenantid: 'tenantId',
     projectId: 'projectId',
     portalContext: {

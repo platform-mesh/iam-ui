@@ -3,7 +3,7 @@ import { MembersSidebarComponent } from './members-sidebar/members-sidebar.compo
 import { UserOverviewHeaderComponent } from './user-overview-header/user-overview-header.component';
 import { Injector, inject } from '@angular/core';
 import { ɵSharedStylesHost } from '@angular/platform-browser';
-import { registerLuigiWebComponents } from '@dxp/iam-lib';
+import { registerLuigiWebComponents } from '@platform-mesh/iam-lib';
 
 export function initializeWC() {
   const injector = inject(Injector);

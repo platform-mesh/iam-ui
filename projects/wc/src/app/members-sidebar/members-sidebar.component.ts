@@ -7,17 +7,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import {
-  DashboardSidebarItemComponent,
-  DxpContext,
-  DxpLuigiContextService,
-  GrantedUsers,
-  AvatarComponent as IAMAvatarComponent,
-  MemberService,
-  ProjectGroupTechnicalNames,
-  RolesTechnicalName,
-  User,
-} from '@dxp/iam-lib';
-import {
   AvatarGroupComponent,
   AvatarGroupItemDirective,
 } from '@fundamental-ngx/core';
@@ -34,6 +23,17 @@ import {
   QuickViewSubheaderTitleComponent,
 } from '@fundamental-ngx/core/quick-view';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
+import {
+  DashboardSidebarItemComponent,
+  GrantedUsers,
+  AvatarComponent as IAMAvatarComponent,
+  IamLuigiContextService,
+  MemberService,
+  NodeContext,
+  ProjectGroupTechnicalNames,
+  RolesTechnicalName,
+  User,
+} from '@platform-mesh/iam-lib';
 import { map } from 'rxjs';
 
 @Component({
@@ -71,12 +71,12 @@ export class MembersSidebarComponent implements OnInit {
   LuigiClient!: LuigiClient;
 
   @Input()
-  set context(context: DxpContext) {
-    this.dxpLuigiContextService.setContext(context);
+  set context(context: NodeContext) {
+    this.iamLuigiContextService.setContext(context);
   }
 
   constructor(
-    private dxpLuigiContextService: DxpLuigiContextService,
+    private iamLuigiContextService: IamLuigiContextService,
     private memberService: MemberService,
     private cdr: ChangeDetectorRef,
   ) {}

@@ -1,7 +1,7 @@
-import { AccountRole } from '../dxp-ngx-core/models/search/account';
-import { AccountSearchResultItem } from '../dxp-ngx-core/models/search/account-search-result.item';
-import { AccountSearchService } from '../dxp-ngx-core/services/search/account-search.service';
+import { AccountRole } from '../models/search/account';
+import { AccountSearchResultItem } from '../models/search/account-search-result.item';
 import { Team } from '../models/team';
+import { AccountSearchService } from '../services/search/account-search.service';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';

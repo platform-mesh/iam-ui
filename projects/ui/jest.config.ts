@@ -11,7 +11,7 @@ const jestConfig: Config = {
   transformIgnorePatterns: ['/node_modules/?!@angular'],
   moduleNameMapper: {
     '^lodash-es(.*)': 'lodash',
-    '@dxp/iam-lib': '<rootDir>/../lib/src/public-api.ts',
+    '@platform-mesh/iam-lib': '<rootDir>/../lib/src/public-api.ts',
   },
 };
 

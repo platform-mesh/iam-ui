@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
-import { LuigiClient, MemberService, User, UserUtils } from '@dxp/iam-lib';
 import { ConfirmationModalSettings } from '@luigi-project/client';
+import {
+  LuigiClient,
+  MemberService,
+  User,
+  UserUtils,
+} from '@platform-mesh/iam-lib';
 import { firstValueFrom } from 'rxjs';
 
 export enum ConfirmationDialogDecision {

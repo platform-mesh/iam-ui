@@ -1,23 +1,23 @@
 import { MembersSidebarComponent } from './members-sidebar.component';
 import { ChangeDetectorRef } from '@angular/core';
 import {
-  DxpLuigiContextService,
+  IamLuigiContextService,
   LuigiClient,
   MemberService,
   User,
-} from '@dxp/iam-lib';
+} from '@platform-mesh/iam-lib';
 import { MockService } from 'ng-mocks';
 import { of } from 'rxjs';
 
 describe('MembersSidebarComponent', () => {
   let component: MembersSidebarComponent;
-  let dxpLuigiContextService: DxpLuigiContextService;
+  let luigiContextService: IamLuigiContextService;
   let memberService: MemberService;
   let cdr: ChangeDetectorRef;
   let luigiClient: LuigiClient;
 
   beforeEach(() => {
-    dxpLuigiContextService = MockService(DxpLuigiContextService);
+    luigiContextService = MockService(IamLuigiContextService);
 
     memberService = MockService(MemberService, {
       getUsersOfEntity: jest.fn().mockReturnValue(of([])),
@@ -38,7 +38,7 @@ describe('MembersSidebarComponent', () => {
     });
 
     component = new MembersSidebarComponent(
-      dxpLuigiContextService,
+      luigiContextService,
       memberService,
       cdr,
     );
