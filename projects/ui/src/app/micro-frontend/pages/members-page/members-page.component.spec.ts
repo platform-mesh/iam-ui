@@ -14,8 +14,8 @@ import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
 import { LinkManager } from '@luigi-project/client';
 import {
   ClaimProjectService,
-  DxpIContextMessage,
   GrantedUsers,
+  IContextMessage,
   IamLuigiContextService,
   LuigiClient,
   Member,
@@ -89,7 +89,7 @@ describe('MembersPageComponent', () => {
   let mockLeaveEntitySubject: Subject<void>;
   let mockRemoveMemberResult: Subject<boolean>;
   let userIsOwnerSubject: Subject<boolean>;
-  let luigiContextSubject: Subject<DxpIContextMessage>;
+  let luigiContextSubject: Subject<IContextMessage>;
 
   beforeEach(() => {
     usersOfEntitySubject = new Subject<GrantedUsers>();
@@ -415,7 +415,7 @@ describe('MembersPageComponent', () => {
 
   it('should check current  user', fakeAsync(() => {
     luigiContextSubject.next(
-      mock<DxpIContextMessage>({
+      mock<IContextMessage>({
         context: mock<NodeContext>({
           userid: mockMemberUser.user.userId,
           entityContext: {
@@ -458,7 +458,7 @@ describe('MembersPageComponent', () => {
     component.openAddMembersDialog();
 
     luigiContextSubject.next(
-      mock<DxpIContextMessage>({
+      mock<IContextMessage>({
         context: mock<NodeContext>({
           goBackContext: {
             addedMembers,
@@ -501,7 +501,7 @@ describe('MembersPageComponent', () => {
     component.openAddMembersDialog();
 
     luigiContextSubject.next(
-      mock<DxpIContextMessage>({
+      mock<IContextMessage>({
         context: mock<NodeContext>({
           goBackContext: {
             error,

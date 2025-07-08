@@ -1,7 +1,7 @@
 import { ENV, Environment, NodeContext } from '../../models';
 import { TestUtils } from '../../test';
 import {
-  DxpIContextMessage,
+  IContextMessage,
   IamLuigiContextService,
 } from './iam-luigi-context.service';
 import { TestBed, fakeAsync } from '@angular/core/testing';
@@ -18,7 +18,7 @@ import { ReplaySubject } from 'rxjs';
 describe('DxpLuigiContextService', () => {
   let iamLuigiContextService: IamLuigiContextService;
   let luigiContextService: LuigiContextServiceImpl;
-  const contextMessage: DxpIContextMessage = {
+  const contextMessage: IContextMessage = {
     contextType: ILuigiContextTypes.UPDATE,
     context: {
       foo: 'bar',
@@ -52,7 +52,7 @@ describe('DxpLuigiContextService', () => {
     });
 
     it('should provide a context observable', fakeAsync(() => {
-      const observable = new ReplaySubject<DxpIContextMessage>();
+      const observable = new ReplaySubject<IContextMessage>();
       luigiContextService.contextObservable = jest
         .fn()
         .mockReturnValue(observable);

@@ -1,6 +1,6 @@
 import { GET_TENANT_INFO } from '../queries/iam-queries';
 import {
-  DxpIContextMessage,
+  IContextMessage,
   IamApolloClientService,
   IamLuigiContextService,
 } from '../services';
@@ -18,7 +18,7 @@ describe('TenantInfoService', () => {
       providers: [
         MockProvider(IamLuigiContextService, {
           contextObservable: () =>
-            of({ context: { tenantid: 'tenantid' } } as DxpIContextMessage),
+            of({ context: { tenantid: 'tenantid' } } as IContextMessage),
         }),
         MockProvider(IamApolloClientService),
       ],

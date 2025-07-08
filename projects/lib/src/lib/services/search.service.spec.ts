@@ -1,6 +1,6 @@
 import { GrantedUsers } from '../authorization';
 import { NodeContext } from '../models';
-import { DxpIContextMessage, IamLuigiContextService } from '../services';
+import { IContextMessage, IamLuigiContextService } from '../services';
 import { MemberService } from './member.service';
 import {
   SearchService,
@@ -45,13 +45,13 @@ const suggestSearchResponse: SuggestedUserResponse = {
 
 describe('SearchService', () => {
   let searchService: SearchService;
-  let luigiContextSubject: BehaviorSubject<DxpIContextMessage>;
+  let luigiContextSubject: BehaviorSubject<IContextMessage>;
 
   let usersOfEntitySubject: Subject<GrantedUsers>;
   let mockHttpClient: HttpClient;
 
   beforeEach(() => {
-    luigiContextSubject = new BehaviorSubject<DxpIContextMessage>({
+    luigiContextSubject = new BehaviorSubject<IContextMessage>({
       context: mockContext,
       contextType: ILuigiContextTypes.INIT,
     });

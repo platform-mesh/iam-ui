@@ -2,7 +2,7 @@ import { NodeContext } from '../models';
 import { AccountSearchResultItem } from '../models/search/account-search-result.item';
 import { SearchResult } from '../models/search/search.result';
 import {
-  DxpIContextMessage,
+  IContextMessage,
   IamApolloClientService,
   IamLuigiContextService,
 } from '../services';
@@ -24,14 +24,14 @@ const mockContext = {
 
 describe('TeamService', () => {
   let teamService: TeamService;
-  let luigiContextSubject: BehaviorSubject<DxpIContextMessage>;
+  let luigiContextSubject: BehaviorSubject<IContextMessage>;
   let apolloSubject: AsyncSubject<ApolloBase>;
   let iamApolloSubject: AsyncSubject<ApolloBase>;
   let accountSearchSubject: AsyncSubject<SearchResult<AccountSearchResultItem>>;
   let accSearchMock: AccountSearchService;
 
   beforeEach(() => {
-    luigiContextSubject = new BehaviorSubject<DxpIContextMessage>({
+    luigiContextSubject = new BehaviorSubject<IContextMessage>({
       context: mockContext,
       contextType: ILuigiContextTypes.INIT,
     });

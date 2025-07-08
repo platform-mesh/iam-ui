@@ -1,4 +1,4 @@
-import { DxpIContextMessage, IamLuigiContextService } from '../../../services';
+import { IContextMessage, IamLuigiContextService } from '../../../services';
 import { DashboardGridComponent } from './dashboard-grid.component';
 import { DashboardGridSection } from './models/dashboard-grid-section';
 import { NodeWithLuigi } from './models/node-with-luigi';
@@ -35,7 +35,7 @@ describe('DashboardGridComponent', () => {
               sections,
             },
           },
-        } as unknown as DxpIContextMessage);
+        } as unknown as IContextMessage);
 
       // when
       component.ngOnInit();
