@@ -28,11 +28,7 @@ import {
 } from '@platform-mesh/iam-lib';
 
 @Component({
-  encapsulation: ViewEncapsulation.ShadowDom,
   selector: 'app-user-overview-header',
-  templateUrl: './user-overview-header.component.html',
-  styleUrl: './user-overview-header.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     PageHeaderComponent,
     FacetGroupComponent,
@@ -44,6 +40,10 @@ import {
     TextComponent,
     LinkComponent,
   ],
+  templateUrl: './user-overview-header.component.html',
+  styleUrl: './user-overview-header.component.scss',
+  encapsulation: ViewEncapsulation.ShadowDom,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserOverviewHeaderComponent implements OnInit {
   user?: User;

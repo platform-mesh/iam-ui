@@ -2,7 +2,7 @@
   <app-page-header [header]="header" [showEditButton]="false">
     <fd-facet-group>
       <fd-facet type="image">
-        <iam-avatar size="l" [user]="user"></iam-avatar>
+        <iam-avatar size="l" [user]="user"/>
       </fd-facet>
 
       <fd-facet type="custom">
@@ -12,39 +12,39 @@
         <div>
           <span>
             <fdp-button
-              fdCompact
-              (click)="chatWithUserViaTeams(user.email)"
               buttonType="transparent"
+              data-testid="app-user-header-chat-button"
+              fdCompact
               glyph="post"
               name="chat-button"
               title="Start a chat"
-              data-testid="app-user-header-chat-button"
-            ></fdp-button>
+              (click)="chatWithUserViaTeams(user.email)"
+            />
             <fdp-button
-              fdCompact
-              (click)="emailUser(user.email)"
               buttonType="transparent"
+              data-testid="app-user-header-email-button"
+              fdCompact
               glyph="email"
               name="email-button"
               title="Send email"
-              data-testid="app-user-header-email-button"
-            ></fdp-button>
+              (click)="emailUser(user.email)"
+            />
             <fdp-button
-              fdCompact
-              (click)="callUserViaTeams(user.email)"
               buttonType="transparent"
+              data-testid="dxp-user-header-call-button"
+              fdCompact
               glyph="call"
               name="call-button"
               title="Start an audio call"
-              data-testid="app-user-header-call-button"
-            ></fdp-button>
+              (click)="callUserViaTeams(user.email)"
+            />
           </span>
         </div>
       </fd-facet>
 
-      <fd-facet type="form" facetTitle="">
+      <fd-facet facetTitle="" type="form">
         <fd-facet-content>
-          <fd-text [text]="getUserContactsHeaderText()"></fd-text>
+          <fd-text [text]="getUserContactsHeaderText()" />
         </fd-facet-content>
         <fd-facet-content>
           <div
@@ -54,8 +54,8 @@
             <div>
               <a
                 fd-link
-                [href]="'https://people.wdf.sap.corp/profiles/' + user.userId"
                 target="_blank"
+                [href]="'https://people.wdf.sap.corp/profiles/' + user.userId"
               >
                 <img alt="logo" src="/assets/sap_logo.svg" width="24px" />
                 People&#64;SAP
@@ -65,8 +65,6 @@
               <a fd-link href="https://sap.stackenterprise.co/" target="_blank">
                 <img
                   alt="stackoverflow logo"
-                  width="24px"
-                  style="position: relative; top: 5px; left: -5px"
                   src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAABGdBTUEAALGPC/xhBQAAACBjSFJN
 AAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB2lBMVEUAAAD/AADygyH0gCP2
 giT0gCP1gCP0gCPxgBz1gSL1gCPzgCP1gCLzhiT0gCP0gCP1giTzgCX0gCP0gCPriSf/kiTzgiT1
@@ -93,6 +91,8 @@ rMg1AAQCJ8aCCyJiDZg0GRNMIcWAitmYYOrQMkCiFhPkMVASCzAwQgyYNh0PmEOEAQTB4DZgxkwi
 wKzRzs8ooAEAAKCrtouUj+k/AAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIwLTAyLTE0VDExOjQ3OjU3
 KzAwOjAwtGSHJQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMC0wMi0xNFQxMTo0Nzo1NyswMDowMMU5
 P5kAAAAASUVORK5CYII="
+                  style="position: relative; top: 5px; left: -5px"
+                  width="24px"
                 />
                 Stack&#64;SAP
               </a>

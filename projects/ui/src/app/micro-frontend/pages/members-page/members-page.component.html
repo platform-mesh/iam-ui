@@ -1,21 +1,22 @@
 <fdp-dynamic-page>
   <fdp-dynamic-page-title
+    title="Members"
     i18n-title="
       members header|Members text for dynamic page header on the members page
     "
-    title="Members"
   >
     <fdp-dynamic-page-global-actions>
-      <fd-toolbar [clearBorder]="true" fdType="transparent">
+      <fd-toolbar fdType="transparent" [clearBorder]="true">
         <button
-          (click)="openAddMembersDialog()"
+          *requiredPolicies="'iamAdmin'"
+          data-testid="app-iam-member-list-add-button"
           fd-button
           fdType="emphasized"
-          i18n-label="add button label|Add button text on the members page"
           id="open-add-members-dialog-button"
           label="Add"
+          i18n-label="add button label|Add button text on the members page"
           title="Add members"
-          data-testid="app-iam-member-list-add-button"
+          (click)="openAddMembersDialog()"
         ></button>
       </fd-toolbar>
     </fdp-dynamic-page-global-actions>
@@ -24,77 +25,73 @@
     <div class="members-filter-group">
       <div class="members-filter-group-search-term">
         <fdp-search-field
-          fd-initial-focus
           contentDensity="compact"
+          data-testid="app-iam-members-list-search-input"
+          fd-initial-focus
           placeholder="Search"
           i18n-placeholder="
             search field placeholder|Search field on the members page
           "
           [disableRefresh]="true"
-          (searchSubmit)="onSearchSubmit($event.text)"
-          (cancelSearch)="onSearchSubmit()"
           [inputText]="searchTerm"
-          data-testid="app-iam-members-list-search-input"
-        ></fdp-search-field>
+          (cancelSearch)="onSearchSubmit()"
+          (searchSubmit)="onSearchSubmit($event.text)"
+        />
       </div>
       @if (rolesForEntity().length) {
         <div class="members-filter-group-roles">
           <div fd-form-item>
-            <label [colon]="true" fd-form-label>Roles</label>
+            <label fd-form-label [colon]="true">Roles</label>
             <fd-multi-combobox
-              [autoResize]="true"
-              name="Roles"
               contentDensity="compact"
-              placeholder="All"
-              [dataSource]="rolesForEntity()"
               displayKey="label"
               lookupKey="id"
+              name="Roles"
+              placeholder="All"
+              [autoResize]="true"
+              [dataSource]="rolesForEntity()"
               (selectionChange)="setRolesFilter($event)"
-            ></fd-multi-combobox>
+            />
           </div>
         </div>
       }
     </div>
   </fdp-dynamic-page-header>
-  <fdp-dynamic-page-content id="iam-members-content" cdkScrollable>
+  <fdp-dynamic-page-content cdkScrollable id="iam-members-content">
     @if (members() && !isLoading) {
       <fdp-table
+        contentDensity="compact"
         [dataSource]="members()"
+        [enableDragResize]="false"
         [initialSortBy]="initialSortOrder"
-        [noOuterBorders]="true"
         [noBodyBorders]="true"
         [noBorderY]="true"
-        [enableDragResize]="false"
+        [noOuterBorders]="true"
         (sortChange)="sortChange($event)"
-        contentDensity="compact"
       >
-        <fdp-column width="75px" key="avatar" name="avatar" [applyText]="false">
+        <fdp-column key="avatar" name="avatar" width="75px" [applyText]="false">
           <fdp-table-cell *fdpCellDef="let member">
             @if (member.user?.invitationOutstanding) {
               <fd-avatar
                 glyph="paper-plane"
+                size="s"
                 [circle]="true"
                 [transparent]="true"
-                size="s"
-              ></fd-avatar>
+              />
             }
             @if (!!member.user && !member.user.invitationOutstanding) {
-              <iam-avatar
-                title="View Profile"
-                size="s"
-                [user]="member.user"
-              ></iam-avatar>
+              <iam-avatar title="View Profile" size="s" [user]="member.user" />
             }
             @if (member.team) {
-              <fd-avatar glyph="group" [circle]="true" size="s"></fd-avatar>
+              <fd-avatar glyph="group" size="s" [circle]="true" />
             }
           </fdp-table-cell>
         </fdp-column>
 
         <fdp-column
-          i18n-label="name table cell|Name table cell text on the members page"
           key="user"
           label="User"
+          i18n-label="name table cell|Name table cell text on the members page"
           name="user"
           [sortable]="true"
         >
@@ -139,60 +136,57 @@
           <fdp-table-cell *fdpCellDef="let member">
             @if (!!member.user && !equalsCurrentUser(member)) {
               <button
-                (click)="emailUser(member.user)"
                 fd-button
                 fdType="transparent"
                 glyph="email"
                 name="email-button"
                 title="Send email"
+                (click)="emailUser(member.user)"
               ></button>
               <button
-                (click)="chatWithUserViaTeams(member.user)"
                 fd-button
                 fdType="transparent"
                 glyph="post"
-                i18n-title
                 name="chat-button"
                 title="Start a chat"
+                i18n-title
+                (click)="chatWithUserViaTeams(member.user)"
               ></button>
               <button
-                (click)="callUserViaTeams(member.user)"
                 fd-button
                 fdType="transparent"
                 glyph="call"
-                i18n-title
                 name="call-button"
                 title="Start an audio call"
+                i18n-title
+                (click)="callUserViaTeams(member.user)"
               ></button>
               <button
-                (click)="callUserViaTeams(member.user, true)"
                 fd-button
                 fdType="transparent"
                 glyph="video"
-                i18n-title
                 name="video-button"
                 title="Start a video call"
+                i18n-title
+                (click)="callUserViaTeams(member.user, true)"
               ></button>
             }
           </fdp-table-cell>
         </fdp-column>
 
         <fdp-column
-          i18n-label="role table cell|Role table cell text on the members page"
           key="role"
-          label="{{ 'Roles' }}"
+          label="Roles"
+          i18n-label="role table cell|Role table cell text on the members page"
           name="role"
           width="20rem"
         >
           <fdp-table-cell *fdpCellDef="let member">
             <div *requiredPolicies="'iamAdmin'">
               <fd-multi-combobox
-                placeholder=""
-                [dataSource]="rolesForEntity()"
                 displayKey="displayName"
                 lookupKey="technicalName"
-                (selectionChange)="saveMember($event, member)"
-                [selectedItems]="member.roles"
+                placeholder=""
                 [attr.data-testid]="
                   member.user
                     ? 'app-iam-member-list-user-' +
@@ -202,7 +196,10 @@
                       member.team?.name +
                       '-role-select'
                 "
-              ></fd-multi-combobox>
+                [dataSource]="rolesForEntity()"
+                [selectedItems]="member.roles"
+                (selectionChange)="saveMember($event, member)"
+              />
             </div>
             <div *requiredPolicies="'!iamAdmin'">
               <ng-container>
@@ -217,19 +214,18 @@
           </fdp-table-cell>
         </fdp-column>
         <fdp-column
+          align="end"
+          key="actions"
+          label="Actions"
           i18n-label="
             actions table cell|Actions table cell text on the members page
           "
-          key="actions"
-          label="Actions"
           name="actions"
-          align="end"
         >
           <fdp-table-cell *fdpCellDef="let member">
             <div *requiredPolicies="'iamAdmin'">
               @if (!equalsCurrentUser(member)) {
                 <button
-                  (click)="openRemoveMemberDialog(member)"
                   fd-button
                   fdType="transparent"
                   glyph="sys-cancel"
@@ -244,21 +240,22 @@
                         member.team?.name +
                         '-remove-button'
                   "
+                  (click)="openRemoveMemberDialog(member)"
                 ></button>
               }
             </div>
 
             @if (equalsCurrentUser(member)) {
               <button
-                (click)="openLeaveDialog()"
-                [disabled]="isCurrentUserUniqueOwner()"
                 fd-button
                 fdType="transparent"
                 glyph="visits"
+                title="Leave"
                 [attr.data-testid]="
                   'app-iam-member-list-leave-' + currentEntity + '-button'
                 "
-                title="Leave"
+                [disabled]="isCurrentUserUniqueOwner()"
+                (click)="openLeaveDialog()"
               ></button>
             }
           </fdp-table-cell>
@@ -267,9 +264,9 @@
           <fdp-table-no-data-wrapper>
             @if (noFiltersApplied()) {
               <figure
-                [svgConfig]="svgConfig"
                 fd-illustrated-message
                 type="scene"
+                [svgConfig]="svgConfig"
               >
                 <figcaption fd-illustrated-message-figcaption>
                   <h3
@@ -290,21 +287,21 @@
 
                 <fd-illustrated-message-actions>
                   <button
-                    (click)="claimProject()"
                     fd-button
+                    label="Claim Project"
                     i18n-label="
                       claim project button label|Claim project button text on
                       the members page
                     "
-                    label="Claim Project"
+                    (click)="claimProject()"
                   ></button>
                 </fd-illustrated-message-actions>
               </figure>
             } @else {
               <figure
-                [svgConfig]="noSearchResults"
                 fd-illustrated-message
                 type="scene"
+                [svgConfig]="noSearchResults"
               >
                 <figcaption fd-illustrated-message-figcaption>
                   <h3
@@ -324,17 +321,17 @@
         }
       </fdp-table>
       <fd-pagination
-        (itemsPerPageChange)="itemsPerPageChange($event); itemsPerPage = $event"
-        (pageChangeStart)="newPageClicked($event)"
-        [currentPage]="currentPage"
-        [itemsPerPageOptions]="itemsPerPageOptions"
-        [itemsPerPage]="itemsPerPage"
-        [totalItems]="totalItems()"
         ariaLabel="Pagination with for the members table"
         fd-toolbar-item
-      ></fd-pagination>
+        [currentPage]="currentPage"
+        [itemsPerPage]="itemsPerPage"
+        [itemsPerPageOptions]="itemsPerPageOptions"
+        [totalItems]="totalItems()"
+        (itemsPerPageChange)="itemsPerPageChange($event); itemsPerPage = $event"
+        (pageChangeStart)="newPageClicked($event)"
+      />
     } @else {
-      <fd-busy-indicator [loading]="true" [block]="true"></fd-busy-indicator>
+      <fd-busy-indicator [block]="true" [loading]="true" />
     }
   </fdp-dynamic-page-content>
 </fdp-dynamic-page>

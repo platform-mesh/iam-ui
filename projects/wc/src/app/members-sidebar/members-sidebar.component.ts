@@ -38,10 +38,6 @@ import { map } from 'rxjs';
 
 @Component({
   selector: 'app-members-sidebar-component',
-  templateUrl: './members-sidebar.component.html',
-  styleUrl: './members-sidebar.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.ShadowDom,
   imports: [
     AvatarGroupComponent,
     AvatarGroupItemDirective,
@@ -58,6 +54,10 @@ import { map } from 'rxjs';
     LinkComponent,
     DashboardSidebarItemComponent,
   ],
+  templateUrl: './members-sidebar.component.html',
+  styleUrl: './members-sidebar.component.scss',
+  encapsulation: ViewEncapsulation.ShadowDom,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MembersSidebarComponent implements OnInit {
   rolesAllowedForEdit = [

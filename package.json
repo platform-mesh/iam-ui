@@ -1,6 +1,6 @@
 {
   "name": "iam-ui",
-  "version": "1.1.297",
+  "version": "1.1.304",
   "scripts": {
     "preinstall": "npx only-allow npm",
     "ng": "ng",
@@ -8,9 +8,9 @@
     "build:lib:watch": "ng build lib --watch",
     "start:ui": "ng serve ui",
     "start:ui:watch": "concurrently 'npm:build:lib:watch' 'npm:start:ui'",
-    "start:wc": "ng serve wc --single-bundle --no-live-reload",
+    "start:wc": "ng serve wc --headers Access-Control-Allow-Origin=*",
     "build:ui": "ng build ui && tar -zcvf iam-ui.tar.gz dist/*",
-    "build:wc": "ng build wc --single-bundle --output-hashing none && tar -zcvf iam-wc.tar.gz dist/*",
+    "build:wc": "ng build wc && tar -zcvf iam-wc.tar.gz dist/*",
     "build": "npm run build:lib && npm run build:ui && npm run build:wc",
     "lint": "npm run build:lib && ng lint",
     "lint:fix": "npm run build:lib && ng lint --fix",
@@ -63,7 +63,7 @@
     "zone.js": "0.15.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "19.2.14",
+    "@angular/build": "19.2.14",
     "@angular/cli": "19.2.14",
     "@angular/compiler-cli": "19.2.14",
     "@luigi-project/testing-utilities": "2.14.1",
@@ -87,7 +87,6 @@
     "lint-staged": "15.5.2",
     "ng-mocks": "14.13.5",
     "ng-packagr": "19.2.2",
-    "ngx-build-plus": "19.0.0",
     "prettier": "^3.5.1",
     "ts-node": "10.9.2",
     "typescript": "5.8.3",
