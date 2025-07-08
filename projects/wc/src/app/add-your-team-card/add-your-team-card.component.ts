@@ -22,12 +22,11 @@ import { catchError, first, of } from 'rxjs';
 
 @Component({
   selector: 'app-add-your-team-card',
+  imports: [ActionCardComponent],
   templateUrl: './add-your-team-card.component.html',
   styleUrl: './add-your-team-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.ShadowDom,
-  standalone: true,
-  imports: [ActionCardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddYourTeamCardComponent implements OnInit {
   imageConfig = {

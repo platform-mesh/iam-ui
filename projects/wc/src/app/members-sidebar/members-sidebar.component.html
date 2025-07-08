@@ -1,11 +1,11 @@
 <app-dashboard-sidebar-item
-  [title]="'Members'"
+  title="Members"
   [loading]="loading"
   [rolesAllowedForCallback]="rolesAllowedForEdit"
   (editCallback)="navigateToMembers()"
 >
   <div class="members">
-    <fd-avatar-group [size]="'xs'" overflowPopoverTitle="Members2">
+    <fd-avatar-group overflowPopoverTitle="Members2" size="xs">
       @for (member of members; track member.userId) {
         <iam-avatar
           *fdAvatarGroupItem="
@@ -13,43 +13,43 @@
             title: member.firstName + ' ' + member.lastName
           "
           size="xs"
-          [user]="member"
           [disablePopover]="true"
-        ></iam-avatar>
+          [user]="member"
+        />
 
         <ng-template #details>
           <fd-quick-view [id]="member.userId!">
             <fd-quick-view-subheader
-              [id]="member.userId + '-popover-subheader'"
               style="display: block; padding-top: 1rem"
+              [id]="member.userId + '-popover-subheader'"
             >
               <fd-avatar
-                [circle]="true"
-                size="xs"
-                [clickable]="true"
-                (avatarClicked)="navigateToUser(member.userId!)"
-                role="img"
-                [image]="'https://avatars.wdf.sap.corp/avatar/' + member.userId"
-                [colorAccent]="6"
                 alterIcon="content|default-icon"
-                [title]="member.firstName + ' ' + member.lastName"
-                [label]="member.firstName + ' ' + member.lastName"
+                role="img"
+                size="xs"
                 [ariaLabel]="
                   member.firstName + ' ' + member.lastName + ' avatar'
                 "
-              ></fd-avatar>
+                [circle]="true"
+                [clickable]="true"
+                [colorAccent]="6"
+                [image]="'https://avatars.wdf.sap.corp/avatar/' + member.userId"
+                [label]="member.firstName + ' ' + member.lastName"
+                [title]="member.firstName + ' ' + member.lastName"
+                (avatarClicked)="navigateToUser(member.userId!)"
+              />
               <fd-quick-view-subheader-title
                 ><span
-                  (click)="navigateToUser(member.userId!)"
                   style="cursor: pointer"
+                  (click)="navigateToUser(member.userId!)"
                   >{{ member.firstName }} {{ member.lastName }}</span
                 ></fd-quick-view-subheader-title
               >
             </fd-quick-view-subheader>
 
             <fd-quick-view-group
-              [attr.aria-labelledby]="member.userId + '-group-title'"
               style="display: block; padding: 1rem"
+              [attr.aria-labelledby]="member.userId + '-group-title'"
             >
               <fd-quick-view-group-title [id]="member.userId + '-group-title'"
                 >Contact Details

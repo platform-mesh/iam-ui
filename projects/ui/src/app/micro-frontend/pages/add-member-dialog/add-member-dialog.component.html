@@ -1,6 +1,6 @@
 <fd-dynamic-page>
   <fd-dynamic-page-header />
-  <fd-dynamic-page-content id="basic" cdkScrollable>
+  <fd-dynamic-page-content cdkScrollable id="basic">
     <label i18n="description for the user search input">
       Enter the names or email addresses of the users you want to add to the
       {{ currentEntity }}.
@@ -10,8 +10,10 @@
     <div fd-form-item>
       <label
         fd-form-label
-        [colon]="true"
         i18n="user|Label for the user search input"
+        inlineHelpBodyPlacement="right"
+        inlineHelpGlyph="message-information"
+        [colon]="true"
         [inlineHelpContent]="
           emailDomains.length > 0
             ? 'You can only add users with @' +
@@ -19,29 +21,27 @@
               ' email addresses.'
             : null
         "
-        inlineHelpGlyph="message-information"
-        inlineHelpBodyPlacement="right"
       >
         User</label
       >
       <div fd-form-item>
         <fd-combobox
+          data-testid="dxp-iam-member-add-dialog-user-search-input"
+          fdCompact="true"
           fdkInitialFocus
+          fillControlMode="equal"
           placeholder="Enter name or email address"
-          [dropdownValues]="dropDownValues"
-          [state]="hasError() ? 'error' : undefined"
-          [itemTemplate]="dropDownTemplate"
-          (itemClicked)="itemClicked($event.item)"
-          [displayFn]="displayFunc"
-          [filterFn]="fakeFilterFunc"
-          [isSearch]="true"
-          [(ngModel)]="currentInput"
-          (inputTextChange)="inputChange($event)"
           [autoComplete]="false"
           [byline]="showByline"
-          fillControlMode="equal"
-          data-testid="app-iam-member-add-dialog-user-search-input"
-          fdCompact="true"
+          [displayFn]="displayFunc"
+          [dropdownValues]="dropDownValues"
+          [filterFn]="fakeFilterFunc"
+          [isSearch]="true"
+          [itemTemplate]="dropDownTemplate"
+          [state]="hasError() ? 'error' : undefined"
+          [(ngModel)]="currentInput"
+          (inputTextChange)="inputChange($event)"
+          (itemClicked)="itemClicked($event.item)"
         >
           @if (filteredUsersCollectionLength) {
             <li fd-list-message type="information">
@@ -73,8 +73,7 @@
           <iam-avatar
             class="add-member-avatar"
             size="s"
-            [user]="user"
-          ></iam-avatar>
+            [user]="user" />
         </span>
         <div
           fd-list-content
@@ -97,8 +96,8 @@
       }
       @if (dropDownValue.noData) {
         <div fd-list-content>
-          <div fd-list-title class="center">No user found</div>
-          <div fd-list-byline class="center">
+          <div class="center" fd-list-title>No user found</div>
+          <div class="center" fd-list-byline>
             Enter an email to invite people to Hyperspace Portal
           </div>
         </div>
@@ -107,10 +106,10 @@
         <span fd-list-thumbnail>
           <fd-avatar
             glyph="paper-plane"
+            size="s"
             [circle]="true"
             [transparent]="true"
-            size="s"
-          ></fd-avatar>
+          />
         </span>
         <div fd-list-content>
           <div fd-list-title><b>Invite</b> {{ dropDownValue.email }}</div>
@@ -120,7 +119,7 @@
 
     <br />
     <br />
-    <table fd-table [noBorderY]="true" fdCompact="true">
+    <table fd-table fdCompact="true" [noBorderY]="true">
       <thead fd-table-header>
         <tr fd-table-row>
           <th fd-table-cell [fitContent]="true"></th>
@@ -132,8 +131,8 @@
           </th>
           <th
             fd-table-cell
-            [fitContent]="true"
             i18n="actions|Column title of a table for possible actions"
+            [fitContent]="true"
           >
             Actions
           </th>
@@ -144,7 +143,7 @@
           <tbody fd-table-body>
             @if (selectedMembers.length && selectedInvitees.length) {
               <tr fd-table-row>
-                <td fd-table-cell colspan="4" class="group-header">
+                <td class="group-header" colspan="4" fd-table-cell>
                   <b>Invite</b>
                 </td>
               </tr>
@@ -154,13 +153,13 @@
                 <td fd-table-cell>
                   <fd-avatar
                     glyph="paper-plane"
+                    size="s"
                     [circle]="true"
                     [transparent]="true"
-                    size="s"
-                  ></fd-avatar>
+                  />
                 </td>
                 <td fd-table-cell>
-                  <ul fd-list [noBorder]="true" [compact]="true">
+                  <ul fd-list [compact]="true" [noBorder]="true">
                     <li fd-list-item>
                       <div fd-list-content>
                         <div fd-list-title>
@@ -173,12 +172,9 @@
                 <td fd-table-cell>
                   <!-- TODO remove $any -->
                   <fd-multi-combobox
-                    placeholder=""
-                    [dataSource]="availableRoles"
                     displayKey="displayName"
                     lookupKey="technicalName"
-                    [selectedItems]="invitee.roles"
-                    (selectionChange)="onRoleChange($event, invitee)"
+                    placeholder=""
                     [attr.data-testid]="
                       invitee.user
                         ? 'app-iam-member-add-dialog-user-' +
@@ -188,13 +184,16 @@
                           $any(invitee).team?.name +
                           '-role-select'
                     "
-                  ></fd-multi-combobox>
+                    [dataSource]="availableRoles"
+                    [selectedItems]="invitee.roles"
+                    (selectionChange)="onRoleChange($event, invitee)"
+                  />
                 </td>
-                <td fd-table-cell class="actions">
+                <td class="actions" fd-table-cell>
                   <button
                     fd-button
-                    glyph="sys-cancel"
                     fdType="transparent"
+                    glyph="sys-cancel"
                     (click)="deleteInviteeFromList(invitee.user.email)"
                   ></button>
                 </td>
@@ -202,7 +201,7 @@
             }
             @if (selectedMembers.length && selectedInvitees.length) {
               <tr fd-table-row>
-                <td fd-table-cell colspan="4" class="group-header">
+                <td class="group-header" colspan="4" fd-table-cell>
                   <b>Add</b>
                 </td>
               </tr>
@@ -210,14 +209,14 @@
             @for (member of selectedMembers; track member.user.userId) {
               <tr fd-table-row>
                 <td fd-table-cell>
-                  <iam-avatar size="s" [user]="member.user"></iam-avatar>
+                  <iam-avatar size="s" [user]="member.user" />
                 </td>
                 <td fd-table-cell>
                   <ul
                     fd-list
                     [byline]="true"
-                    [noBorder]="true"
                     [compact]="true"
+                    [noBorder]="true"
                   >
                     <li fd-list-item id="add-member-dialog-user-info">
                       <div fd-list-content>
@@ -240,12 +239,9 @@
                 <td fd-table-cell>
                   <!-- TODO remove $any -->
                   <fd-multi-combobox
-                    placeholder=""
-                    [dataSource]="availableRoles"
                     displayKey="displayName"
                     lookupKey="technicalName"
-                    [selectedItems]="member.roles"
-                    (selectionChange)="onRoleChange($event, member)"
+                    placeholder=""
                     [attr.data-testid]="
                       member.user
                         ? 'app-iam-member-add-dialog-user-' +
@@ -255,13 +251,16 @@
                           $any(member).team?.name +
                           '-role-select'
                     "
-                  ></fd-multi-combobox>
+                    [dataSource]="availableRoles"
+                    [selectedItems]="member.roles"
+                    (selectionChange)="onRoleChange($event, member)"
+                  />
                 </td>
-                <td fd-table-cell class="actions">
+                <td class="actions" fd-table-cell>
                   <button
                     fd-button
-                    glyph="sys-cancel"
                     fdType="transparent"
+                    glyph="sys-cancel"
                     (click)="deleteMemberFromList(member.user.userId)"
                   ></button>
                 </td>
@@ -272,13 +271,13 @@
           <tbody fd-table-body>
             <tr fd-table-row>
               <td
-                fd-table-cell
                 colspan="4"
-                id="emptyTableMessage"
+                fd-table-cell
                 i18n="
                   No new members added yet|text when no members are selected to
                   be added
                 "
+                id="emptyTableMessage"
               >
                 No new members added yet
               </td>
@@ -294,11 +293,11 @@
       <div fd-bar-right>
         <fd-bar-element>
           <button
+            data-testid="app-iam-member-add-dialog-add-button"
             fd-button
             fdType="emphasized"
-            data-testid="app-iam-member-add-dialog-add-button"
-            i18n-label="add button|Add button text on the add member dialog"
             label="Add"
+            i18n-label="add button|Add button text on the add member dialog"
             (click)="addMembers()"
           ></button>
         </fd-bar-element>
@@ -306,10 +305,10 @@
           <button
             fd-button
             fdType="transparent"
+            label="Cancel"
             i18n-label="
               cancel button|Cancel button text on the add member dialog
             "
-            label="Cancel"
             (click)="closeDialogError()"
           ></button>
         </fd-bar-element>

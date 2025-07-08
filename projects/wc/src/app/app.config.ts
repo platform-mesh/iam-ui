@@ -11,8 +11,7 @@ import { provideNamedApollo } from 'apollo-angular';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAppInitializer(() => {
-      const initializerFn = initializeWC();
-      initializerFn();
+      initializeWC();
     }),
     provideNamedApollo(() => ({})),
     provideHttpClient(),

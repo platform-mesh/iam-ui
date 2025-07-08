@@ -12,7 +12,8 @@
             "order": 10
           },
           "webcomponent": {
-            "selfRegistered": true
+            "selfRegistered": true,
+            "type": "module"
           },
           "id": "members-sidebar"
         }

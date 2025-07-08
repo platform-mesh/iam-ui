@@ -89,10 +89,6 @@ export interface UIRole extends Role {
 
 @Component({
   selector: 'app-members-page',
-  providers: [ConfirmationService, ConfirmationMessagesService],
-  styleUrl: './members-page.component.scss',
-  templateUrl: './members-page.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ToolbarComponent,
     PolicyDirective,
@@ -124,6 +120,10 @@ export interface UIRole extends Role {
     FormLabelComponent,
     MultiComboboxComponent,
   ],
+  templateUrl: './members-page.component.html',
+  styleUrl: './members-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ConfirmationService, ConfirmationMessagesService],
 })
 export class MembersPageComponent implements OnInit, OnDestroy {
   public currentUserIsOwner = false;

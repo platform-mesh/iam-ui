@@ -3,11 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { ThemingService } from '@fundamental-ngx/core';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-root',
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  imports: [RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   constructor(themingService: ThemingService) {

@@ -11,7 +11,8 @@
             "slot": "header"
           },
           "webcomponent": {
-            "selfRegistered": true
+            "selfRegistered": true,
+            "type": "module"
           }
         }
       ],

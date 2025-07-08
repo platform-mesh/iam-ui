@@ -75,9 +75,6 @@ export const MAX_USERS_SHOWN = 5;
 
 @Component({
   selector: 'app-add-member-dialog',
-  templateUrl: './add-member-dialog.component.html',
-  styleUrl: './add-member-dialog.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DynamicPageComponent,
     DynamicPageHeaderComponent,
@@ -111,6 +108,9 @@ export const MAX_USERS_SHOWN = 5;
     BarElementDirective,
     InitialFocusDirective,
   ],
+  templateUrl: './add-member-dialog.component.html',
+  styleUrl: './add-member-dialog.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddMemberDialogComponent implements OnInit, OnDestroy {
   searchInput: BehaviorSubject<string> = new BehaviorSubject<string>('');
