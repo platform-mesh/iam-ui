@@ -1,5 +1,5 @@
 import { NodeContext } from '../../models';
-import { DxpIContextMessage, IamLuigiContextService } from '../luigi';
+import { IContextMessage, IamLuigiContextService } from '../luigi';
 import { AnalyticsTrackerService } from './analytics-tracker.service';
 import { TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
@@ -11,7 +11,7 @@ describe('AnalyticsTrackerService', () => {
   let analyticsTrackingService: AnalyticsTrackerService;
   let ctxSrv: IamLuigiContextService;
 
-  const testLuigiContext = new BehaviorSubject<DxpIContextMessage>({
+  const testLuigiContext = new BehaviorSubject<IContextMessage>({
     contextType: 0,
     context: mock<NodeContext>({}),
   });
@@ -25,7 +25,7 @@ describe('AnalyticsTrackerService', () => {
       providers: [
         AnalyticsTrackerService,
         MockProvider(IamLuigiContextService, {
-          contextObservable(): Observable<DxpIContextMessage> {
+          contextObservable(): Observable<IContextMessage> {
             return testLuigiContext;
           },
         }),
@@ -55,7 +55,7 @@ describe('AnalyticsTrackerService', () => {
   ])(
     'test component should  not have script if luigi context does not have correct analytics tracker config',
     (context) => {
-      const testLuigiContext = new BehaviorSubject<DxpIContextMessage>({
+      const testLuigiContext = new BehaviorSubject<IContextMessage>({
         contextType: 0,
         context: mock<NodeContext>({ context }),
       });
@@ -70,7 +70,7 @@ describe('AnalyticsTrackerService', () => {
   );
 
   it('test component should have script after analytics tracker injection', async () => {
-    const testLuigiContext = new BehaviorSubject<DxpIContextMessage>({
+    const testLuigiContext = new BehaviorSubject<IContextMessage>({
       contextType: 0,
       context: mock<NodeContext>({
         tenantid: 'tenantid',

@@ -39,7 +39,7 @@ export const getSrc = () => {
   const src = document.currentScript?.getAttribute('src');
   if (!src) {
     throw new Error(
-      'src of currentScript is not defined. Contact the DXP Frame team for support.',
+      'src of currentScript is not defined. Contact the support team.',
     );
   }
   return src;

@@ -13,9 +13,9 @@ import {
 import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
 import { LinkManager } from '@luigi-project/client';
 import {
-  ClaimProjectService,
-  DxpIContextMessage,
+  ClaimEntityService,
   GrantedUsers,
+  IContextMessage,
   IamLuigiContextService,
   LuigiClient,
   Member,
@@ -83,13 +83,13 @@ describe('MembersPageComponent', () => {
   let memberService: MemberService;
   let notificationService: NotificationService;
   let luigiClient: LuigiClient;
-  let claimProjectService: ClaimProjectService;
+  let claimProjectService: ClaimEntityService;
 
   let usersOfEntitySubject: Subject<GrantedUsers>;
   let mockLeaveEntitySubject: Subject<void>;
   let mockRemoveMemberResult: Subject<boolean>;
   let userIsOwnerSubject: Subject<boolean>;
-  let luigiContextSubject: Subject<DxpIContextMessage>;
+  let luigiContextSubject: Subject<IContextMessage>;
 
   beforeEach(() => {
     usersOfEntitySubject = new Subject<GrantedUsers>();
@@ -129,7 +129,7 @@ describe('MembersPageComponent', () => {
             ),
           }),
         }),
-        MockProvider(ClaimProjectService),
+        MockProvider(ClaimEntityService),
       ],
       imports: [MembersPageComponent],
     })
@@ -148,7 +148,7 @@ describe('MembersPageComponent', () => {
     memberService = TestBed.inject(MemberService);
     notificationService = TestBed.inject(NotificationService);
     luigiClient = TestBed.inject(LuigiClient);
-    claimProjectService = TestBed.inject(ClaimProjectService);
+    claimProjectService = TestBed.inject(ClaimEntityService);
 
     fixture = TestBed.createComponent(MembersPageComponent);
     component = fixture.componentInstance;
@@ -415,7 +415,7 @@ describe('MembersPageComponent', () => {
 
   it('should check current  user', fakeAsync(() => {
     luigiContextSubject.next(
-      mock<DxpIContextMessage>({
+      mock<IContextMessage>({
         context: mock<NodeContext>({
           userid: mockMemberUser.user.userId,
           entityContext: {
@@ -458,7 +458,7 @@ describe('MembersPageComponent', () => {
     component.openAddMembersDialog();
 
     luigiContextSubject.next(
-      mock<DxpIContextMessage>({
+      mock<IContextMessage>({
         context: mock<NodeContext>({
           goBackContext: {
             addedMembers,
@@ -501,7 +501,7 @@ describe('MembersPageComponent', () => {
     component.openAddMembersDialog();
 
     luigiContextSubject.next(
-      mock<DxpIContextMessage>({
+      mock<IContextMessage>({
         context: mock<NodeContext>({
           goBackContext: {
             error,
@@ -523,9 +523,9 @@ describe('MembersPageComponent', () => {
   }));
 
   it('should claim project', fakeAsync(() => {
-    claimProjectService.claimProject = jest.fn();
-    component.claimProject();
-    expect(claimProjectService.claimProject).toHaveBeenCalled();
+    claimProjectService.claim = jest.fn();
+    component.claimEntity();
+    expect(claimProjectService.claim).toHaveBeenCalled();
   }));
 
   describe('noFiltersApplied method', () => {

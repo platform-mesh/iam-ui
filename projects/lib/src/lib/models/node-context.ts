@@ -14,9 +14,6 @@ export interface NodeContext extends Record<string, any> {
   entityType: string;
   portalContext: PortalContext;
   serviceProviderConfig: Record<string, string>;
-  projectId?: string;
-  teamId?: string;
-  accountId?: string;
   entityId: string;
   entity: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   componentId?: string;
