@@ -16,6 +16,7 @@ export interface PortalContext extends Record<string, string> {
   githubServiceApiUrl: string;
   iamServiceApiUrl: string;
   iamEntityConfig: string;
+  iamClaimEntityUrl: string;
   metadataServiceApiUrl: string;
   organizationServiceApiUrl: string;
   pipelineBackendUrl: string;

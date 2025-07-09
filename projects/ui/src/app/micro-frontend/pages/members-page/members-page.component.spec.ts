@@ -13,7 +13,7 @@ import {
 import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
 import { LinkManager } from '@luigi-project/client';
 import {
-  ClaimProjectService,
+  ClaimEntityService,
   GrantedUsers,
   IContextMessage,
   IamLuigiContextService,
@@ -83,7 +83,7 @@ describe('MembersPageComponent', () => {
   let memberService: MemberService;
   let notificationService: NotificationService;
   let luigiClient: LuigiClient;
-  let claimProjectService: ClaimProjectService;
+  let claimProjectService: ClaimEntityService;
 
   let usersOfEntitySubject: Subject<GrantedUsers>;
   let mockLeaveEntitySubject: Subject<void>;
@@ -129,7 +129,7 @@ describe('MembersPageComponent', () => {
             ),
           }),
         }),
-        MockProvider(ClaimProjectService),
+        MockProvider(ClaimEntityService),
       ],
       imports: [MembersPageComponent],
     })
@@ -148,7 +148,7 @@ describe('MembersPageComponent', () => {
     memberService = TestBed.inject(MemberService);
     notificationService = TestBed.inject(NotificationService);
     luigiClient = TestBed.inject(LuigiClient);
-    claimProjectService = TestBed.inject(ClaimProjectService);
+    claimProjectService = TestBed.inject(ClaimEntityService);
 
     fixture = TestBed.createComponent(MembersPageComponent);
     component = fixture.componentInstance;
@@ -523,9 +523,9 @@ describe('MembersPageComponent', () => {
   }));
 
   it('should claim project', fakeAsync(() => {
-    claimProjectService.claimProject = jest.fn();
-    component.claimProject();
-    expect(claimProjectService.claimProject).toHaveBeenCalled();
+    claimProjectService.claim = jest.fn();
+    component.claimEntity();
+    expect(claimProjectService.claim).toHaveBeenCalled();
   }));
 
   describe('noFiltersApplied method', () => {

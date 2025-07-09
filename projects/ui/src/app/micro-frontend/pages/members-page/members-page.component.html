@@ -278,25 +278,29 @@
                   >
                     No members found.
                   </h3>
-                  <p fd-illustrated-message-text>
-                    Are you the owner of this {{ currentEntity }}
-                    <strong>{{ scopeDisplayName }}</strong
-                    >? You can claim the {{ currentEntity }} by creating a Jira
-                    Change Request Issue.
-                  </p>
+
+                  @if (iamClaimEntityUrl) {
+                    <p fd-illustrated-message-text>
+                      Are you the owner of this {{ currentEntity }}
+                      <strong>{{ scopeDisplayName }}</strong
+                      >? You can claim the {{ currentEntity }} by following the
+                      link.
+                    </p>
+                  }
                 </figcaption>
 
-                <fd-illustrated-message-actions>
-                  <button
-                    fd-button
-                    label="Claim Project"
-                    i18n-label="
-                      claim project button label|Claim project button text on
-                      the members page
-                    "
-                    (click)="claimProject()"
-                  ></button>
-                </fd-illustrated-message-actions>
+                @if (iamClaimEntityUrl) {
+                  <fd-illustrated-message-actions>
+                    <button
+                      fd-button
+                      label="Claim"
+                      i18n-label="
+                        claim button label|Claim button text on the members page
+                      "
+                      (click)="claim()"
+                    ></button>
+                  </fd-illustrated-message-actions>
+                }
               </figure>
             } @else {
               <figure
