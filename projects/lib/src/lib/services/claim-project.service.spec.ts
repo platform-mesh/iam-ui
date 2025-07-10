@@ -8,7 +8,7 @@ import { of } from 'rxjs';
 describe('ClaimProjectService', () => {
   let service: ClaimEntityService;
   const entityId = 'abc';
-  const frameBaseUrl = 'https://example.com';
+  const portalBaseUrl = 'https://example.com';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,7 +16,7 @@ describe('ClaimProjectService', () => {
         ClaimEntityService,
         MockProvider(IamLuigiContextService, {
           getContext: jest.fn().mockReturnValue({
-            frameBaseUrl,
+            portalBaseUrl,
             entityContext: {
               project: {
                 id: entityId,
@@ -24,7 +24,7 @@ describe('ClaimProjectService', () => {
             },
             portalContext: {
               iamClaimEntityUrl:
-                'https://jira.tools.sap/secure/CreateIssueDetails!init.jspa?pid=106042&issuetype=10100&components=300068&summary=Claim+Project+Request+for+Project+${entityId}&description=h3.+Description%0ADescribe+why+you+want+to+claim+this+project%3A%0A%0AWho+should+be+added+as+an+owner+of+the+project%3F%0A%0Ah3.+Link+to+Project%0A${frameBaseUrl}%2Fprojects%2F${entityId}d%0A',
+                'https://jira.tools.sap/secure/CreateIssueDetails!init.jspa?pid=106042&issuetype=10100&components=300068&summary=Claim+Project+Request+for+Project+${entityId}&description=h3.+Description%0ADescribe+why+you+want+to+claim+this+project%3A%0A%0AWho+should+be+added+as+an+owner+of+the+project%3F%0A%0Ah3.+Link+to+Project%0A${portalBaseUrl}%2Fprojects%2F${entityId}d%0A',
             },
           }),
         }),
