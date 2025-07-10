@@ -21,13 +21,11 @@ export class ClaimEntityService {
       entity,
       this.luigiContextService.getContext(),
     );
-    const frameBaseUrl = this.luigiContextService.getContext()[
-      'frameBaseUrl'
-    ] as string;
+    const portalBaseUrl = this.luigiContextService.getContext().portalBaseUrl;
 
     iamClaimEntityUrl = iamClaimEntityUrl
       .replaceAll('${entityId}', entityId)
-      .replaceAll('${frameBaseUrl}', frameBaseUrl);
+      .replaceAll('${portalBaseUrl}', portalBaseUrl);
 
     const url = new URL(iamClaimEntityUrl);
     window.open(url.href, '_blank');
