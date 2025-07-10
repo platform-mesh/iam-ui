@@ -177,6 +177,9 @@ describe('MembersPageComponent', () => {
         entityContext: {
           project: { policies: ['iamAdmin'], id: 'id', displayName: 'dM' },
         },
+        portalContext: {
+          iamClaimEntityUrl: 'http://example.com',
+        },
       },
     } as any);
 
@@ -212,6 +215,9 @@ describe('MembersPageComponent', () => {
             id: 'id',
             displayName: 'Display Name',
           },
+        },
+        portalContext: {
+          iamClaimEntityUrl: 'http://example.com',
         },
       },
     } as any);
@@ -298,6 +304,9 @@ describe('MembersPageComponent', () => {
             id: 'id',
             displayName: 'Display Name',
           },
+        },
+        portalContext: {
+          iamClaimEntityUrl: 'http://example.com',
         },
       },
     } as any);
@@ -401,6 +410,9 @@ describe('MembersPageComponent', () => {
                 id: 'id',
                 displayName: 'dM',
               },
+            },
+            portalContext: {
+              iamClaimEntityUrl: 'http://example.com',
             },
           },
         } as any);
@@ -524,7 +536,7 @@ describe('MembersPageComponent', () => {
 
   it('should claim project', fakeAsync(() => {
     claimProjectService.claim = jest.fn();
-    component.claimEntity();
+    component.claim();
     expect(claimProjectService.claim).toHaveBeenCalled();
   }));
 
