@@ -186,7 +186,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         this.memberService.currentEntity(),
         this.luigiContextService.contextObservable(),
       ]).subscribe(([entity, context]) => {
-        console.log(context);
         this.currentEntity = entity;
         this.currentUserId = context.context.userid;
         this.iamClaimEntityUrl =
