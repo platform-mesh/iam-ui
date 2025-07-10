@@ -21,7 +21,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "dist",
+              "base": "dist-ui",
               "browser": ""
             },
             "index": "projects/ui/src/index.html",
@@ -127,7 +127,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "dist",
+              "base": "dist-wc",
               "browser": ""
             },
             "index": "projects/wc/src/index.html",
