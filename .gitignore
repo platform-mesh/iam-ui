@@ -1,5 +1,7 @@
 dist/
 dist-lib/
+dist-wc/
+dist-ui/
 coverage/
 main
 
