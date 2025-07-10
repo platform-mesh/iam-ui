@@ -7,7 +7,6 @@ import {
 import { TestBed, fakeAsync } from '@angular/core/testing';
 import { Context } from '@luigi-project/client';
 import {
-  IContextMessage,
   ILuigiContextTypes,
   LuigiContextServiceImpl,
 } from '@luigi-project/client-support-angular';
