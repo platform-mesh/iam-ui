@@ -16,3 +16,10 @@ export const getEntityId = (entity: string, ctx: NodeContext): string => {
   const contextProperty = iamEntityConfig[entity].contextProperty;
   return ctx[contextProperty];
 };
+
+export const getEntityIdFromEntityContext = (
+  entity: string,
+  ctx: NodeContext,
+): string => {
+  return ctx.entityContext?.[entity].id;
+};

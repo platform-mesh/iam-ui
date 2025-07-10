@@ -1,5 +1,5 @@
 import { IamLuigiContextService } from '../services';
-import { ClaimProjectService } from './claim-project.service';
+import { ClaimEntityService } from './claim-entity.service';
 import { TestBed } from '@angular/core/testing';
 import { MockProvider } from 'ng-mocks';
 
@@ -7,24 +7,24 @@ const projectId = 'abc';
 const frameBaseUrl = 'https://example.com';
 
 describe('ClaimProjectService', () => {
-  let service: ClaimProjectService;
+  let service: ClaimEntityService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        ClaimProjectService,
+        ClaimEntityService,
         MockProvider(IamLuigiContextService, {
           getContext: jest.fn().mockReturnValue({ projectId, frameBaseUrl }),
         }),
       ],
     });
-    service = TestBed.inject(ClaimProjectService);
+    service = TestBed.inject(ClaimEntityService);
   });
 
   it('should open Jira URL to create a claim project ticket', () => {
     window.open = jest.fn();
 
-    service.claimProject();
+    service.claim();
 
     expect(window.open).toHaveBeenCalledWith(
       'https://jira.tools.sap/secure/CreateIssueDetails!init.jspa?pid=106042&issuetype=10100&components=300068&summary=Claim+Project+Request+for+Project+abc&description=h3.+Description%0ADescribe+why+you+want+to+claim+this+project%3A%0A%0AWho+should+be+added+as+an+owner+of+the+project%3F%0A%0Ah3.+Link+to+Project%0Ahttps%3A%2F%2Fexample.com%2Fprojects%2Fabc%0A',

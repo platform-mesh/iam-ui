@@ -1,4 +1,4 @@
-import { DxpIContextMessage, IamLuigiContextService } from '../../../services';
+import { IContextMessage, IamLuigiContextService } from '../../../services';
 import { DashboardComponent } from './dashboard.component';
 import { MockService } from 'ng-mocks';
 import { of } from 'rxjs';
@@ -23,7 +23,7 @@ describe('DashboardComponent', () => {
               sidebar: { title: 'sidebar title' },
             },
           },
-        } as unknown as DxpIContextMessage);
+        } as unknown as IContextMessage);
 
       // when
       component.ngOnInit();
@@ -41,7 +41,7 @@ describe('DashboardComponent', () => {
           context: {
             dashboard: {},
           },
-        } as unknown as DxpIContextMessage);
+        } as unknown as IContextMessage);
 
       // when
       component.ngOnInit();

@@ -1,6 +1,6 @@
 import { NodeContext, User } from '../../models';
 import { IamApolloClientService } from '../apollo';
-import { DxpIContextMessage, IamLuigiContextService } from '../luigi';
+import { IContextMessage, IamLuigiContextService } from '../luigi';
 import { UserService } from './user.service';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ApolloBase } from 'apollo-angular';
@@ -60,7 +60,7 @@ const usersMock = [currentUserMock, otherUserMock];
 
 describe('UsersService', () => {
   let userService: UserService;
-  let luigiContext: BehaviorSubject<DxpIContextMessage>;
+  let luigiContext: BehaviorSubject<IContextMessage>;
   let apolloSubject: AsyncSubject<ApolloBase>;
   let userServiceSubscription: Subscription;
 

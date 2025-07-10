@@ -61,7 +61,7 @@ import {
   TableInitialStateDirective,
 } from '@fundamental-ngx/platform/table-helpers';
 import {
-  ClaimProjectService,
+  ClaimEntityService,
   GrantedUsers,
   AvatarComponent as IAMAvatarComponent,
   IamLuigiContextService,
@@ -130,6 +130,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   public countOwners?: number;
   public scopeDisplayName?: string;
   public currentEntity?: string;
+  public iamClaimEntityUrl?: string;
 
   private subscriptions: Subscription = new Subscription();
   private currentUserId?: string;
@@ -175,7 +176,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     private confirmationService: ConfirmationService,
     private luigiClient: LuigiClient,
     private luigiContextService: IamLuigiContextService,
-    private claimProjectService: ClaimProjectService,
+    private claimEntityService: ClaimEntityService,
     private confirmationMessagesService: ConfirmationMessagesService,
   ) {}
 
@@ -185,8 +186,11 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         this.memberService.currentEntity(),
         this.luigiContextService.contextObservable(),
       ]).subscribe(([entity, context]) => {
+        console.log(context);
         this.currentEntity = entity;
         this.currentUserId = context.context.userid;
+        this.iamClaimEntityUrl =
+          context.context.portalContext.iamClaimEntityUrl;
 
         if (entity && context.context.entityContext) {
           this.scopeDisplayName =
@@ -472,8 +476,8 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  claimProject() {
-    this.claimProjectService.claimProject();
+  claim() {
+    this.claimEntityService.claim();
   }
 
   onSearchSubmit(searchTerm = '') {

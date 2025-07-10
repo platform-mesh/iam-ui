@@ -1,5 +1,5 @@
 /**
- * The PortalContext is provided by the DXP application frame and offers the URLs to the various DXP services.
+ * The PortalContext is provided by the portal application frame and offers the URLs to the various services.
  * It can be retrieved from the luigi context data by using the property 'portalContext'.
  */
 export interface PortalContext extends Record<string, string> {
@@ -16,6 +16,7 @@ export interface PortalContext extends Record<string, string> {
   githubServiceApiUrl: string;
   iamServiceApiUrl: string;
   iamEntityConfig: string;
+  iamClaimEntityUrl: string;
   metadataServiceApiUrl: string;
   organizationServiceApiUrl: string;
   pipelineBackendUrl: string;

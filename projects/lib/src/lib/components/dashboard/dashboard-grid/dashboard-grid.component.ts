@@ -1,4 +1,4 @@
-import { DxpIContextMessage, IamLuigiContextService } from '../../../services';
+import { IContextMessage, IamLuigiContextService } from '../../../services';
 import { DashboardGridSection } from './models/dashboard-grid-section';
 import { NodeWithLuigi } from './models/node-with-luigi';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
@@ -19,7 +19,7 @@ export class DashboardGridComponent implements OnInit {
   ngOnInit(): void {
     this.luigiContextService
       .contextObservable()
-      .subscribe((context: DxpIContextMessage) => {
+      .subscribe((context: IContextMessage) => {
         const sections = context.context?.dashboard?.sections;
         if (sections?.length > 0) {
           this.sections = sections;

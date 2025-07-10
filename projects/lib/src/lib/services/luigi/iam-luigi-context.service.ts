@@ -9,7 +9,7 @@ import deepmerge from 'deepmerge';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export interface DxpIContextMessage {
+export interface IContextMessage {
   contextType: ILuigiContextTypes;
   context: NodeContext;
 }
@@ -64,9 +64,9 @@ export class IamLuigiContextService extends LuigiContextService {
       );
   }
 
-  contextObservable(): Observable<DxpIContextMessage> {
+  contextObservable(): Observable<IContextMessage> {
     if (!this.env.luigiContextOverwrite) {
-      return this.luigiContextService.contextObservable() as Observable<DxpIContextMessage>;
+      return this.luigiContextService.contextObservable() as Observable<IContextMessage>;
     }
 
     return this.luigiContextService.contextObservable().pipe(

@@ -9,7 +9,7 @@ import {
 } from '../queries/iam-queries';
 import { IamApolloClientService } from '../services/apollo';
 import {
-  DxpIContextMessage,
+  IContextMessage,
   IamLuigiContextService,
   LuigiClient,
 } from '../services/luigi';
@@ -42,11 +42,11 @@ export class MemberService {
   ) {
     this.entity = this.luigiContextService.contextObservable().pipe(
       filter(
-        (ctx: DxpIContextMessage) =>
+        (ctx: IContextMessage) =>
           ctx.context?.parentNavigationContexts !== undefined ||
           !!ctx.context?.entityType,
       ),
-      map((ctx: DxpIContextMessage) => {
+      map((ctx: IContextMessage) => {
         const parentNavigationContexts = ctx.context.parentNavigationContexts;
         return ctx.context.entityType || parentNavigationContexts[0];
       }),
