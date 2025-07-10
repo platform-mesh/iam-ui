@@ -30,7 +30,7 @@ const mockContext = {
     }`,
   },
   token: 'some-token',
-  tenantid: 'tenantId',
+  tenantId: 'tenantId',
   projectId: 'projectId',
 };
 
@@ -68,7 +68,7 @@ describe('MemberService', () => {
     expect(mutate).toHaveBeenCalledWith({
       mutation: ASSIGN_ROLE_BINDINGS,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         entityType: 'project',
         entityId: mockContext.projectId,
         input: [
@@ -105,7 +105,7 @@ describe('MemberService', () => {
     expect(removeFromEntity).toHaveBeenCalledWith({
       mutation: REMOVE_FROM_ENTITY,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         entityType: 'project',
         entityId: mockContext.projectId,
         userId: mockUser.userId,
@@ -136,7 +136,7 @@ describe('MemberService', () => {
     expect(deleteInvite).toHaveBeenCalledWith({
       mutation: DELETE_INVITE,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         invite: {
           email: 'user@sap.com',
           entity: {
@@ -161,7 +161,7 @@ describe('MemberService', () => {
     expect(mutate).toHaveBeenCalledWith({
       mutation: LEAVE_ENTITY,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         entityType: 'project',
         entityId: mockContext.projectId,
       },
@@ -199,7 +199,7 @@ describe('MemberService', () => {
       expect(query).toHaveBeenCalledWith({
         query: USERS_OF_ENTITY,
         variables: {
-          tenantId: mockContext.tenantid,
+          tenantId: mockContext.tenantId,
           entity: {
             entityType: 'project',
             entityId: mockContext.projectId,
@@ -254,7 +254,7 @@ describe('MemberService', () => {
       expect(query).toHaveBeenCalledWith({
         query: USERS_OF_ENTITY,
         variables: {
-          tenantId: mockContext.tenantid,
+          tenantId: mockContext.tenantId,
           entity: {
             entityType: 'project',
             entityId: mockContext.projectId,
@@ -303,7 +303,7 @@ describe('MemberService', () => {
       expect(query).toHaveBeenCalledWith({
         query: USERS_OF_ENTITY,
         variables: {
-          tenantId: mockContext.tenantid,
+          tenantId: mockContext.tenantId,
           entity: {
             entityType: 'project',
             entityId: mockContext.projectId,
@@ -362,7 +362,7 @@ describe('MemberService', () => {
     expect(query).toHaveBeenCalledWith({
       query: GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         entityType: 'project',
       },
       fetchPolicy: 'no-cache',
@@ -383,7 +383,7 @@ describe('MemberService', () => {
     expect(mutate).toHaveBeenCalledWith({
       mutation: ASSIGN_ROLE_BINDINGS,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         entityType: 'project',
         entityId: mockContext.projectId,
         input: [

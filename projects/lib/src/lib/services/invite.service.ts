@@ -25,7 +25,7 @@ export class InviteService {
       .mutate<boolean>({
         mutation: INVITE_USER,
         variables: {
-          tenantId: context.tenantid || context.organizationId,
+          tenantId: context.tenantId || context.organizationId,
           invite: {
             email: user.email,
             entity: {
@@ -50,7 +50,7 @@ export class InviteService {
       .mutate<DeleteInviteResponse>({
         mutation: DELETE_INVITE,
         variables: {
-          tenantId: context.tenantid || context.organizationId,
+          tenantId: context.tenantId || context.organizationId,
           invite: {
             email: user.email,
             entity: {

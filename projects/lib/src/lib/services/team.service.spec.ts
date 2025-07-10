@@ -17,7 +17,7 @@ import { AsyncSubject, BehaviorSubject } from 'rxjs';
 
 const mockContext = {
   token: 'some-token',
-  tenantid: 'tenantid',
+  tenantId: 'tenantId',
   teamId: 'teamId',
   projectId: 'projectId',
 } as any;

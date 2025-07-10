@@ -28,7 +28,7 @@ const mockUserB = {
 };
 const mockContext = {
   token: 'some-token',
-  tenantid: 'tenantid',
+  tenantId: 'tenantId',
   teamId: 'teamId',
   projectId: 'projectId',
   portalContext: {
@@ -91,7 +91,7 @@ describe('SearchService', () => {
 
     expect(mockHttpClient.get).toHaveBeenCalledTimes(1);
     expect(mockHttpClient.get).toHaveBeenCalledWith(
-      'https://usersearch.service.url/suggest?fuzzy=true&fq=tenant%3Atenantid&limit=5&q=placeholder',
+      'https://usersearch.service.url/suggest?fuzzy=true&fq=tenant%3AtenantId&limit=5&q=placeholder',
       { headers: { Authorization: 'Bearer some-token' } },
     );
     expect(response).toEqual(suggestSearchResponse);
