@@ -20,7 +20,7 @@ const mockContext = {
   tenantid: 'tenantid',
   teamId: 'teamId',
   projectId: 'projectId',
-} as NodeContext;
+} as any;
 
 describe('TeamService', () => {
   let teamService: TeamService;

@@ -42,7 +42,7 @@ describe('InviteService', () => {
           email: user.email,
           entity: {
             entityType: 'project',
-            entityId: mockContext.projectId,
+            entityId: mockContext['projectId'],
           },
           roles,
         },
@@ -71,7 +71,7 @@ describe('InviteService', () => {
           email: user.email,
           entity: {
             entityType: 'project',
-            entityId: mockContext.projectId,
+            entityId: mockContext['projectId'],
           },
           roles: [],
         },
