@@ -9,7 +9,7 @@ import { AsyncSubject, BehaviorSubject, Subscription, of } from 'rxjs';
 
 const mockContext = {
   token: 'some-token',
-  tenantid: 'tenantId',
+  tenantId: 'tenantId',
   userid: 'userId',
   entityContext: {
     project: {
@@ -115,7 +115,7 @@ describe('UsersService', () => {
         expect.objectContaining({
           query: expect.anything() as object,
           variables: {
-            tenantId: mockContext.tenantid,
+            tenantId: mockContext.tenantId,
             limit: limit,
           },
         }),

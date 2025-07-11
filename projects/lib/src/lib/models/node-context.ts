@@ -8,7 +8,7 @@ export interface EntityConfig {
 export interface NodeContext extends Record<string, any> {
   token: string;
   userid: string;
-  tenantid: string;
+  tenantId: string;
   organization: string;
   organizationId: string; // to be removed once migrated to the organizationId
   entityType: string;

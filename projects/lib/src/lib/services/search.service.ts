@@ -48,7 +48,7 @@ export class SearchService {
         this.userSuggestUrl.searchParams.append('fuzzy', 'true');
         this.userSuggestUrl.searchParams.append(
           'fq',
-          `tenant:${luigiContext.tenantid || luigiContext.organizationId}`,
+          `tenant:${luigiContext.tenantId || luigiContext.organizationId}`,
         );
       });
   }

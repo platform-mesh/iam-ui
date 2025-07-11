@@ -28,7 +28,7 @@ export class TenantInfoService {
         apollo.query<TenantInfoResponse>({
           query: GET_TENANT_INFO,
           variables: {
-            tenantId: ctx.context.tenantid || ctx.context.organizationId,
+            tenantId: ctx.context.tenantId || ctx.context.organizationId,
           },
         }),
       ),

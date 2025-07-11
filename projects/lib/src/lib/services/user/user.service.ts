@@ -36,7 +36,7 @@ export class UserService {
         apollo.query<UserResponse>({
           query: GET_USER,
           variables: {
-            tenantId: ctx.context.tenantid || ctx.context.organizationId,
+            tenantId: ctx.context.tenantId || ctx.context.organizationId,
             userId,
           },
         }),
@@ -55,7 +55,7 @@ export class UserService {
         apollo.query<UsersResponse>({
           query: GET_USERS,
           variables: {
-            tenantId: ctx.context.tenantid || ctx.context.organizationId,
+            tenantId: ctx.context.tenantId || ctx.context.organizationId,
             limit,
           },
         }),

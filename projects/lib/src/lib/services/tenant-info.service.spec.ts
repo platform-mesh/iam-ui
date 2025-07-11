@@ -18,7 +18,7 @@ describe('TenantInfoService', () => {
       providers: [
         MockProvider(IamLuigiContextService, {
           contextObservable: () =>
-            of({ context: { tenantid: 'tenantid' } } as IContextMessage),
+            of({ context: { tenantId: 'tenantId' } } as IContextMessage),
         }),
         MockProvider(IamApolloClientService),
       ],
@@ -42,7 +42,7 @@ describe('TenantInfoService', () => {
     expect(query).toHaveBeenCalledWith({
       query: GET_TENANT_INFO,
       variables: {
-        tenantId: 'tenantid',
+        tenantId: 'tenantId',
       },
     });
   }));

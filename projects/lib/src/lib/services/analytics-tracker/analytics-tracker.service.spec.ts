@@ -73,10 +73,10 @@ describe('AnalyticsTrackerService', () => {
     const testLuigiContext = new BehaviorSubject<IContextMessage>({
       contextType: 0,
       context: mock<NodeContext>({
-        tenantid: 'tenantid',
+        tenantId: 'tenantId',
         analyticsTrackerConfig: {
           siteUrl: 'site-url',
-          tenantIds: ['tenantid'],
+          tenantIds: ['tenantId'],
         },
         serviceProviderConfig: { matomoContainerId: 'matomo-container-id' },
         userid: 'user-id',
