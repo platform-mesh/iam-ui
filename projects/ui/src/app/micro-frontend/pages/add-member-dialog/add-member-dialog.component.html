@@ -26,7 +26,7 @@
       >
       <div fd-form-item>
         <fd-combobox
-          data-testid="dxp-iam-member-add-dialog-user-search-input"
+          data-testid="app-iam-member-add-dialog-user-search-input"
           fdCompact="true"
           fdkInitialFocus
           fillControlMode="equal"
@@ -70,10 +70,7 @@
       @let user = dropDownValue.user;
       @if (user) {
         <span fd-list-thumbnail>
-          <iam-avatar
-            class="add-member-avatar"
-            size="s"
-            [user]="user" />
+          <iam-avatar class="add-member-avatar" size="s" [user]="user" />
         </span>
         <div
           fd-list-content
