@@ -8,7 +8,7 @@ RUN --mount=type=secret,id=github_token NODE_AUTH_TOKEN=$(cat /run/secrets/githu
 RUN npm run build
 
 FROM nginx:alpine
-COPY --from=build /app/frontend/dist /usr/share/nginx/html/ui
-COPY --from=build /app/frontend/dist-wc /usr/share/nginx/html/wc
+COPY --from=build /app/dist-ui /usr/share/nginx/html/ui
+COPY --from=build /app/dist-wc /usr/share/nginx/html/wc
 COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8080
