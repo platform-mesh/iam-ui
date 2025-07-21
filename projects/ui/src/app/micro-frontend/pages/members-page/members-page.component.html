@@ -58,7 +58,7 @@
     </div>
   </fdp-dynamic-page-header>
   <fdp-dynamic-page-content cdkScrollable id="iam-members-content">
-    @if (members() && !isLoading) {
+    @if (members() && !isLoading()) {
       <fdp-table
         contentDensity="compact"
         [dataSource]="members()"
