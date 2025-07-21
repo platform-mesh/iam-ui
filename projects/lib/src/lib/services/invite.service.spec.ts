@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 describe('InviteService', () => {
   const service: InviteService = new InviteService();
   const mockContext = mock<NodeContext>({
-    tenantid: 'tenantId',
+    tenantId: 'tenantId',
     projectId: 'projectId',
     portalContext: {
       iamEntityConfig: `{
@@ -37,7 +37,7 @@ describe('InviteService', () => {
     expect(mutate).toHaveBeenCalledWith({
       mutation: INVITE_USER,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         invite: {
           email: user.email,
           entity: {
@@ -66,7 +66,7 @@ describe('InviteService', () => {
     expect(mutate).toHaveBeenCalledWith({
       mutation: DELETE_INVITE,
       variables: {
-        tenantId: mockContext.tenantid,
+        tenantId: mockContext.tenantId,
         invite: {
           email: user.email,
           entity: {

@@ -1,0 +1,9 @@
+*
+
+!projects/***
+!nginx.conf
+!.npmrc
+!package.json
+!package-lock.json
+!angular.json
+!tsconfig.json

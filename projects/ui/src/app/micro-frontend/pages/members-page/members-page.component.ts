@@ -194,7 +194,8 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         if (entity && context.context.entityContext) {
           this.scopeDisplayName =
             context.context.entityContext[entity].displayName ||
-            context.context.entityContext[entity].id;
+            context.context.entityContext[entity].id ||
+            context.context.organization;
           this.currentUserIsOwner =
             context.context.entityContext[entity].policies?.includes(
               'iamAdmin',

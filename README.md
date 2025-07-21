@@ -1,4 +1,4 @@
-# IAM-UI
+# Platform Mesh - IAM-UI
 
 ## Description
 

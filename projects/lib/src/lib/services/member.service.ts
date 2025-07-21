@@ -74,7 +74,7 @@ export class MemberService {
         apollo.query<{ usersOfEntity: GrantedUsers }>({
           query: USERS_OF_ENTITY,
           variables: {
-            tenantId: ctx.context.tenantid || ctx.context.organizationId,
+            tenantId: ctx.context.tenantId || ctx.context.organizationId,
             entity: {
               entityType: entity,
               entityId: getEntityId(entity, ctx.context),
@@ -109,7 +109,7 @@ export class MemberService {
         return apollo.query<{ availableRolesForEntityType: Role[] }>({
           query: GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
           variables: {
-            tenantId: ctx.context.tenantid || ctx.context.organizationId,
+            tenantId: ctx.context.tenantId || ctx.context.organizationId,
             entityType: entity,
           },
           fetchPolicy: 'no-cache',
@@ -146,7 +146,7 @@ export class MemberService {
             .mutate<RemoveFromEntityResponse>({
               mutation: REMOVE_FROM_ENTITY,
               variables: {
-                tenantId: ctx.context.tenantid || ctx.context.organizationId,
+                tenantId: ctx.context.tenantId || ctx.context.organizationId,
                 entityType: entity,
                 entityId: getEntityId(entity, ctx.context),
                 userId: user.userId,
@@ -185,7 +185,7 @@ export class MemberService {
         apollo.mutate<LeaveEntityResponse>({
           mutation: LEAVE_ENTITY,
           variables: {
-            tenantId: ctx.context.tenantid || ctx.context.organizationId,
+            tenantId: ctx.context.tenantId || ctx.context.organizationId,
             entityType: entity,
             entityId: getEntityId(entity, ctx.context),
           },
@@ -218,7 +218,7 @@ export class MemberService {
           return apollo.mutate<boolean>({
             mutation: ASSIGN_ROLE_BINDINGS,
             variables: {
-              tenantId: ctx.context.tenantid || ctx.context.organizationId,
+              tenantId: ctx.context.tenantId || ctx.context.organizationId,
               entityId: getEntityId(entity, ctx.context),
               entityType: entity,
               input: [

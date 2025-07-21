@@ -26,6 +26,7 @@ __debug_bin
 # local env config
 **/.env
 **/.secrets
+.secret/
 
 iam-ui.tar.gz
 iam-wc.tar.gz
