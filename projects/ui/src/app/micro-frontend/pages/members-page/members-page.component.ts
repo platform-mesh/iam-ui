@@ -146,7 +146,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   itemsPerPage = 10;
   currentPage = 1;
   itemsPerPageOptions: number[] = [5, 10, 15];
-  isLoading = true;
+  isLoading = signal<boolean>(true);
 
   svgConfig = {
     scene: {
@@ -262,25 +262,30 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         roles: this.selectedFilterRoles,
         sortBy: this.sortBy,
       })
-      .subscribe((members: GrantedUsers) => {
-        if (!members) {
-          return;
-        }
+      .subscribe({
+        next: (members: GrantedUsers) => {
+          if (!members) {
+            return;
+          }
 
-        this.members.set([
-          ...(members?.users.map((user) => {
-            return {
-              user: user.user,
-              roles: this.rolesForEntity().filter((role) =>
-                user.roles?.some((r) => r.displayName === role.displayName),
-              ),
-            };
-          }) || []),
-        ]);
-        this.totalItems.set(members.pageInfo.totalCount || 0);
+          this.members.set([
+            ...(members?.users.map((user) => {
+              return {
+                user: user.user,
+                roles: this.rolesForEntity().filter((role) =>
+                  user.roles?.some((r) => r.displayName === role.displayName),
+                ),
+              };
+            }) || []),
+          ]);
+          this.totalItems.set(members.pageInfo.totalCount || 0);
 
-        this.countOwners = members.pageInfo.ownerCount;
-        this.isLoading = false;
+          this.countOwners = members.pageInfo.ownerCount;
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          this.isLoading.set(false);
+        },
       });
   }
 
