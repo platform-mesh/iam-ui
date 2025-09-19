@@ -6,7 +6,7 @@ export const getEntityId = (entity: string, ctx: NodeContext): string => {
   ) as Record<string, EntityConfig>;
 
   if (!ctx.portalContext.iamEntityConfig) {
-    throw new Error(`Missing iam entity config property.`);
+    return ctx.entityId;
   }
 
   if (!iamEntityConfig[entity]) {
