@@ -7,6 +7,12 @@ const jestConfig: Config = {
     '<rootDir>/projects/wc',
   ],
   reporters: ['default', ['jest-junit', { outputName: 'TEST-frontend.xml' }]],
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      lines: 75,
+    },
+  },
 };
 
 export default jestConfig;

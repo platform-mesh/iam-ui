@@ -5,9 +5,13 @@ import { UserUtils } from '@platform-mesh/iam-lib';
 @Injectable()
 export class ConfirmationMessagesService {
   public getAddedMembersMessage(
-    { addedMembers = [] }: AddMembersData,
+    { addedMembers }: AddMembersData,
     entity?: string,
   ): string {
+    if (!addedMembers?.length) {
+      return 'nothing to add.';
+    }
+
     if (addedMembers.length === 1) {
       return (
         UserUtils.getNameOrId(addedMembers[0]) +
@@ -18,7 +22,7 @@ export class ConfirmationMessagesService {
     }
 
     return (
-      addedMembers?.length.toString() +
+      addedMembers.length.toString() +
       (entity
         ? $localize` members have been added to the ${entity}.`
         : $localize` members have been added.`)

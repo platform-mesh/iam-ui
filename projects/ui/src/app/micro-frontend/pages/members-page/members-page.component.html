@@ -100,11 +100,14 @@
             data-testid="app-iam-member-list-member-row"
           >
             <p
+              class="name-link"
               [attr.data-testid]="
                 'app-iam-members-page-' + member.user?.userId ||
                 member.user?.email ||
                 member.team?.name + '-entity'
               "
+              (keypress)="navigateToUserProfile(member.user?.userId)"
+              (mouseup)="navigateToUserProfile(member.user?.userId)"
             >
               @if (member.user) {
                 @if (member.user.invitationOutstanding) {
@@ -130,7 +133,7 @@
         <fdp-column
           i18n="contact table cell|Contact table cell text on the members page"
           key="contact"
-          label="Contact"
+          label="Communication"
           name="contact"
         >
           <fdp-table-cell *fdpCellDef="let member">
@@ -213,53 +216,55 @@
             </div>
           </fdp-table-cell>
         </fdp-column>
-        <fdp-column
-          align="end"
-          key="actions"
-          label="Actions"
-          i18n-label="
-            actions table cell|Actions table cell text on the members page
-          "
-          name="actions"
-        >
-          <fdp-table-cell *fdpCellDef="let member">
-            <div *requiredPolicies="'iamAdmin'">
-              @if (!equalsCurrentUser(member)) {
+          @if ((isCurrentUserMember() | async) ?? false) {
+              <fdp-column
+                      align="end"
+                      key="actions"
+                      label="Actions"
+                      i18n-label="
+              actions table cell|Actions table cell text on the members page
+            "
+                      name="actions"
+              >
+                  <fdp-table-cell *fdpCellDef="let member">
+                      <div *dxpRequiredPolicies="'iamAdmin'">
+                          @if (!equalsCurrentUser(member)) {
+                              <button
+                                      fd-button
+                                      fdType="transparent"
+                                      glyph="sys-cancel"
+                                      id="remove-member-button"
+                                      title="Remove member"
+                                      [attr.data-testid]="
+                      member.user
+                        ? 'dxp-iam-member-list-user-' +
+                          member.user?.userId +
+                          '-remove-button'
+                        : 'dxp-iam-member-list-team-' +
+                          member.team?.name +
+                          '-remove-button'
+                    "
+                                      (click)="openRemoveMemberDialog(member)"
+                              ></button>
+                          }
+                      </div>
+
+                      @if (equalsCurrentUser(member)) {
                 <button
                   fd-button
                   fdType="transparent"
-                  glyph="sys-cancel"
-                  id="remove-member-button"
-                  title="Remove member"
+                  glyph="visits"
+                  title="Leave"
                   [attr.data-testid]="
-                    member.user
-                      ? 'app-iam-member-list-user-' +
-                        member.user?.userId +
-                        '-remove-button'
-                      : 'app-iam-member-list-team-' +
-                        member.team?.name +
-                        '-remove-button'
+                    'dxp-iam-member-list-leave-' + currentEntity + '-button'
                   "
-                  (click)="openRemoveMemberDialog(member)"
+                  [disabled]="isCurrentUserUniqueOwner()"
+                  (click)="openLeaveDialog()"
                 ></button>
               }
-            </div>
-
-            @if (equalsCurrentUser(member)) {
-              <button
-                fd-button
-                fdType="transparent"
-                glyph="visits"
-                title="Leave"
-                [attr.data-testid]="
-                  'app-iam-member-list-leave-' + currentEntity + '-button'
-                "
-                [disabled]="isCurrentUserUniqueOwner()"
-                (click)="openLeaveDialog()"
-              ></button>
-            }
-          </fdp-table-cell>
-        </fdp-column>
+                  </fdp-table-cell>
+              </fdp-column>
+          }
         @if (members().length === 0) {
           <fdp-table-no-data-wrapper>
             @if (noFiltersApplied()) {

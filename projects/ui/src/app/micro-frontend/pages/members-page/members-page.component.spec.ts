@@ -5,12 +5,17 @@ import {
 } from '../../services/notification/confirmation.service';
 import { MembersPageComponent, UIRole } from './members-page.component';
 import {
+  ERROR_MUST_HAVE_AT_LEAST_ONE_OWNER,
+  ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
+} from './string-variables';
+import {
   ComponentFixture,
   TestBed,
   fakeAsync,
   tick,
 } from '@angular/core/testing';
 import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
+import { TableSortChangeEvent } from '@fundamental-ngx/platform';
 import { LinkManager } from '@luigi-project/client';
 import {
   ClaimEntityService,
@@ -85,14 +90,14 @@ describe('MembersPageComponent', () => {
   let luigiClient: LuigiClient;
   let claimProjectService: ClaimEntityService;
 
-  let usersOfEntitySubject: Subject<GrantedUsers>;
+  let usersOfEntitySubject: Subject<GrantedUsers | undefined>;
   let mockLeaveEntitySubject: Subject<void>;
   let mockRemoveMemberResult: Subject<boolean>;
   let userIsOwnerSubject: Subject<boolean>;
   let luigiContextSubject: Subject<IContextMessage>;
 
   beforeEach(() => {
-    usersOfEntitySubject = new Subject<GrantedUsers>();
+    usersOfEntitySubject = new Subject<GrantedUsers | undefined>();
     mockLeaveEntitySubject = new Subject<void>();
     mockRemoveMemberResult = new Subject<boolean>();
     userIsOwnerSubject = new Subject<boolean>();
@@ -202,128 +207,319 @@ describe('MembersPageComponent', () => {
     });
   }));
 
-  it('should open remove member dialog', fakeAsync(() => {
-    confirmationServiceMock.showRemoveMemberDialog.mockReturnValue(
-      Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
-    );
+  describe('on openRemoveMemberDialog', () => {
+    it('should open remove member dialog', fakeAsync(() => {
+      confirmationServiceMock.showRemoveMemberDialog.mockReturnValue(
+        Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
+      );
 
-    luigiContextSubject.next({
-      context: {
-        entityContext: {
-          project: {
-            policies: ['iamAdmin'],
-            id: 'id',
-            displayName: 'Display Name',
-          },
+      component.openRemoveMemberDialog(mockMemberUser);
+      tick();
+      mockRemoveMemberResult.next(true);
+
+      expect(
+        confirmationServiceMock.showRemoveMemberDialog,
+      ).toHaveBeenCalledWith(mockMemberUser.user, mockScopeDisplayName);
+      expect(memberService.removeFromEntity).toHaveBeenCalledWith(
+        mockMemberUser.user,
+      );
+      expect(notificationService.openSuccessToast).toHaveBeenCalledWith(
+        `${mockMemberUser.user.firstName} ${mockMemberUser.user.lastName} was removed from the project.`,
+      );
+      expect(memberService.usersOfEntity).toHaveBeenCalledWith({
+        limit: 10,
+        page: 1,
+        showInvitees: true,
+        roles: [],
+        searchTerm: '',
+        sortBy: {
+          direction: 'asc',
+          field: 'user',
         },
-        portalContext: {
-          iamClaimEntityUrl: 'http://example.com',
-        },
-      },
-    } as any);
+      });
+    }));
 
-    component.openRemoveMemberDialog(mockMemberUser);
-    tick();
-    mockRemoveMemberResult.next(true);
+    it('should show error notification if remove member fails', fakeAsync(() => {
+      confirmationServiceMock.showRemoveMemberDialog.mockReturnValue(
+        Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
+      );
+      memberService.removeFromEntity = jest
+        .fn()
+        .mockReturnValue(throwError(() => new Error('remove error')));
 
-    expect(confirmationServiceMock.showRemoveMemberDialog).toHaveBeenCalledWith(
-      mockMemberUser.user,
-      mockScopeDisplayName,
-    );
-    expect(memberService.removeFromEntity).toHaveBeenCalledWith(
-      mockMemberUser.user,
-    );
-    expect(notificationService.openSuccessToast).toHaveBeenCalledWith(
-      `${mockMemberUser.user.firstName} ${mockMemberUser.user.lastName} was removed from the project.`,
-    );
-    expect(memberService.usersOfEntity).toHaveBeenCalledWith({
-      limit: 10,
-      page: 1,
-      showInvitees: true,
-      roles: [],
-      searchTerm: '',
-      sortBy: {
-        direction: 'asc',
-        field: 'user',
-      },
-    });
-  }));
+      component.openRemoveMemberDialog(mockMemberUser);
+      tick();
 
-  it('should save member roles', fakeAsync(() => {
-    const changeEvent = mock<MultiComboboxSelectionChangeEvent>({
-      selectedItems: [{ displayName: 'foo' }],
-    });
-    const member = {
-      user: {} as User,
-      roles: [{ displayName: 'bar' }, { displayName: 'baz' }],
-    } as Member;
+      expect(confirmationServiceMock.showRemoveMemberDialog).toHaveBeenCalled();
+      expect(memberService.removeFromEntity).toHaveBeenCalledWith(
+        mockMemberUser.user,
+      );
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        expect.stringContaining('Could not remove user from'),
+      );
+    }));
 
+    it('should show error if showRemoveMemberDialog fails', fakeAsync(() => {
+      confirmationServiceMock.showRemoveMemberDialog.mockImplementationOnce(
+        () => Promise.reject(new Error('error')),
+      );
+
+      component.openRemoveMemberDialog(mockMemberUser);
+      tick();
+
+      expect(confirmationServiceMock.showRemoveMemberDialog).toHaveBeenCalled();
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        expect.stringContaining('Could not remove user from '),
+      );
+    }));
+
+    it('should call showRemoveMemberDialog with empty string if scopeDisplayName not defined', fakeAsync(() => {
+      confirmationServiceMock.showRemoveMemberDialog.mockReturnValue(
+        Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
+      );
+      component.scopeDisplayName = undefined;
+
+      component.openRemoveMemberDialog(mockMemberUser);
+      tick();
+
+      expect(
+        confirmationServiceMock.showRemoveMemberDialog,
+      ).toHaveBeenCalledWith(mockMemberUser.user, '');
+    }));
+  });
+
+  it('should update currentPage and call readMembers when newPageClicked is called', () => {
     component.readMembers = jest.fn();
-    component.saveMember(changeEvent, member);
-    tick();
+    component.currentPage = 1;
+    component.newPageClicked(3);
 
-    expect(memberService.setMemberRoles).toHaveBeenCalledWith(
-      member.user,
-      changeEvent.selectedItems,
-      false,
-    );
+    component.newPageClicked(3);
+
+    expect(component.currentPage).toBe(3);
     expect(component.readMembers).toHaveBeenCalled();
-    expect(notificationService.openSuccessToast).toHaveBeenCalled();
-  }));
+  });
 
-  it('should show error if member role save failed', fakeAsync(() => {
-    const changeEvent = mock<MultiComboboxSelectionChangeEvent>({
-      selectedItems: [mock()],
-    });
-    const member = {
-      user: {} as User,
-      roles: [{ displayName: 'bar' }, { displayName: 'baz' }],
-    } as Member;
+  describe('on saveMember', () => {
+    it('should not save member roles if selected roles are the same as current roles (ignoring order)', fakeAsync(() => {
+      const changeEvent = {
+        selectedItems: [
+          { technicalName: 'member', displayName: 'Member' },
+          { technicalName: 'owner', displayName: 'Owner' },
+        ],
+        source: { setValue: jest.fn() },
+      } as unknown as MultiComboboxSelectionChangeEvent;
 
-    component.readMembers = jest.fn();
-    memberService.setMemberRoles = jest
-      .fn()
-      .mockReturnValue(throwError(() => new Error('test')));
-    component.saveMember(changeEvent, member);
-    tick();
+      const member = {
+        user: {} as User,
+        roles: [
+          { technicalName: 'owner', displayName: 'Owner' },
+          { technicalName: 'member', displayName: 'Member' },
+        ],
+      } as Member;
+      component.readMembers = jest.fn();
+      component.saveMember(changeEvent, member);
+      tick();
 
-    expect(component.readMembers).toHaveBeenCalled();
-    expect(notificationService.openErrorStrip).toHaveBeenCalled();
-  }));
+      expect(memberService.setMemberRoles).not.toHaveBeenCalled();
+      expect(component.readMembers).not.toHaveBeenCalled();
+      expect(notificationService.openSuccessToast).not.toHaveBeenCalled();
+    }));
 
-  it('should open leave project dialog', fakeAsync(() => {
-    confirmationServiceMock.showLeaveScopeDialog.mockReturnValue(
-      Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
-    );
+    it('should show error and reset combobox if no roles are selected', fakeAsync(() => {
+      const setValueMock = jest.fn();
+      const changeEvent = {
+        selectedItems: [],
+        source: { setValue: setValueMock },
+      } as unknown as MultiComboboxSelectionChangeEvent;
 
-    luigiContextSubject.next({
-      context: {
-        entityContext: {
-          project: {
-            policies: ['iamAdmin'],
-            id: 'id',
-            displayName: 'Display Name',
-          },
-        },
-        portalContext: {
-          iamClaimEntityUrl: 'http://example.com',
-        },
-      },
-    } as any);
+      const member = {
+        user: {} as User,
+        roles: [{ technicalName: 'owner', displayName: 'Owner' }],
+      } as Member;
 
-    component.openLeaveDialog();
-    tick();
-    mockLeaveEntitySubject.next();
+      component.saveMember(changeEvent, member);
+      tick();
 
-    expect(confirmationServiceMock.showLeaveScopeDialog).toHaveBeenCalledWith(
-      mockScopeDisplayName,
-    );
-    expect(memberService.leaveEntity).toHaveBeenCalled();
-    expect(notificationService.openSuccessToast).toHaveBeenCalledWith(
-      'You have left the project Display Name.',
-    );
-    expect(memberService.navigateToList).toHaveBeenCalledWith();
-  }));
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        expect.stringContaining(ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE),
+      );
+      expect(setValueMock).toHaveBeenCalledWith(member.roles);
+    }));
+
+    it('should show error and reset combobox if unique owner tries to remove owner role', fakeAsync(() => {
+      const setValueMock = jest.fn();
+      const changeEvent = {
+        selectedItems: [{ technicalName: 'member', displayName: 'Member' }], // no 'owner'
+        source: { setValue: setValueMock },
+      } as unknown as MultiComboboxSelectionChangeEvent;
+
+      const member = {
+        user: { userId: 'currentUserId' } as User,
+        roles: [
+          { technicalName: 'owner', displayName: 'Owner' },
+          { technicalName: 'member', displayName: 'Member' },
+        ],
+      } as Member;
+
+      luigiContextSubject.next(
+        mock<IContextMessage>({
+          context: mock<NodeContext>({
+            userid: 'currentUserId',
+          }),
+        }),
+      );
+      component.currentUserIsOwner = true;
+      component.countOwners = 1;
+
+      component.saveMember(changeEvent, member);
+      tick();
+
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        expect.stringContaining(ERROR_MUST_HAVE_AT_LEAST_ONE_OWNER),
+      );
+      expect(setValueMock).toHaveBeenCalledWith(member.roles);
+    }));
+
+    it('should not save member roles if lockView is true', fakeAsync(() => {
+      const setValueMock = jest.fn();
+      const changeEvent = {
+        selectedItems: [{ technicalName: 'member', displayName: 'Member' }],
+        source: { setValue: setValueMock },
+      } as unknown as MultiComboboxSelectionChangeEvent;
+
+      const member = {
+        user: { userId: 'any' } as User,
+        roles: [{ technicalName: 'owner', displayName: 'Owner' }],
+      } as Member;
+
+      const roleUpdate$ = new Subject<void>();
+      jest
+        .spyOn(memberService, 'setMemberRoles')
+        .mockReturnValue(roleUpdate$.asObservable());
+
+      component.saveMember(changeEvent, member);
+
+      component.saveMember(changeEvent, member);
+
+      expect(memberService.setMemberRoles).toHaveBeenCalledTimes(1);
+      expect(setValueMock).not.toHaveBeenCalled();
+
+      roleUpdate$.next();
+      roleUpdate$.complete();
+
+      component.saveMember(changeEvent, member);
+      expect(memberService.setMemberRoles).toHaveBeenCalledTimes(2);
+    }));
+
+    it('should save member roles', fakeAsync(() => {
+      const changeEvent = mock<MultiComboboxSelectionChangeEvent>({
+        selectedItems: [{ displayName: 'foo' }],
+      });
+      const member = {
+        user: {} as User,
+        roles: [{ displayName: 'bar' }, { displayName: 'baz' }],
+      } as Member;
+
+      component.readMembers = jest.fn();
+      component.saveMember(changeEvent, member);
+      tick();
+
+      expect(memberService.setMemberRoles).toHaveBeenCalledWith(
+        member.user,
+        changeEvent.selectedItems,
+        false,
+      );
+      expect(component.readMembers).toHaveBeenCalled();
+      expect(notificationService.openSuccessToast).toHaveBeenCalled();
+    }));
+
+    it('should show error if member role save failed', fakeAsync(() => {
+      const changeEvent = mock<MultiComboboxSelectionChangeEvent>({
+        selectedItems: [mock()],
+      });
+      const member = {
+        user: {} as User,
+        roles: [{ displayName: 'bar' }, { displayName: 'baz' }],
+      } as Member;
+
+      component.readMembers = jest.fn();
+      memberService.setMemberRoles = jest
+        .fn()
+        .mockReturnValue(throwError(() => new Error('test')));
+      component.saveMember(changeEvent, member);
+      tick();
+
+      expect(component.readMembers).toHaveBeenCalled();
+      expect(notificationService.openErrorStrip).toHaveBeenCalled();
+    }));
+  });
+
+  describe('on openLeaveDialog', () => {
+    it('should open leave project dialog', fakeAsync(() => {
+      confirmationServiceMock.showLeaveScopeDialog.mockReturnValue(
+        Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
+      );
+
+      component.openLeaveDialog();
+      tick();
+      mockLeaveEntitySubject.next();
+
+      expect(confirmationServiceMock.showLeaveScopeDialog).toHaveBeenCalledWith(
+        mockScopeDisplayName,
+      );
+      expect(memberService.leaveEntity).toHaveBeenCalled();
+      expect(notificationService.openSuccessToast).toHaveBeenCalledWith(
+        'You have left the project Display Name.',
+      );
+      expect(memberService.navigateToList).toHaveBeenCalledWith();
+    }));
+
+    it('should show error if remove leaveEntity fails', fakeAsync(() => {
+      confirmationServiceMock.showLeaveScopeDialog.mockReturnValue(
+        Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
+      );
+      memberService.leaveEntity = jest
+        .fn()
+        .mockReturnValue(throwError(() => new Error('remove error')));
+
+      component.openLeaveDialog();
+      tick();
+
+      expect(confirmationServiceMock.showLeaveScopeDialog).toHaveBeenCalled();
+      //expect(memberService.removeFromEntity).toHaveBeenCalledWith(mockMemberUser.user);
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        expect.stringContaining('Could not leave project. Reason: '),
+      );
+    }));
+
+    it('should show error if remove showLeaveScopeDialog fails', fakeAsync(() => {
+      confirmationServiceMock.showLeaveScopeDialog.mockImplementationOnce(() =>
+        Promise.reject(new Error('remove error')),
+      );
+
+      component.openLeaveDialog();
+      tick();
+
+      expect(confirmationServiceMock.showLeaveScopeDialog).toHaveBeenCalled();
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        expect.stringContaining('Could not leave project. Reason: '),
+      );
+    }));
+
+    it('should call showLeaveScopeDialog with empty string if scopeDisplayName not defined', fakeAsync(() => {
+      confirmationServiceMock.showLeaveScopeDialog.mockReturnValue(
+        Promise.resolve(ConfirmationDialogDecision.CONFIRMED),
+      );
+      component.scopeDisplayName = undefined;
+
+      component.openLeaveDialog();
+      tick();
+
+      expect(confirmationServiceMock.showLeaveScopeDialog).toHaveBeenCalledWith(
+        '',
+      );
+    }));
+  });
 
   describe('when getUserNameOrId is called', () => {
     describe.each([
@@ -342,18 +538,26 @@ describe('MembersPageComponent', () => {
     ])(
       'with user is current user=$isCurrentUser',
       ({ firstName, lastName, isCurrentUser, expected }) => {
-        const mockMember: Member = {
+        const mockMember = {
           user: {
             firstName: firstName,
             lastName: lastName,
-          },
+          } as User,
           roles: [],
         };
 
         it(`should return ${expected.toString()}`, () => {
-          component['currentUserId'] = isCurrentUser
+          const userid = isCurrentUser
             ? mockMember.user.userId
             : mockMemberOwner.user.userId;
+
+          luigiContextSubject.next(
+            mock<IContextMessage>({
+              context: mock<NodeContext>({
+                userid,
+              }),
+            }),
+          );
 
           const displayName = component.getUserNameOrId(mockMember);
 
@@ -391,6 +595,17 @@ describe('MembersPageComponent', () => {
       expected: true,
       countOwners: 1,
     },
+    {
+      members: mockOneMemberOwner,
+      isUserOwner: true,
+      expected: true,
+      countOwners: 0,
+    },
+    {
+      members: mockOneMemberOwner,
+      isUserOwner: true,
+      expected: true,
+    },
   ])(
     `when isCurrentUserUniqueOwner is called`,
     ({ members, isUserOwner, countOwners, expected }) => {
@@ -425,7 +640,34 @@ describe('MembersPageComponent', () => {
     },
   );
 
-  it('should check current  user', fakeAsync(() => {
+  describe('should handle readMembers error', () => {
+    it('should assign corner values if data missing', () => {
+      usersOfEntitySubject.next({
+        users: [],
+        // @ts-expect-error expected to be undefined
+        pageInfo: { totalCount: undefined, ownerCount: 1 },
+      });
+
+      component.readMembers();
+
+      const members = component.members();
+      const totalItems = component.totalItems();
+
+      expect(totalItems).toEqual(0);
+      expect(members).toEqual([]);
+    });
+
+    it('should assign corner values if data missing 2', () => {
+      usersOfEntitySubject.next(undefined);
+      component.readMembers();
+
+      const countOwners = component.countOwners;
+
+      expect(countOwners).toBeUndefined();
+    });
+  });
+
+  it('should check current user', fakeAsync(() => {
     luigiContextSubject.next(
       mock<IContextMessage>({
         context: mock<NodeContext>({
@@ -567,6 +809,74 @@ describe('MembersPageComponent', () => {
       component.searchTerm = 'test';
 
       expect(component.noFiltersApplied()).toBeFalsy();
+    });
+  });
+
+  it('should set itemsPerPage and call newPageClicked with 1 on itemsPerPageChange()', () => {
+    component.newPageClicked = jest.fn();
+    component.itemsPerPage = 10;
+
+    component.itemsPerPageChange(25);
+
+    expect(component.itemsPerPage).toBe(25);
+    expect(component.newPageClicked).toHaveBeenCalledWith(1);
+  });
+
+  it('should set currentPage to 1, update selectedFilterRoles, and call readMembers on setRolesFilter', () => {
+    const readMembersMock = jest.fn();
+    component.readMembers = readMembersMock;
+    component.currentPage = 5;
+    component.selectedFilterRoles = [];
+
+    const event = {
+      selectedItems: [roleOwner, roleMember],
+    } as unknown as MultiComboboxSelectionChangeEvent;
+
+    component.setRolesFilter(event);
+
+    expect(component.currentPage).toBe(1);
+    expect(component.selectedFilterRoles).toEqual([roleOwner, roleMember]);
+    expect(readMembersMock).toHaveBeenCalled();
+  });
+
+  it('should set sortBy and call readMembers on sortChange', () => {
+    const readMembersMock = jest.fn();
+    component.readMembers = readMembersMock;
+    const sortEvent = {
+      current: [{ field: 'user', direction: 'desc' }],
+    } as TableSortChangeEvent;
+
+    component.sortChange(sortEvent);
+
+    expect(component.sortBy).toEqual({ field: 'user', direction: 'desc' });
+    expect(readMembersMock).toHaveBeenCalled();
+  });
+
+  describe('on onSearchSubmit', () => {
+    it('should set currentPage to 1, trim and set searchTerm, and call readMembers on onSearchSubmit', () => {
+      const readMembersMock = jest.fn();
+      component.readMembers = readMembersMock;
+      component.currentPage = 5;
+      component.searchTerm = 'old';
+
+      component.onSearchSubmit('  new search  ');
+
+      expect(component.currentPage).toBe(1);
+      expect(component.searchTerm).toBe('new search');
+      expect(readMembersMock).toHaveBeenCalled();
+    });
+
+    it('should default searchTerm to empty string if not provided', () => {
+      const readMembersMock = jest.fn();
+      component.readMembers = readMembersMock;
+      component.currentPage = 2;
+      component.searchTerm = 'something';
+
+      component.onSearchSubmit();
+
+      expect(component.currentPage).toBe(1);
+      expect(component.searchTerm).toBe('');
+      expect(readMembersMock).toHaveBeenCalled();
     });
   });
 });

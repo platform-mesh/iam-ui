@@ -10,4 +10,15 @@ global.fetch = () => Promise.resolve({} as Response);
 
 setupZoneTestEnv();
 global.TextEncoder = TextEncoder;
+// @ts-expect-error incompatibility with Node.js
 global.TextDecoder = TextDecoder as unknown as typeof globalThis.TextDecoder;
+
+const consoleError = console.error;
+console.error = function (error: unknown, ...errorData: unknown[]) {
+  if (error?.toString().includes('Could not parse CSS stylesheet')) {
+    return;
+  }
+
+  consoleError(error, errorData);
+  throw 'a console error occurred';
+};

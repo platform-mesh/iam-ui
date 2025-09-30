@@ -18,10 +18,10 @@ import { ButtonComponent } from '@fundamental-ngx/platform/button';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
 import {
   AvatarComponent,
+  DashboardComponent,
   Header,
   IamLuigiContextService,
   NodeContext,
-  PageHeaderComponent,
   User,
   UserService,
   UserUtils,
@@ -30,7 +30,6 @@ import {
 @Component({
   selector: 'app-user-overview-header',
   imports: [
-    PageHeaderComponent,
     FacetGroupComponent,
     FacetComponent,
     AvatarComponent,
@@ -39,6 +38,7 @@ import {
     FacetContentComponent,
     TextComponent,
     LinkComponent,
+    DashboardComponent,
   ],
   templateUrl: './user-overview-header.component.html',
   styleUrl: './user-overview-header.component.scss',
@@ -79,12 +79,12 @@ export class UserOverviewHeaderComponent implements OnInit {
     this.userService.getUser(this.ctx?.profileUserId ?? '').subscribe({
       next: (user) => {
         this.user = user;
-        this.cdRef.detectChanges();
+        this.cdRef.markForCheck();
       },
     });
   }
 
-  getFirsLastNameOrUserId(user: User): string {
+  getFirstLastNameOrUserId(user: User): string {
     const name = UserUtils.getNameOrDefault(user, '');
     return name ? `${name} (${user.userId})` : user.userId || '';
   }
@@ -100,7 +100,7 @@ export class UserOverviewHeaderComponent implements OnInit {
   }
 
   emailUser(email: string | undefined): void {
-    window.location.href = `mailto:${email}`;
+    window.location.assign(`mailto:${email}`);
   }
 
   private openNewWindow(url: string): void {

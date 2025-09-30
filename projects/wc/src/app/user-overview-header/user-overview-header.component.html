@@ -1,5 +1,5 @@
 @if (user) {
-  <app-page-header [header]="header" [showEditButton]="false">
+  <app-dashboard [header]="header" [showEditButton]="false">
     <fd-facet-group>
       <fd-facet type="image">
         <iam-avatar size="l" [user]="user" />
@@ -7,7 +7,7 @@
 
       <fd-facet type="custom">
         <div class="user-name" data-testid="app-user-header-name">
-          {{ getFirsLastNameOrUserId(user) }}
+          {{ getFirstLastNameOrUserId(user) }}
         </div>
         <div>
           <span>
@@ -101,5 +101,5 @@ P5kAAAAASUVORK5CYII="
         </fd-facet-content>
       </fd-facet>
     </fd-facet-group>
-  </app-page-header>
+  </app-dashboard>
 }

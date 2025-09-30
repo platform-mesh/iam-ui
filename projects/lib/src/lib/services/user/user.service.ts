@@ -60,7 +60,17 @@ export class UserService {
           },
         }),
       ),
-      map((apolloResponse) => apolloResponse.data.usersConnection.user),
+      map((apolloResponse) => {
+        if (
+          apolloResponse &&
+          apolloResponse.data &&
+          apolloResponse.data.usersConnection &&
+          Array.isArray(apolloResponse.data.usersConnection.user)
+        ) {
+          return apolloResponse.data.usersConnection.user;
+        }
+        return [];
+      }),
     );
   }
 }
