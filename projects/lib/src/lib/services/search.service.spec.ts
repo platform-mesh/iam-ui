@@ -81,9 +81,11 @@ describe('SearchService', () => {
   });
 
   it('should call the "suggest" endpoint of the user search service and return response', fakeAsync(() => {
-    let response: SuggestedUserResponse | null = null;
+    let response: SuggestedUserResponse = {} as SuggestedUserResponse;
     searchService.getSuggestedUsers('placeholder', 5).subscribe((result) => {
-      response = result;
+      if (result) {
+        response = result;
+      }
     });
 
     const req = httpMock.expectOne((request) => {
@@ -103,9 +105,11 @@ describe('SearchService', () => {
   }));
 
   it('should use default limit=10 when not provided', fakeAsync(() => {
-    let response: SuggestedUserResponse | null = null;
+    let response: SuggestedUserResponse = {} as SuggestedUserResponse;
     searchService.getSuggestedUsers('some-search').subscribe((result) => {
-      response = result;
+      if (result) {
+        response = result;
+      }
     });
 
     const req = httpMock.expectOne((request) => {

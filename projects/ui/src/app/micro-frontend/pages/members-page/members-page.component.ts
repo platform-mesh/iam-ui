@@ -249,10 +249,11 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   public isCurrentUserMember(): Observable<boolean> {
     return this.luigiContextService.contextObservable().pipe(
       map((data) => {
-        const projectPolicies = data.context.entityContext?.project?.policies;
+        const projectPolicies =
+          data.context.entityContext?.['project']?.policies;
         const isProjectMember =
           Array.isArray(projectPolicies) && projectPolicies.length > 0;
-        const teamPolicies = data.context.entityContext?.team?.policies;
+        const teamPolicies = data.context.entityContext?.['team']?.policies;
         const isTeamMember =
           Array.isArray(teamPolicies) && teamPolicies.length > 0;
         return isProjectMember || isTeamMember;

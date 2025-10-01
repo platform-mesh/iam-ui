@@ -10,7 +10,6 @@ global.fetch = () => Promise.resolve({} as Response);
 
 setupZoneTestEnv();
 global.TextEncoder = TextEncoder;
-// @ts-expect-error incompatibility with Node.js
 global.TextDecoder = TextDecoder as unknown as typeof globalThis.TextDecoder;
 
 const consoleError = console.error;
