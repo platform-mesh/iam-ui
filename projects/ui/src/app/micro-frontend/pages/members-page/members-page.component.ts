@@ -1,4 +1,5 @@
 import { SearchResultItem } from '../../../../../../lib/src/lib/models/search/search-result.item';
+import { RoutingService } from '../../../../../../lib/src/lib/services/routing/routing.service';
 import { ConfirmationMessagesService } from '../../services/confirmation-messages/confirmation-messages.service';
 import {
   ConfirmationDialogDecision,
