@@ -12,6 +12,7 @@ import {
   SUCCESS_CHANGING_MEMBERS_ROLE,
 } from './string-variables';
 import { CdkScrollable } from '@angular/cdk/scrolling';
+import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -129,6 +130,7 @@ export interface SearchResultItemLink {
     FormItemComponent,
     FormLabelComponent,
     MultiComboboxComponent,
+    AsyncPipe,
   ],
   templateUrl: './members-page.component.html',
   styleUrl: './members-page.component.scss',
