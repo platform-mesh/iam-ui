@@ -12,6 +12,7 @@ import {
   ComponentFixture,
   TestBed,
   fakeAsync,
+  flush,
   tick,
 } from '@angular/core/testing';
 import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
@@ -28,28 +29,29 @@ import {
   NodeContext,
   NotificationService,
   Role,
+  RoutingService,
   User,
 } from '@platform-mesh/iam-lib';
 import { mock } from 'jest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { Subject, Subscription, of, throwError } from 'rxjs';
 
-const roleOwner: UIRole = {
+const roleOwner = {
   id: 'owner',
   label: 'Owner',
   technicalName: 'owner',
   displayName: 'Owner',
-};
-const roleMember: UIRole = {
+} as UIRole;
+const roleMember = {
   id: 'member',
   label: 'Member',
   technicalName: 'member',
   displayName: 'Member',
-};
+} as UIRole;
 
 const allAvailableRoles = [roleOwner, roleMember];
 
-const mockMemberOwner: Member = {
+const mockMemberOwner = {
   user: {
     userId: 'userIdOwner',
     email: 'owner@sap.com',
@@ -57,9 +59,9 @@ const mockMemberOwner: Member = {
     lastName: 'ownerLastName',
   },
   roles: [roleOwner],
-};
+} as Member;
 
-const mockMemberUser: Member = {
+const mockMemberUser = {
   user: {
     userId: 'userIdMember',
     email: 'member@sap.com',
@@ -67,7 +69,7 @@ const mockMemberUser: Member = {
     lastName: 'memberLastName',
   },
   roles: [roleMember],
-};
+} as Member;
 
 const mockTwoMemberOwners: Member[] = [mockMemberOwner, mockMemberOwner];
 const mockOneMemberOwner: Member[] = [mockMemberOwner];
@@ -124,7 +126,16 @@ describe('MembersPageComponent', () => {
         MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContextSubject,
         }),
-        MockProvider(ConfirmationMessagesService),
+        MockProvider(ConfirmationMessagesService, {
+          getAddedMembersMessage: jest
+            .fn()
+            .mockImplementation((data: any, entity: string) => {
+              const name = data?.addedMembers?.[0]
+                ? `${data.addedMembers[0].firstName} ${data.addedMembers[0].lastName}`
+                : '';
+              return `${name} has been added to the ${entity}.`;
+            }),
+        }),
         MockProvider(LuigiClient, {
           linkManager: jest.fn().mockReturnValue({
             fromParent: jest.fn().mockReturnValue(
@@ -135,6 +146,7 @@ describe('MembersPageComponent', () => {
           }),
         }),
         MockProvider(ClaimEntityService),
+        MockProvider(RoutingService, { openLink: jest.fn() }),
       ],
       imports: [MembersPageComponent],
     })
@@ -158,6 +170,22 @@ describe('MembersPageComponent', () => {
     fixture = TestBed.createComponent(MembersPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+
+    luigiContextSubject.next({
+      context: {
+        userid: 'test-user',
+        entityContext: {
+          project: {
+            policies: [],
+            id: 'project-id',
+            displayName: mockScopeDisplayName,
+          },
+        },
+        portalContext: {
+          iamClaimEntityUrl: 'http://example.com',
+        },
+      },
+    } as any);
   });
 
   afterAll(() => {
@@ -446,8 +474,12 @@ describe('MembersPageComponent', () => {
       memberService.setMemberRoles = jest
         .fn()
         .mockReturnValue(throwError(() => new Error('test')));
+
+      jest.spyOn(console, 'error').mockImplementation(() => undefined as any);
+
       component.saveMember(changeEvent, member);
       tick();
+      flush();
 
       expect(component.readMembers).toHaveBeenCalled();
       expect(notificationService.openErrorStrip).toHaveBeenCalled();

@@ -1,6 +1,6 @@
 import { SearchResultItem } from '../../models/search/search-result.item';
 import { Injectable } from '@angular/core';
-import { LuigiClient } from '@platform-mesh/iam-lib';
+import { LuigiClient } from '../luigi';
 
 @Injectable({
   providedIn: 'root',

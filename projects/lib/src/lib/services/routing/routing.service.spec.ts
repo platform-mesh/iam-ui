@@ -1,6 +1,6 @@
+import { LuigiClient } from '../luigi';
 import { RoutingService } from './routing.service';
 import { TestBed } from '@angular/core/testing';
-import { LuigiClient } from '@platform-mesh/iam-lib';
 import { MockProvider } from 'ng-mocks';
 
 describe('RoutingService', () => {
