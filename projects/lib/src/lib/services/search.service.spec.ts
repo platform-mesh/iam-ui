@@ -91,7 +91,7 @@ describe('SearchService', () => {
     const req = httpMock.expectOne((request) => {
       return (
         request.urlWithParams ===
-        'https://usersearch.service.url/suggest?fuzzy=true&fq=tenant%3Atenantid&limit=5&q=placeholder'
+        'https://usersearch.service.url/suggest?fuzzy=true&fq=tenant%3AtenantId&limit=5&q=placeholder'
       );
     });
 
@@ -115,7 +115,7 @@ describe('SearchService', () => {
     const req = httpMock.expectOne((request) => {
       return (
         request.urlWithParams ===
-        'https://usersearch.service.url/suggest?fuzzy=true&fq=tenant%3Atenantid&limit=10&q=some-search'
+        'https://usersearch.service.url/suggest?fuzzy=true&fq=tenant%3AtenantId&limit=10&q=some-search'
       );
     });
 
