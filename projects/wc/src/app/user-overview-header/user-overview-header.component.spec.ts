@@ -1,15 +1,15 @@
 import { UserOverviewHeaderComponent } from './user-overview-header.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  ILuigiContextTypes,
-  LuigiContextService,
-} from '@luigi-project/client-support-angular';
+import { ILuigiContextTypes } from '@luigi-project/client-support-angular';
 import {
   IContextMessage,
+  IamLuigiContextService,
   NodeContext,
   User,
   UserService,
 } from '@platform-mesh/iam-lib';
+import { provideNamedApollo } from 'apollo-angular';
 import { MockProvider } from 'ng-mocks';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -24,7 +24,7 @@ const mockContext = {
   },
 } as unknown as NodeContext;
 
-let dxpLuigiContextService: LuigiContextService;
+let iamLuigiContextService: IamLuigiContextService;
 let fixture: ComponentFixture<UserOverviewHeaderComponent>;
 const luigiContext = new BehaviorSubject<IContextMessage>({
   context: mockContext,
@@ -41,29 +41,31 @@ describe('UserOverviewHeaderComponent', () => {
     };
 
     TestBed.configureTestingModule({
+      imports: [UserOverviewHeaderComponent, HttpClientTestingModule],
       providers: [
-        UserOverviewHeaderComponent,
+        provideNamedApollo(() => ({})),
         { provide: UserService, useValue: mockUserService },
-        MockProvider(LuigiContextService, {
+        MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContext,
+          setContext: jest.fn(),
         }),
       ],
     });
 
     fixture = TestBed.createComponent(UserOverviewHeaderComponent);
     component = fixture.componentInstance;
-    dxpLuigiContextService = TestBed.inject(LuigiContextService);
+    iamLuigiContextService = TestBed.inject(IamLuigiContextService);
   });
 
-  it('should call dxpLuigiContextService.setContext when context is set', () => {
-    const dxpLuigiContextServiceSpy = dxpLuigiContextService as unknown as {
+  it('should call iamLuigiContextService.setContext when context is set', () => {
+    const iamLuigiContextServiceSpy = iamLuigiContextService as unknown as {
       setContext: jest.Mock;
     };
-    dxpLuigiContextServiceSpy.setContext = jest.fn();
+    iamLuigiContextServiceSpy.setContext = jest.fn();
 
     component.context = mockContext;
 
-    expect(dxpLuigiContextServiceSpy.setContext).toHaveBeenCalledWith(
+    expect(iamLuigiContextServiceSpy.setContext).toHaveBeenCalledWith(
       mockContext,
     );
   });
