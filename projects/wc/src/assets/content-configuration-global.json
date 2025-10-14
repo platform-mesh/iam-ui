@@ -37,7 +37,7 @@
           },
           "webcomponent": {
             "selfRegistered": true,
-            "type": "module",
+            "type": "module"
           },
           "urlSuffix": "/main.js?wc=user-overview",
           "context": {

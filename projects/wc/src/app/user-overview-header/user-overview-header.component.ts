@@ -1,31 +1,12 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnInit,
-  ViewEncapsulation,
-} from '@angular/core';
-import {
-  FacetComponent,
-  FacetContentComponent,
-  FacetGroupComponent,
-} from '@fundamental-ngx/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { FacetComponent, FacetContentComponent, FacetGroupComponent } from '@fundamental-ngx/core';
 import { ContentDensityDirective } from '@fundamental-ngx/core/content-density';
 import { LinkComponent } from '@fundamental-ngx/core/link';
 import { TextComponent } from '@fundamental-ngx/core/text';
 import { ButtonComponent } from '@fundamental-ngx/platform/button';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
-import {
-  AvatarComponent,
-  DashboardComponent,
-  Header,
-  IamLuigiContextService,
-  NodeContext,
-  User,
-  UserService,
-  UserUtils,
-} from '@platform-mesh/iam-lib';
+import { AvatarComponent, DashboardComponent, Header, IamLuigiContextService, NodeContext, User, UserService, UserUtils } from '@platform-mesh/iam-lib';
+
 
 @Component({
   selector: 'app-user-overview-header',
@@ -37,7 +18,6 @@ import {
     ContentDensityDirective,
     FacetContentComponent,
     TextComponent,
-    LinkComponent,
     DashboardComponent,
   ],
   templateUrl: './user-overview-header.component.html',
@@ -79,6 +59,17 @@ export class UserOverviewHeaderComponent implements OnInit {
     this.userService.getUser(this.ctx?.profileUserId ?? '').subscribe({
       next: (user) => {
         this.user = user;
+        this.cdRef.markForCheck();
+      },
+      error: (error) => {
+        this.user = {
+          userId: this.ctx?.profileUserId,
+          invitationOutstanding: false,
+          email: 'test@test.com',
+          firstName: 'First',
+          lastName: 'Last',
+          title: 'Title',
+        };
         this.cdRef.markForCheck();
       },
     });

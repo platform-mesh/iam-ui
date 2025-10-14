@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -5,6 +6,7 @@ import {
   Input,
   OnInit,
   ViewEncapsulation,
+  inject,
 } from '@angular/core';
 import {
   AvatarGroupComponent,
@@ -24,6 +26,7 @@ import {
 } from '@fundamental-ngx/core/quick-view';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
 import {
+  AvatarProviderService,
   DashboardSidebarItemComponent,
   GrantedUsers,
   AvatarComponent as IAMAvatarComponent,
@@ -53,6 +56,7 @@ import { map } from 'rxjs';
     QuickViewGroupItemContentComponent,
     LinkComponent,
     DashboardSidebarItemComponent,
+    AsyncPipe,
   ],
   templateUrl: './members-sidebar.component.html',
   styleUrl: './members-sidebar.component.scss',
@@ -60,6 +64,7 @@ import { map } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MembersSidebarComponent implements OnInit {
+  private avatarProviderService = inject(AvatarProviderService);
   rolesAllowedForEdit = [
     ProjectGroupTechnicalNames.PROJECT_OWNER,
     RolesTechnicalName.OWNER,
@@ -110,5 +115,9 @@ export class MembersSidebarComponent implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
       });
+  }
+
+  public getUserAvatarImgUrl(user: User): Promise<string | undefined> {
+    return this.avatarProviderService.getAvatarImageUrl(user);
   }
 }

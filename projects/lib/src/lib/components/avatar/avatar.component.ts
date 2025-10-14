@@ -1,5 +1,5 @@
 import { User } from '../../models';
-import { imageLoadable } from '../image-loadable';
+import { AvatarProviderService } from '../../services';
 import { UserQuickViewComponent } from '../user-quick-view';
 import { AvatarMode } from './avatar.model';
 import { NgTemplateOutlet } from '@angular/common';
@@ -9,6 +9,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core';
 import { Size } from '@fundamental-ngx/core';
 import { AvatarComponent as AvatarComponent_1 } from '@fundamental-ngx/core/avatar';
@@ -21,6 +22,7 @@ import { AvatarComponent as AvatarComponent_1 } from '@fundamental-ngx/core/avat
   imports: [UserQuickViewComponent, NgTemplateOutlet, AvatarComponent_1],
 })
 export class AvatarComponent implements OnChanges {
+  private avatarProviderService = inject(AvatarProviderService);
   /**
    * The size of the avatar component.
    */
@@ -47,7 +49,10 @@ export class AvatarComponent implements OnChanges {
   }
 
   async setupUserAvatar(): Promise<void> {
-    const avatarImageUrl = await this.getAvatarImageUrl(this.user);
+    const avatarImageUrl = await this.avatarProviderService.getAvatarImageUrl(
+      this.user,
+    );
+
     if (avatarImageUrl) {
       this.imageUrl = avatarImageUrl;
       this.avatarMode = AvatarMode.Image;
@@ -58,18 +63,5 @@ export class AvatarComponent implements OnChanges {
     }
 
     this.cdr.detectChanges();
-  }
-
-  private async getAvatarImageUrl(user: User): Promise<string | undefined> {
-    if (!user?.userId) {
-      return undefined;
-    }
-
-    const url = `https://avatars.wdf.sap.corp/avatar/${user.userId}`;
-    if (await imageLoadable(url)) {
-      return url;
-    } else {
-      return undefined;
-    }
   }
 }

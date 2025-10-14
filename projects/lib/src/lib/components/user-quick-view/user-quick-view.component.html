@@ -16,7 +16,7 @@
               <fd-avatar
                 size="s"
                 [circle]="true"
-                [image]="getUserAvatarImgUrl()"
+                [image]="getUserAvatarImgUrl() | async"
                 alterIcon="content|default-icon"
                 >{{ getUserFullName() }}
               </fd-avatar>

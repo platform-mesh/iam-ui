@@ -1,23 +1,49 @@
 import { User } from '../../models';
-import { LuigiClient } from '../../services/luigi';
+import { AvatarProviderService, LuigiClient } from '../../services';
 import { UserQuickViewComponent } from './user-quick-view.component';
+import { TestBed } from '@angular/core/testing';
 
 describe('UserQuickViewComponent', () => {
   const luigiClient: LuigiClient = {} as LuigiClient;
   let component: UserQuickViewComponent;
+  let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
 
   beforeEach(async () => {
-    component = new UserQuickViewComponent(luigiClient);
+    const mockService = {
+      getAvatarImageUrl: jest.fn(),
+    };
+
+    await TestBed.configureTestingModule({
+      providers: [
+        { provide: AvatarProviderService, useValue: mockService },
+        { provide: LuigiClient, useValue: luigiClient },
+      ],
+    }).compileComponents();
+
+    component = TestBed.createComponent(
+      UserQuickViewComponent,
+    ).componentInstance;
+    mockAvatarProviderService = TestBed.inject(
+      AvatarProviderService,
+    ) as jest.Mocked<AvatarProviderService>;
   });
 
   describe('getUserAvatarImgUrl', () => {
-    it('should provide user avatar url', () => {
+    it('should provide user avatar url', async () => {
       // given
+      const expectedUrl = 'stab';
       component.user = { userId: 'C776' } as User;
+      mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(
+        expectedUrl,
+      );
+
+      // when
+      const result = await component.getUserAvatarImgUrl();
 
       // then
-      expect(component.getUserAvatarImgUrl()).toEqual(
-        'https://avatars.wdf.sap.corp/avatar/C776',
+      expect(result).toEqual(expectedUrl);
+      expect(mockAvatarProviderService.getAvatarImageUrl).toHaveBeenCalledWith(
+        component.user,
       );
     });
   });

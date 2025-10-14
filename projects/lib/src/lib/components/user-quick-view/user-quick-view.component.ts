@@ -1,10 +1,12 @@
 import { User } from '../../models';
-import { LuigiClient } from '../../services';
+import { AvatarProviderService, LuigiClient } from '../../services';
+import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   Input,
   ViewChild,
+  inject,
 } from '@angular/core';
 import {
   ButtonComponent,
@@ -45,9 +47,11 @@ import { AvatarComponent } from '@fundamental-ngx/core/avatar';
     QuickViewGroupComponent,
     IconComponent,
     ButtonComponent,
+    AsyncPipe,
   ],
 })
 export class UserQuickViewComponent {
+  private avatarProviderService = inject(AvatarProviderService);
   /**
    * The user data that will be shown in the quick view
    */
@@ -58,8 +62,8 @@ export class UserQuickViewComponent {
 
   constructor(private luigiClient: LuigiClient) {}
 
-  public getUserAvatarImgUrl(): string {
-    return `https://avatars.wdf.sap.corp/avatar/${this.user.userId}`;
+  public getUserAvatarImgUrl(): Promise<string | undefined> {
+    return this.avatarProviderService.getAvatarImageUrl(this.user);
   }
 
   public getGithubURL(): string {
