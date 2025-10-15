@@ -3,6 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ILuigiContextTypes } from '@luigi-project/client-support-angular';
 import {
+  AvatarProviderService,
   IContextMessage,
   IamLuigiContextService,
   NodeContext,
@@ -21,6 +22,9 @@ const mockContext = {
     project: {
       policies: [],
     },
+  },
+  portalContext: {
+    avatarImgUrl: 'https://avatar.url',
   },
 } as unknown as NodeContext;
 
@@ -48,6 +52,9 @@ describe('UserOverviewHeaderComponent', () => {
         MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContext,
           setContext: jest.fn(),
+        }),
+        MockProvider(AvatarProviderService, {
+          getAvatarImageUrl: jest.fn().mockResolvedValue(undefined),
         }),
       ],
     });
@@ -79,7 +86,7 @@ describe('UserOverviewHeaderComponent', () => {
       fixture.detectChanges();
 
       expect(mockUserService.getUser).toHaveBeenCalledWith('D123456');
-      expect(component.user).toBe(user);
+      expect(component.user()).toBe(user);
     });
 
     it('should fetch user with empty string if ctx or profileUserId is missing', () => {
@@ -90,7 +97,7 @@ describe('UserOverviewHeaderComponent', () => {
       fixture.detectChanges();
 
       expect(mockUserService.getUser).toHaveBeenCalledWith('');
-      expect(component.user).toBe(user);
+      expect(component.user()).toBe(user);
     });
   });
 
@@ -184,10 +191,10 @@ describe('UserOverviewHeaderComponent', () => {
 
   describe('When calling getUserContactsHeaderText', () => {
     it("should include the user's first name in the see on text", () => {
-      component.user = {
+      component.user.set({
         userId: 'D123456',
         firstName: 'John',
-      } as User;
+      } as User);
 
       const seeOnText = component.getUserContactsHeaderText();
 
@@ -195,9 +202,9 @@ describe('UserOverviewHeaderComponent', () => {
     });
 
     it('should say "Check on:" in the see on text if the user\'s first name is not available', () => {
-      component.user = {
+      component.user.set({
         userId: 'D123456',
-      } as User;
+      } as User);
 
       const seeOnText = component.getUserContactsHeaderText();
 

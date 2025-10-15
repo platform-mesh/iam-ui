@@ -10,6 +10,7 @@ import { of } from 'rxjs';
 
 jest.mock('../../services', () => ({
   AvatarProviderService: jest.fn(),
+  IamLuigiContextService: jest.fn(),
 }));
 
 describe('AvatarComponent', () => {
@@ -51,6 +52,15 @@ describe('AvatarComponent', () => {
 
     fixture = TestBed.createComponent(AvatarComponent);
     component = fixture.componentInstance;
+
+    // Set required inputs
+    fixture.componentRef.setInput('size', 's');
+    fixture.componentRef.setInput('user', {
+      firstName: 'John',
+      userId: 'ICOS',
+      lastName: 'Doe',
+    });
+
     mockAvatarProviderService = TestBed.inject(
       AvatarProviderService,
     ) as jest.Mocked<AvatarProviderService>;
@@ -59,11 +69,6 @@ describe('AvatarComponent', () => {
 
   it('should set avatar mode as image and image url when Image fetch resolves', async () => {
     const expectedUrl = 'stab';
-    fixture.componentRef.setInput('user', {
-      firstName: 'John',
-      userId: 'ICOS',
-      lastName: 'Doe',
-    });
 
     mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(expectedUrl);
 
