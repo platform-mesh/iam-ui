@@ -1,4 +1,4 @@
-@if (user) {
+@if (user(); as user) {
   <app-dashboard [header]="header" [showEditButton]="false">
     <fd-facet-group>
       <fd-facet type="image">

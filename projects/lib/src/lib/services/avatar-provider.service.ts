@@ -6,12 +6,15 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class AvatarProviderService {
-  public async getAvatarImageUrl(user: User): Promise<string | undefined> {
-    if (!user?.userId) {
+  public async getAvatarImageUrl(
+    user: User,
+    avatarImageUrl?: string,
+  ): Promise<string | undefined> {
+    if (!user?.userId || !avatarImageUrl) {
       return undefined;
     }
 
-    const url = `stab`; //TODO Replace with new image provider
+    const url = avatarImageUrl.replace('${userId}', user.userId);
     if (await imageLoadable(url)) {
       return url;
     } else {

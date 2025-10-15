@@ -71,12 +71,14 @@ export class MembersSidebarComponent implements OnInit {
   ];
   members: User[] = [];
   loading = true;
+  ctx?: NodeContext;
 
   @Input()
   LuigiClient!: LuigiClient;
 
   @Input()
   set context(context: NodeContext) {
+    this.ctx = context;
     this.iamLuigiContextService.setContext(context);
   }
 
@@ -118,6 +120,6 @@ export class MembersSidebarComponent implements OnInit {
   }
 
   public getUserAvatarImgUrl(user: User): Promise<string | undefined> {
-    return this.avatarProviderService.getAvatarImageUrl(user);
+    return this.avatarProviderService.getAvatarImageUrl(user, this.ctx?.portalContext.avatarImgUrl);
   }
 }

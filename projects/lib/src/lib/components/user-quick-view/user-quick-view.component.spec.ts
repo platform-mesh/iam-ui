@@ -1,13 +1,13 @@
 import { User } from '../../models';
 import { AvatarProviderService, LuigiClient } from '../../services';
 import { UserQuickViewComponent } from './user-quick-view.component';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 describe('UserQuickViewComponent', () => {
   const luigiClient: LuigiClient = {} as LuigiClient;
   let component: UserQuickViewComponent;
   let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
-
+  let fixture: ComponentFixture<UserQuickViewComponent>;
   beforeEach(async () => {
     const mockService = {
       getAvatarImageUrl: jest.fn(),
@@ -20,9 +20,8 @@ describe('UserQuickViewComponent', () => {
       ],
     }).compileComponents();
 
-    component = TestBed.createComponent(
-      UserQuickViewComponent,
-    ).componentInstance;
+    fixture = TestBed.createComponent(UserQuickViewComponent);
+    component = fixture.componentInstance;
     mockAvatarProviderService = TestBed.inject(
       AvatarProviderService,
     ) as jest.Mocked<AvatarProviderService>;
@@ -32,7 +31,7 @@ describe('UserQuickViewComponent', () => {
     it('should provide user avatar url', async () => {
       // given
       const expectedUrl = 'stab';
-      component.user = { userId: 'C776' } as User;
+      fixture.componentRef.setInput('user', { userId: 'C776' } as User);
       mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(
         expectedUrl,
       );
@@ -51,7 +50,7 @@ describe('UserQuickViewComponent', () => {
   describe('getUserFullName', () => {
     it('should provide user full name', () => {
       // given
-      component.user = { firstName: 'John', lastName: 'Doe' } as User;
+      fixture.componentRef.setInput('user', { firstName: 'John', lastName: 'Doe' } as User);
 
       // then
       expect(component.getUserFullName()).toEqual('John Doe');

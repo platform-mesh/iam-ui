@@ -3,6 +3,7 @@
  * It can be retrieved from the luigi context data by using the property 'portalContext'.
  */
 export interface PortalContext extends Record<string, string> {
+  avatarImgUrl: string;
   accountSearchServiceApiUrl: string;
   accountsServiceApiUrl: string;
   automaticDServiceApiUrl: string;

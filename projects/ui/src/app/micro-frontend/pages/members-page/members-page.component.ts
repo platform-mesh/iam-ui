@@ -198,22 +198,28 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       combineLatest([
         this.memberService.currentEntity(),
         this.luigiContextService.contextObservable(),
-      ]).subscribe(([entity, context]) => {
-        this.currentEntity = entity;
-        this.currentUserId = context.context.userid;
-        this.iamClaimEntityUrl =
-          context.context.portalContext.iamClaimEntityUrl;
+      ]).subscribe({
+        next: ([entity, context]) => {
+          this.currentEntity = entity;
+          this.currentUserId = context.context.userid;
+          this.iamClaimEntityUrl =
+            context.context.portalContext.iamClaimEntityUrl;
 
-        if (entity && context.context?.entityContext) {
-          this.scopeDisplayName =
-            context.context.entityContext[entity]?.displayName ||
-            context.context.entityContext[entity]?.id ||
-            context.context.organization;
-          this.currentUserIsOwner =
-            context.context.entityContext[entity]?.policies?.includes(
-              'iamAdmin',
-            );
-        }
+          if (entity && context.context?.entityContext) {
+            this.scopeDisplayName =
+              context.context.entityContext[entity]?.displayName ||
+              context.context.entityContext[entity]?.id ||
+              context.context.organization;
+            this.currentUserIsOwner =
+              context.context.entityContext[entity]?.policies?.includes(
+                'iamAdmin',
+              );
+          }
+        },
+        error: (error) => {
+          console.error(error);
+          console.log('test');
+        },
       }),
     );
 

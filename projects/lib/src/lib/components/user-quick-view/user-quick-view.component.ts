@@ -1,13 +1,18 @@
 import { User } from '../../models';
-import { AvatarProviderService, LuigiClient } from '../../services';
+import {
+  AvatarProviderService,
+  IamLuigiContextService,
+  LuigiClient,
+} from '../../services';
 import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
-  ViewChild,
   inject,
+  input,
+  viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   ButtonComponent,
   CardComponent,
@@ -52,26 +57,28 @@ import { AvatarComponent } from '@fundamental-ngx/core/avatar';
 })
 export class UserQuickViewComponent {
   private avatarProviderService = inject(AvatarProviderService);
+  private iamLuigiContextService = inject(IamLuigiContextService);
   /**
    * The user data that will be shown in the quick view
    */
-  @Input() user!: User;
+  user = input.required<User>();
+  ctx = toSignal(this.iamLuigiContextService.contextObservable());
 
-  @ViewChild(PopoverBodyComponent)
-  popover!: PopoverBodyComponent;
+  popover = viewChild.required<PopoverBodyComponent>(PopoverBodyComponent);
 
   constructor(private luigiClient: LuigiClient) {}
 
   public getUserAvatarImgUrl(): Promise<string | undefined> {
-    return this.avatarProviderService.getAvatarImageUrl(this.user);
+    return this.avatarProviderService.getAvatarImageUrl(this.user(), this.ctx()?.context.portalContext.avatarImgUrl);
   }
 
   public getGithubURL(): string {
-    return `https://github.tools.sap/${this.user.userId}`;
+    return `https://github.tools.sap/${this.user().userId}`;
   }
 
   public getUserFullName(): string {
-    return `${this.user.firstName || ''} ${this.user.lastName || ''}`;
+    const user = this.user();
+    return `${user.firstName || ''} ${user.lastName || ''}`;
   }
 
   public callUserViaTeams(email: string, withVideo = false): void {
@@ -91,7 +98,7 @@ export class UserQuickViewComponent {
   public isOpenChange(isOpen: boolean) {
     if (isOpen) {
       setTimeout(() => {
-        this.popover._focusFirstTabbableElement();
+        this.popover()._focusFirstTabbableElement();
       }, 0);
     }
   }

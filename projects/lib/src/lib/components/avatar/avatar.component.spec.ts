@@ -1,11 +1,12 @@
 import { User } from '../../models';
-import { AvatarProviderService } from '../../services';
+import { AvatarProviderService, IamLuigiContextService } from '../../services';
 import { UserQuickViewComponent } from '../user-quick-view';
 import { AvatarComponent } from './avatar.component';
 import { AvatarMode } from './avatar.model';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AvatarModule } from '@fundamental-ngx/core';
 import { MockComponent, MockModule } from 'ng-mocks';
+import { of } from 'rxjs';
 
 jest.mock('../../services', () => ({
   AvatarProviderService: jest.fn(),
@@ -21,8 +22,26 @@ describe('AvatarComponent', () => {
       getAvatarImageUrl: jest.fn(),
     };
 
+    const mockIamLuigiContextService = {
+      contextObservable: jest.fn().mockReturnValue(
+        of({
+          context: {
+            portalContext: {
+              avatarImgUrl: 'https://avatar.url',
+            },
+          },
+        }),
+      ),
+    };
+
     void TestBed.configureTestingModule({
-      providers: [{ provide: AvatarProviderService, useValue: mockService }],
+      providers: [
+        { provide: AvatarProviderService, useValue: mockService },
+        {
+          provide: IamLuigiContextService,
+          useValue: mockIamLuigiContextService,
+        },
+      ],
       imports: [
         AvatarComponent,
         MockComponent(UserQuickViewComponent),
@@ -40,7 +59,11 @@ describe('AvatarComponent', () => {
 
   it('should set avatar mode as image and image url when Image fetch resolves', async () => {
     const expectedUrl = 'stab';
-    component.user = { firstName: 'John', userId: 'ICOS', lastName: 'Doe' };
+    fixture.componentRef.setInput('user', {
+      firstName: 'John',
+      userId: 'ICOS',
+      lastName: 'Doe',
+    });
 
     mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(expectedUrl);
 
@@ -101,7 +124,7 @@ describe('AvatarComponent', () => {
       user: User,
       serviceResponse: string | undefined,
     ): Promise<void> => {
-      component.user = user;
+      fixture.componentRef.setInput('user', user);
 
       mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(
         serviceResponse,
