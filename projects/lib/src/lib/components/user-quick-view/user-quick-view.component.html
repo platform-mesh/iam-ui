@@ -8,6 +8,7 @@
     <ng-content></ng-content>
   </fd-popover-control>
   <ng-template fdPopoverBody>
+    @let userObj = user();
     <div class="quick-view-card">
       <fd-card cardType="quickView">
         <fd-card-content>
@@ -16,23 +17,23 @@
               <fd-avatar
                 size="s"
                 [circle]="true"
-                [image]="getUserAvatarImgUrl()"
+                [image]="getUserAvatarImgUrl() | async"
                 alterIcon="content|default-icon"
                 >{{ getUserFullName() }}
               </fd-avatar>
               <fd-quick-view-subheader-title>
-                <a fd-link (click)="navigateToUserProfile(user.userId)">
+                <a fd-link (click)="navigateToUserProfile(userObj.userId)">
                   {{ getUserFullName() }}
                 </a>
               </fd-quick-view-subheader-title>
               <fd-quick-view-subheader-subtitle>
-                <span class="link" (click)="navigateToUserProfile(user.userId)">
-                  {{ user.userId }}
+                <span class="link" (click)="navigateToUserProfile(userObj.userId)">
+                  {{ userObj.userId }}
                 </span>
               </fd-quick-view-subheader-subtitle>
             </fd-quick-view-subheader>
 
-            @if (user.userId) {
+            @if (userObj.userId) {
               <fd-quick-view-group class="group">
                 <div class="group-title">User Profiles</div>
                 <a fd-link [href]="getGithubURL()" target="_blank">
@@ -42,12 +43,12 @@
               </fd-quick-view-group>
             }
 
-            @if (user.email) {
+            @if (userObj.email) {
               <fd-quick-view-group class="group">
                 <div class="group-title next">Contact</div>
                 <div>
                   <button
-                    (click)="emailUser(user.email)"
+                    (click)="emailUser(userObj.email)"
                     fd-button
                     fdType="transparent"
                     glyph="email"
@@ -56,7 +57,7 @@
                     title="Send email"
                   ></button>
                   <button
-                    (click)="chatWithUserViaTeams(user.email)"
+                    (click)="chatWithUserViaTeams(userObj.email)"
                     fd-button
                     fdType="transparent"
                     glyph="post"
@@ -65,7 +66,7 @@
                     title="Start a chat"
                   ></button>
                   <button
-                    (click)="callUserViaTeams(user.email)"
+                    (click)="callUserViaTeams(userObj.email)"
                     fd-button
                     fdType="transparent"
                     glyph="call"
@@ -74,7 +75,7 @@
                     title="Start an audio call"
                   ></button>
                   <button
-                    (click)="callUserViaTeams(user.email, true)"
+                    (click)="callUserViaTeams(userObj.email, true)"
                     fd-button
                     fdType="transparent"
                     glyph="video"

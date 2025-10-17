@@ -1,10 +1,10 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   Input,
   OnInit,
   ViewEncapsulation,
+  signal,
 } from '@angular/core';
 import {
   FacetComponent,
@@ -12,7 +12,6 @@ import {
   FacetGroupComponent,
 } from '@fundamental-ngx/core';
 import { ContentDensityDirective } from '@fundamental-ngx/core/content-density';
-import { LinkComponent } from '@fundamental-ngx/core/link';
 import { TextComponent } from '@fundamental-ngx/core/text';
 import { ButtonComponent } from '@fundamental-ngx/platform/button';
 import { LuigiClient } from '@luigi-project/client/luigi-element';
@@ -37,7 +36,6 @@ import {
     ContentDensityDirective,
     FacetContentComponent,
     TextComponent,
-    LinkComponent,
     DashboardComponent,
   ],
   templateUrl: './user-overview-header.component.html',
@@ -46,7 +44,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserOverviewHeaderComponent implements OnInit {
-  user?: User;
+  user = signal<User | undefined>(undefined);
   header: Header = {
     title: 'User Profile',
     subtitle: '',
@@ -72,14 +70,22 @@ export class UserOverviewHeaderComponent implements OnInit {
   constructor(
     private luigiContextService: IamLuigiContextService,
     private userService: UserService,
-    private cdRef: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.userService.getUser(this.ctx?.profileUserId ?? '').subscribe({
       next: (user) => {
-        this.user = user;
-        this.cdRef.markForCheck();
+        this.user.set(user);
+      },
+      error: (error) => {
+        this.user.set({
+          userId: this.ctx?.profileUserId,
+          invitationOutstanding: false,
+          email: 'test@test.com',
+          firstName: 'First',
+          lastName: 'Last',
+          title: 'Title',
+        });
       },
     });
   }
@@ -108,8 +114,9 @@ export class UserOverviewHeaderComponent implements OnInit {
   }
 
   getUserContactsHeaderText(): string {
-    return this.user?.firstName
-      ? `See ${this.user.firstName} on:`
+    const user = this.user();
+    return user?.firstName
+      ? `See ${user?.firstName} on:`
       : 'Check on:';
   }
 }

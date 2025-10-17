@@ -1,6 +1,8 @@
 import { MembersSidebarComponent } from './members-sidebar.component';
 import { ChangeDetectorRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
+  AvatarProviderService,
   IamLuigiContextService,
   LuigiClient,
   MemberService,
@@ -15,8 +17,9 @@ describe('MembersSidebarComponent', () => {
   let memberService: MemberService;
   let cdr: ChangeDetectorRef;
   let luigiClient: LuigiClient;
+  let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     luigiContextService = MockService(IamLuigiContextService);
 
     memberService = MockService(MemberService, {
@@ -37,13 +40,25 @@ describe('MembersSidebarComponent', () => {
       }),
     });
 
-    component = new MembersSidebarComponent(
-      luigiContextService,
-      memberService,
-      cdr,
-    );
+    const mockAvatarService = {
+      getAvatarImageUrl: jest.fn(),
+    };
 
+    await TestBed.configureTestingModule({
+      providers: [
+        { provide: AvatarProviderService, useValue: mockAvatarService },
+        { provide: IamLuigiContextService, useValue: luigiContextService },
+        { provide: MemberService, useValue: memberService },
+        { provide: ChangeDetectorRef, useValue: cdr },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(MembersSidebarComponent);
+    component = fixture.componentInstance;
     component.LuigiClient = luigiClient as any;
+    mockAvatarProviderService = TestBed.inject(
+      AvatarProviderService,
+    ) as jest.Mocked<AvatarProviderService>;
   });
 
   it('should get members on init', () => {
@@ -77,10 +92,11 @@ describe('MembersSidebarComponent', () => {
       .mockReturnValue(of({ users: [{ user: expectedUsers }] }));
     component.loading = true;
 
+    const detectChangesSpy = jest.spyOn(component['cdr'], 'detectChanges');
     component.getUsersOfEntity();
 
     expect(component.loading).toBe(false);
     expect(component.members).toEqual([expectedUsers]);
-    expect(cdr.detectChanges).toHaveBeenCalled();
+    expect(detectChangesSpy).toHaveBeenCalled();
   });
 });

@@ -1,10 +1,10 @@
 @if (!disablePopover) {
-  <app-user-quick-view [user]="user">
+  <app-user-quick-view [user]="user()">
     <ng-container *ngTemplateOutlet="avatarTemplate"></ng-container>
   </app-user-quick-view>
 }
 
-@if (disablePopover) {
+@if (disablePopover()) {
   <ng-container *ngTemplateOutlet="avatarTemplate"></ng-container>
 }
 
@@ -12,7 +12,7 @@
   @switch (avatarMode) {
     @case (allAvatarModes.Image) {
       <fd-avatar
-        [size]="size"
+        [size]="size()"
         [image]="imageUrl"
         [circle]="true"
         [colorAccent]="6"
@@ -22,11 +22,11 @@
 
     @case (allAvatarModes.Name) {
       <fd-avatar
-        [size]="size"
+        [size]="size()"
         [circle]="true"
         [colorAccent]="6"
-        label="{{ user?.firstName?.toUpperCase() }} {{
-          user?.lastName?.toUpperCase()
+        label="{{ user().firstName?.toUpperCase() }} {{
+          user().lastName?.toUpperCase()
         }}"
       >
       </fd-avatar>
@@ -34,7 +34,7 @@
 
     @case (allAvatarModes.GlyphIcon) {
       <fd-avatar
-        [size]="size"
+        [size]="size()"
         [placeholder]="true"
         glyph="person-placeholder"
         [circle]="true"
