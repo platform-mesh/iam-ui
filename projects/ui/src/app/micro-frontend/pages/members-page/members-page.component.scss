@@ -19,6 +19,16 @@
   width: 100%;
 }
 
+.name-link {
+  pointer-events: all;
+  color: var(--sapLinkColor);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .member-extra-information {
   color: var(--sapNeutralTextColor);
 }

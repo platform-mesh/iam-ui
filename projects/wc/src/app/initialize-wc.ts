@@ -10,7 +10,7 @@ export function initializeWC() {
   registerLuigiWebComponents(
     {
       'members-sidebar': MembersSidebarComponent,
-      'user-overview-header': UserOverviewHeaderComponent,
+      'user-overview': UserOverviewHeaderComponent,
     },
     injector,
     source,

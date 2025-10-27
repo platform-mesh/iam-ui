@@ -8,14 +8,14 @@ export class ClaimProjectService {
   constructor(private luigiContextService: IamLuigiContextService) {}
 
   public claimProject(): void {
-    const projectId = this.luigiContextService.getContext().projectId;
+    const projectId = this.luigiContextService.getContext()['projectId'] ?? '';
     const frameBaseUrl = this.luigiContextService.getContext()[
       'frameBaseUrl'
     ] as string;
     const projectUrl = `${frameBaseUrl}/projects/${projectId}`;
 
     const url = new JiraTicketRequest()
-      .withDxpProject(projectId ?? '')
+      .withDxpProject(projectId)
       .withDxpProjectUrl(projectUrl)
       .create();
     window.open(url.href, '_blank');

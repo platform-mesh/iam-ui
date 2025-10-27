@@ -1,3 +1,4 @@
+import { ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE } from '../members-page/string-variables';
 import {
   AddMemberDialogComponent,
   DropDownValue,
@@ -8,11 +9,13 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
+import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
 import {
   LuigiClient,
   LuigiDialogUtil,
   Member,
   MemberService,
+  NotificationService,
   Role,
   SearchService,
   SuggestedUser,
@@ -32,6 +35,7 @@ describe('AddMemberDialogComponent', () => {
   let mockGetAvailableRoles: Subject<Role[]>;
   let mockGetUsers: Subject<User[]>;
   let mockMembersService: Partial<MemberService>;
+  let mockNotificationService: Partial<NotificationService>;
   let mockLuigiClient: Partial<LuigiClient>;
 
   const mockUserA: SuggestedUser = {
@@ -66,6 +70,7 @@ describe('AddMemberDialogComponent', () => {
     mockAddMembersToProject = new Subject<Member[]>();
     mockGetAvailableRoles = new Subject<Role[]>();
     mockGetUsers = new Subject<User[]>();
+    mockNotificationService = { openErrorStrip: jest.fn() };
     mockMembersService = {
       addMembersWithFga: jest.fn().mockReturnValue(mockAddMembersToProject),
       currentEntity: jest.fn().mockReturnValue(of('project')),
@@ -94,6 +99,7 @@ describe('AddMemberDialogComponent', () => {
             .mockReturnValue(of(mockSuggestedUserResponse)),
         }),
         MockProvider(MemberService, mockMembersService),
+        MockProvider(NotificationService, mockNotificationService),
         MockProvider(TenantInfoService, {
           tenantInfo: jest
             .fn()
@@ -111,6 +117,21 @@ describe('AddMemberDialogComponent', () => {
 
     mockGetAvailableRoles.next(allAvailableRoles);
   });
+
+  it('should call filter after debounce when searchInput emits', fakeAsync(() => {
+    const filterSpy = jest.spyOn(component, 'filter');
+
+    component.ngOnInit();
+
+    component.searchInput.next('hello');
+
+    expect(filterSpy).not.toHaveBeenCalled();
+
+    tick(500);
+
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith('hello');
+  }));
 
   describe('when roles are emitted', () => {
     it('should initialize availableRoles and defaultRole is member', () => {
@@ -167,11 +188,12 @@ describe('AddMemberDialogComponent', () => {
       [[mockMembersA], mockUserA.userId, []],
       [[mockMembersA], mockUserB.userId, [mockMembersA]],
       [[mockMembersA, mockMembersB], mockUserB.userId, [mockMembersA]],
+      [[mockMembersA, mockMembersB], undefined, [mockMembersA, mockMembersB]],
     ])(
       'removes users from selectedMembers for passed userId',
       (
         selectedMembers: Member[],
-        userIdToDelete: string,
+        userIdToDelete: string | undefined,
         expectedMembers: Member[],
       ) => {
         component.selectedMembers = selectedMembers;
@@ -188,11 +210,12 @@ describe('AddMemberDialogComponent', () => {
       [[mockMembersA], mockUserA.email, []],
       [[mockMembersA], mockUserB.email, [mockMembersA]],
       [[mockMembersA, mockMembersB], mockUserB.email, [mockMembersA]],
+      [[mockMembersA, mockMembersB], undefined, [mockMembersA, mockMembersB]],
     ])(
       'removes users from selectedInvitees for passed email',
       (
         selectedInvitees: Member[],
-        emailToDelete: string,
+        emailToDelete: string | undefined,
         expectedSelectedInvitees: Member[],
       ) => {
         component.selectedInvitees = selectedInvitees;
@@ -202,6 +225,69 @@ describe('AddMemberDialogComponent', () => {
         expect(component.selectedInvitees).toEqual(expectedSelectedInvitees);
       },
     );
+  });
+
+  it('should push lowercased value to searchInput', fakeAsync(() => {
+    const nextSpy = jest.spyOn(component.searchInput, 'next');
+
+    component.inputChange('HelloWorld');
+
+    expect(nextSpy).toHaveBeenCalledWith('helloworld');
+  }));
+
+  describe('onRoleChange', () => {
+    let potentialMember: Member;
+    let eventMock: MultiComboboxSelectionChangeEvent;
+    let notificationService: NotificationService;
+
+    beforeEach(() => {
+      potentialMember = {
+        user: {
+          userId: 'u1',
+          email: 'u1@sap.com',
+          firstName: '',
+          lastName: '',
+        },
+        roles: [defaultRole],
+      };
+
+      eventMock = {
+        selectedItems: [] as Role[],
+        source: { setValue: jest.fn() },
+      } as unknown as MultiComboboxSelectionChangeEvent;
+
+      notificationService = TestBed.inject(NotificationService);
+      jest
+        .spyOn(notificationService, 'openErrorStrip')
+        .mockImplementation(jest.fn());
+    });
+
+    it('should update roles when selectedItems is not empty', () => {
+      const newRoles: Role[] = [ownerRole];
+      eventMock.selectedItems = newRoles;
+
+      component.onRoleChange(
+        eventMock as unknown as MultiComboboxSelectionChangeEvent,
+        potentialMember,
+      );
+
+      expect(potentialMember.roles).toEqual(newRoles);
+      expect(mockNotificationService.openErrorStrip).not.toHaveBeenCalled();
+      expect(eventMock.source.setValue).not.toHaveBeenCalled();
+    });
+
+    it('should call error and restore roles when selectedItems is empty', () => {
+      const oldRoles = [...potentialMember.roles];
+      eventMock.selectedItems = [];
+
+      component.onRoleChange(eventMock, potentialMember);
+
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
+      );
+      expect(eventMock.source.setValue).toHaveBeenCalledWith(oldRoles);
+      expect(potentialMember.roles).toEqual(oldRoles);
+    });
   });
 
   describe('when filterUsers is called', () => {

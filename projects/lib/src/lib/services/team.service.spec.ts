@@ -1,4 +1,3 @@
-import { NodeContext } from '../models';
 import { AccountSearchResultItem } from '../models/search/account-search-result.item';
 import { SearchResult } from '../models/search/search.result';
 import {
@@ -87,6 +86,48 @@ describe('TeamService', () => {
         '',
         2,
         500,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'team',
+        undefined,
+      );
+      expect(searchResponse).toEqual([searchTeamsResult]);
+    }));
+    it('should query data using default search params', fakeAsync(() => {
+      // Arrange
+      const searchTeamsResult: Partial<AccountSearchResultItem> = {
+        id: 'teamId',
+        displayName: 'team name',
+      };
+      const query = { items: [searchTeamsResult] };
+      let searchResponse: AccountSearchResultItem[] = [];
+
+      // Act
+      teamService
+        .searchTeams({
+          searchTerm: undefined,
+          currentPage: undefined,
+          itemsPerPage: undefined,
+        })
+        .subscribe((response) => (searchResponse = response));
+      accountSearchSubject.next(query as never);
+      accountSearchSubject.complete();
+      tick();
+
+      // Assert
+      expect(accSearchMock.search).toHaveBeenCalledTimes(1);
+      expect(accSearchMock.search).toHaveBeenCalledWith(
+        '',
+        1,
+        100,
         undefined,
         undefined,
         undefined,

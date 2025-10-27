@@ -1,23 +1,48 @@
 import { User } from '../../models';
-import { imageLoadable } from '../image-loadable';
+import { AvatarProviderService, IamLuigiContextService } from '../../services';
 import { UserQuickViewComponent } from '../user-quick-view';
 import { AvatarComponent } from './avatar.component';
 import { AvatarMode } from './avatar.model';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AvatarModule } from '@fundamental-ngx/core';
 import { MockComponent, MockModule } from 'ng-mocks';
+import { of } from 'rxjs';
 
-jest.mock('../image-loadable', () => ({
-  imageLoadable: jest.fn(),
+jest.mock('../../services', () => ({
+  AvatarProviderService: jest.fn(),
+  IamLuigiContextService: jest.fn(),
 }));
 
 describe('AvatarComponent', () => {
   let component: AvatarComponent;
   let fixture: ComponentFixture<AvatarComponent>;
+  let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
 
   beforeEach(() => {
+    const mockService = {
+      getAvatarImageUrl: jest.fn(),
+    };
+
+    const mockIamLuigiContextService = {
+      contextObservable: jest.fn().mockReturnValue(
+        of({
+          context: {
+            portalContext: {
+              avatarImgUrl: 'https://avatar.url',
+            },
+          },
+        }),
+      ),
+    };
+
     void TestBed.configureTestingModule({
-      providers: [],
+      providers: [
+        { provide: AvatarProviderService, useValue: mockService },
+        {
+          provide: IamLuigiContextService,
+          useValue: mockIamLuigiContextService,
+        },
+      ],
       imports: [
         AvatarComponent,
         MockComponent(UserQuickViewComponent),
@@ -27,14 +52,25 @@ describe('AvatarComponent', () => {
 
     fixture = TestBed.createComponent(AvatarComponent);
     component = fixture.componentInstance;
+
+    // Set required inputs
+    fixture.componentRef.setInput('size', 's');
+    fixture.componentRef.setInput('user', {
+      firstName: 'John',
+      userId: 'ICOS',
+      lastName: 'Doe',
+    });
+
+    mockAvatarProviderService = TestBed.inject(
+      AvatarProviderService,
+    ) as jest.Mocked<AvatarProviderService>;
     fixture.detectChanges();
   });
 
   it('should set avatar mode as image and image url when Image fetch resolves', async () => {
-    const expectedUrl = 'https://avatars.wdf.sap.corp/avatar/ICOS';
-    component.user = { firstName: 'John', userId: 'ICOS', lastName: 'Doe' };
+    const expectedUrl = 'stab';
 
-    (imageLoadable as jest.Mock).mockResolvedValue(true);
+    mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(expectedUrl);
 
     await component.setupUserAvatar();
 
@@ -47,43 +83,43 @@ describe('AvatarComponent', () => {
       'fetch to get avatar image resolves',
       AvatarMode.Image,
       { firstName: 'John', userId: 'ICOS', lastName: 'Doe' },
-      true,
+      'stab',
     ],
     [
       'fetch to get avatar image rejects and user has firstName',
       AvatarMode.Name,
       { firstName: 'John', userId: 'ICOS', lastName: '' },
-      false,
+      undefined,
     ],
     [
       'fetch to get avatar image rejects and user has lastName',
       AvatarMode.Name,
       { firstName: '', userId: 'ICOS', lastName: 'Doe' },
-      false,
+      undefined,
     ],
     [
       'fetch to get avatar image rejects and user has firstName and lastName',
       AvatarMode.Name,
       { firstName: 'John', userId: 'ICOS', lastName: 'Doe' },
-      false,
+      undefined,
     ],
     [
       'fetch to get avatar image rejects and user does not have firstName or lastName',
       AvatarMode.GlyphIcon,
       { firstName: '', userId: 'ICOS', lastName: '' },
-      false,
+      undefined,
     ],
     [
       'user does not have id but has firstName or lastName',
       AvatarMode.Name,
       { firstName: 'John', userId: '', lastName: 'Doe' },
-      true,
+      undefined,
     ],
     [
       'user does not have id neither firstName or lastName',
       AvatarMode.GlyphIcon,
       { firstName: '', userId: '', lastName: '' },
-      true,
+      undefined,
     ],
   ])(
     'when %, sets avatar mode as %s',
@@ -91,11 +127,13 @@ describe('AvatarComponent', () => {
       testDesc: string,
       expectedAvatarMode: AvatarMode,
       user: User,
-      fetchResponse: boolean,
+      serviceResponse: string | undefined,
     ): Promise<void> => {
-      component.user = user;
+      fixture.componentRef.setInput('user', user);
 
-      (imageLoadable as jest.Mock).mockResolvedValue(fetchResponse);
+      mockAvatarProviderService.getAvatarImageUrl.mockResolvedValue(
+        serviceResponse,
+      );
 
       await component.setupUserAvatar();
 

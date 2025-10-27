@@ -1,15 +1,16 @@
 import { User } from '../../models';
-import { imageLoadable } from '../image-loadable';
+import { AvatarProviderService, IamLuigiContextService } from '../../services';
 import { UserQuickViewComponent } from '../user-quick-view';
 import { AvatarMode } from './avatar.model';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
-  Input,
-  OnChanges,
-  SimpleChanges,
+  effect,
+  inject,
+  input,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Size } from '@fundamental-ngx/core';
 import { AvatarComponent as AvatarComponent_1 } from '@fundamental-ngx/core/avatar';
 
@@ -20,56 +21,49 @@ import { AvatarComponent as AvatarComponent_1 } from '@fundamental-ngx/core/avat
   standalone: true,
   imports: [UserQuickViewComponent, NgTemplateOutlet, AvatarComponent_1],
 })
-export class AvatarComponent implements OnChanges {
+export class AvatarComponent {
+  private avatarProviderService = inject(AvatarProviderService);
+  private iamLuigiContextService = inject(IamLuigiContextService);
   /**
    * The size of the avatar component.
    */
-  @Input() size!: Size;
+  size = input.required<Size>();
   /**
    * The user data used to generate the avatar
    */
-  @Input() user!: User;
+  user = input.required<User>();
   /**
    * Determines whether to disable the popover when clicking on the avatar
    */
-  @Input() disablePopover = false;
+  disablePopover = input<boolean>(false);
+
+  ctx = toSignal(this.iamLuigiContextService.contextObservable());
 
   imageUrl!: string;
   avatarMode: AvatarMode = AvatarMode.GlyphIcon;
   allAvatarModes = AvatarMode;
 
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['user']?.currentValue !== changes['user']?.previousValue) {
+  constructor(private cdr: ChangeDetectorRef) {
+    effect(() => {
       this.setupUserAvatar();
-    }
+    });
   }
 
   async setupUserAvatar(): Promise<void> {
-    const avatarImageUrl = await this.getAvatarImageUrl(this.user);
+    const user = this.user();
+    const ctx = this.ctx();
+    const avatarImageUrl =
+      await this.avatarProviderService.getAvatarImageUrl(user, ctx?.context.portalContext.avatarImgUrl);
+
     if (avatarImageUrl) {
       this.imageUrl = avatarImageUrl;
       this.avatarMode = AvatarMode.Image;
-    } else if (this.user?.firstName || this.user?.lastName) {
+    } else if (user.firstName || user.lastName) {
       this.avatarMode = AvatarMode.Name;
     } else {
       this.avatarMode = AvatarMode.GlyphIcon;
     }
 
     this.cdr.detectChanges();
-  }
-
-  private async getAvatarImageUrl(user: User): Promise<string | undefined> {
-    if (!user?.userId) {
-      return undefined;
-    }
-
-    const url = `https://avatars.wdf.sap.corp/avatar/${user.userId}`;
-    if (await imageLoadable(url)) {
-      return url;
-    } else {
-      return undefined;
-    }
   }
 }

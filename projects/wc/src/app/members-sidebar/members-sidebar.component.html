@@ -33,7 +33,7 @@
                 [circle]="true"
                 [clickable]="true"
                 [colorAccent]="6"
-                [image]="'https://avatars.wdf.sap.corp/avatar/' + member.userId"
+                [image]="getUserAvatarImgUrl(member) | async"
                 [label]="member.firstName + ' ' + member.lastName"
                 [title]="member.firstName + ' ' + member.lastName"
                 (avatarClicked)="navigateToUser(member.userId!)"

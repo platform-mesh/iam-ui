@@ -3,7 +3,7 @@ import { ListItem } from './models/list-item';
 import { SvgConfigType } from './models/svg-config-type';
 import { sapIllusDotAvatarAlternate } from './svg/dot-avatar-alternate';
 import { sapIllusDotNoApplicationsAlternate } from './svg/dot-no-applications-alternate';
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
@@ -11,10 +11,22 @@ describe('DashboardListComponent', () => {
   let component: DashboardListComponent;
   let fixture: ComponentFixture<DashboardListComponent>;
   let componentRef: ComponentRef<DashboardListComponent>;
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined as any);
+  });
+
+  afterAll(() => {
+    consoleErrorSpy.mockRestore();
+  });
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardListComponent],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardListComponent);
@@ -22,6 +34,8 @@ describe('DashboardListComponent', () => {
     componentRef = fixture.componentRef;
     componentRef.setInput('list', []);
     componentRef.setInput('noItemTitle', 'there are no foo items');
+    componentRef.setInput('showByline', false);
+    componentRef.setInput('svgConfigType', SvgConfigType.AvatarAlternate);
     fixture.detectChanges();
   });
 
