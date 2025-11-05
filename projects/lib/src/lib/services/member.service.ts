@@ -1,265 +1,227 @@
-import { GrantedUsers, Member, Role } from '../authorization';
-import { User } from '../models';
+import { Member, Role, UserConnection } from '../authorization';
 import {
-  ASSIGN_ROLE_BINDINGS,
-  GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
-  LEAVE_ENTITY,
-  REMOVE_FROM_ENTITY,
-  USERS_OF_ENTITY,
+  NodeContext,
+  RoleAssignmentResult,
+  RoleRemovalResult,
+  User,
+} from '../models';
+import { PageInput, ResourceContext, SortByInput } from '../models/resource';
+import {
+  ASSIGN_ROLES_TO_USERS,
+  KNOWN_USERS,
+  ME,
+  REMOVE_ROLE,
+  ROLES,
+  USER,
+  USERS,
 } from '../queries/iam-queries';
 import { IamApolloClientService } from '../services/apollo';
-import {
-  IContextMessage,
-  IamLuigiContextService,
-  LuigiClient,
-} from '../services/luigi';
-import { getEntityId } from './entity-id';
-import { InviteService } from './invite.service';
+import { IamLuigiContextService, LuigiClient } from '../services/luigi';
 import { Injectable } from '@angular/core';
-import { CollectionSort } from '@fundamental-ngx/platform';
 import { Observable, combineLatest, first, forkJoin, mergeMap } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
-interface RemoveFromEntityResponse {
-  removeFromEntity: boolean;
-}
-
-interface LeaveEntityResponse {
-  leaveEntity: boolean;
+export interface UIRole extends Role {
+  label: string;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class MemberService {
-  private readonly entity: Observable<string>;
-
   constructor(
     private apolloClientService: IamApolloClientService,
-    private luigiClient: LuigiClient,
     private luigiContextService: IamLuigiContextService,
-    private inviteService: InviteService,
-  ) {
-    this.entity = this.luigiContextService.contextObservable().pipe(
-      filter(
-        (ctx: IContextMessage) =>
-          ctx.context?.parentNavigationContexts !== undefined ||
-          !!ctx.context?.entityType,
-      ),
-      map((ctx: IContextMessage) => {
-        const parentNavigationContexts = ctx.context.parentNavigationContexts;
-        return ctx.context.entityType || parentNavigationContexts[0];
-      }),
-    );
-  }
+  ) {}
 
-  usersOfEntity(
+  users(
     cfg: {
-      limit?: number;
-      page?: number;
-      showInvitees?: boolean;
-      searchTerm?: string;
-      roles?: Role[];
-      sortBy?: CollectionSort;
+      roleFilters?: string[];
+      sortBy?: SortByInput;
+      page?: PageInput;
     } = {},
-  ): Observable<GrantedUsers> {
-    cfg = { limit: 10, page: 1, showInvitees: false, ...cfg };
+  ): Observable<UserConnection> {
+    const context = this.luigiContextService.getContext();
+
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
-      this.entity,
     ]).pipe(
-      first(),
-      mergeMap(([apollo, ctx, entity]) =>
-        apollo.query<{ usersOfEntity: GrantedUsers }>({
-          query: USERS_OF_ENTITY,
+      mergeMap(([apollo, ctx]) =>
+        apollo.query<{ users: UserConnection }>({
+          query: USERS,
           variables: {
-            tenantId: ctx.context.tenantId || ctx.context.organizationId,
-            entity: {
-              entityType: entity,
-              entityId: getEntityId(entity, ctx.context),
-            },
-            limit: cfg.limit,
-            page: cfg.page,
-            showInvitees: cfg.showInvitees,
-            searchTerm: cfg.searchTerm,
-            roles: (cfg.roles || []).map((role) => ({
-              displayName: role.displayName,
-              technicalName: role.technicalName,
-            })),
+            context: this.getResourceContext(ctx.context),
+            roleFilters: cfg.roleFilters,
             sortBy: cfg.sortBy,
+            page: cfg.page,
           },
           fetchPolicy: 'no-cache',
         }),
       ),
       map((apolloResponse) => {
-        return apolloResponse.data.usersOfEntity;
+        return apolloResponse.data.users;
       }),
     );
   }
 
-  getAvailableRolesForEntityType(): Observable<Role[]> {
+  knownUsers(
+    cfg: {
+      roleFilters?: string[];
+      sortBy?: SortByInput;
+      page?: PageInput;
+    } = {},
+  ): Observable<UserConnection> {
+    return this.apolloClientService.apollo().pipe(
+      mergeMap((apollo) =>
+        apollo.query<{ knownUsers: UserConnection }>({
+          query: KNOWN_USERS,
+          variables: {
+            sortBy: cfg.sortBy,
+            page: cfg.page,
+          },
+          fetchPolicy: 'no-cache',
+        }),
+      ),
+      map((apolloResponse) => {
+        return apolloResponse.data.knownUsers;
+      }),
+    );
+  }
+
+  user(userId: string): Observable<User> {
+    return this.apolloClientService.apollo().pipe(
+      mergeMap((apollo) =>
+        apollo.query<{ user: User }>({
+          query: USER,
+          variables: {
+            userId,
+          },
+          fetchPolicy: 'no-cache',
+        }),
+      ),
+      map((apolloResponse) => {
+        return apolloResponse.data.user;
+      }),
+    );
+  }
+
+  me(): Observable<User> {
+    return this.apolloClientService.apollo().pipe(
+      mergeMap((apollo) =>
+        apollo.query<{ user: User }>({
+          query: ME,
+          fetchPolicy: 'no-cache',
+        }),
+      ),
+      map((apolloResponse) => {
+        return apolloResponse.data.user;
+      }),
+    );
+  }
+
+  roles(): Observable<UIRole[]> {
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
-      this.entity,
     ]).pipe(
-      take(1),
-      mergeMap(([apollo, ctx, entity]) => {
-        return apollo.query<{ availableRolesForEntityType: Role[] }>({
-          query: GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
+      mergeMap(([apollo, ctx]) => {
+        return apollo.query<{ roles: Role[] }>({
+          query: ROLES,
           variables: {
-            tenantId: ctx.context.tenantId || ctx.context.organizationId,
-            entityType: entity,
+            context: this.getResourceContext(ctx.context),
           },
           fetchPolicy: 'no-cache',
         });
       }),
       map((apolloResponse) => {
-        return apolloResponse.data.availableRolesForEntityType;
-      }),
-    );
-  }
-
-  addMembersWithFga(members: Member[]): Observable<void> {
-    const roleSettingObservables = members.map((member) =>
-      this.setMemberRoles(member.user, member.roles, true),
-    );
-
-    return forkJoin(roleSettingObservables).pipe(map(() => undefined));
-  }
-
-  /**
-   * Removes the given user from the current entity (project or team).
-   * The current entity is determined by the Luigi context.
-   */
-  removeFromEntity(user: User): Observable<boolean> {
-    return combineLatest([
-      this.apolloClientService.apollo(),
-      this.luigiContextService.contextObservable(),
-      this.entity,
-    ]).pipe(
-      first(),
-      mergeMap(([apollo, ctx, entity]) => {
-        if (user.userId) {
-          return apollo
-            .mutate<RemoveFromEntityResponse>({
-              mutation: REMOVE_FROM_ENTITY,
-              variables: {
-                tenantId: ctx.context.tenantId || ctx.context.organizationId,
-                entityType: entity,
-                entityId: getEntityId(entity, ctx.context),
-                userId: user.userId,
-              },
-            })
-            .pipe(
-              map(
-                (apolloResponse) =>
-                  apolloResponse.data?.removeFromEntity ?? false,
-              ),
-            );
-        }
-        return this.inviteService.deleteInvite(
-          apollo,
-          ctx.context,
-          entity,
-          user,
+        return apolloResponse.data.roles.map(
+          (r): UIRole => ({
+            label: r.displayName || '',
+            ...r,
+          }),
         );
       }),
     );
   }
 
-  /**
-   * Initiates a leave request for the current user of the current entity (project or team).
-   * The current entity is determined by the Luigi context.
-   * The current user is determined by the subject of the Jwt WebToken  send with the request to iam-service.
-   */
-  leaveEntity(): Observable<void> {
-    return combineLatest([
-      this.apolloClientService.apollo(),
-      this.luigiContextService.contextObservable(),
-      this.entity,
-    ]).pipe(
-      first(),
-      mergeMap(([apollo, ctx, entity]) =>
-        apollo.mutate<LeaveEntityResponse>({
-          mutation: LEAVE_ENTITY,
-          variables: {
-            tenantId: ctx.context.tenantId || ctx.context.organizationId,
-            entityType: entity,
-            entityId: getEntityId(entity, ctx.context),
-          },
-        }),
-      ),
-      map(() => undefined),
-    );
-  }
-
-  /**
-   * Assigns the given roles to the given user for the current entity (project or team).
-   * @param user
-   * @param roles
-   * @param notifyInvitedMember
-   */
-  setMemberRoles(
+  assignRolesToUser(
     user: User,
     roles: Role[],
-    notifyInvitedMember: boolean,
-  ): Observable<void> {
-    const rolesTechnicalNames = roles.map((role) => role.technicalName);
+  ): Observable<RoleAssignmentResult | undefined> {
+    const rolesTechnicalNames = roles.map((role) => role.id);
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
-      this.entity,
     ]).pipe(
       first(),
-      mergeMap(([apollo, ctx, entity]) => {
-        if (user.userId) {
-          return apollo.mutate<boolean>({
-            mutation: ASSIGN_ROLE_BINDINGS,
-            variables: {
-              tenantId: ctx.context.tenantId || ctx.context.organizationId,
-              entityId: getEntityId(entity, ctx.context),
-              entityType: entity,
-              input: [
-                {
-                  userId: user.userId,
-                  roles: rolesTechnicalNames,
-                },
-              ],
-            },
-          });
-        } else {
-          return this.inviteService.invite(
-            apollo,
-            ctx.context,
-            entity,
-            user,
-            rolesTechnicalNames,
-            notifyInvitedMember,
-          );
-        }
+      mergeMap(([apollo, ctx]) => {
+        return apollo.mutate<{ assignRolesToUsers: RoleAssignmentResult }>({
+          mutation: ASSIGN_ROLES_TO_USERS,
+          variables: {
+            context: this.getResourceContext(ctx.context),
+            changes: [
+              {
+                userId: user.userId,
+                roles: rolesTechnicalNames,
+              },
+            ],
+          },
+        });
       }),
-      map(() => undefined),
+      map((response) => {
+        return response.data?.assignRolesToUsers;
+      }),
     );
   }
 
-  /**
-   * Returns the current entity type (project or team).
-   * The current entity type is determined by the Luigi context.
-   */
-  currentEntity(): Observable<string> {
-    return this.entity;
+  removeRole(
+    user: User,
+    role: Role,
+  ): Observable<RoleRemovalResult | undefined> {
+    return combineLatest([
+      this.apolloClientService.apollo(),
+      this.luigiContextService.contextObservable(),
+    ]).pipe(
+      first(),
+      mergeMap(([apollo, ctx]) => {
+        return apollo
+          .mutate<{ removeRole: RoleRemovalResult }>({
+            mutation: REMOVE_ROLE,
+            variables: {
+              context: this.getResourceContext(ctx.context),
+              input: { userId: user.userId, role: role.id },
+            },
+          })
+          .pipe(map((response) => response.data?.removeRole));
+      }),
+    );
   }
 
-  /**
-   * Navigates to the list of projects or teams depending on the current entity type.
-   * The current entity type is determined by the Luigi context.
-   */
-  navigateToList() {
-    this.entity.pipe(first()).subscribe((entity) => {
-      const routePath = entity === 'project' ? 'projects' : 'teams';
-      this.luigiClient.linkManager().navigate(`/${routePath}`);
-    });
+  private getResourceContext(context: NodeContext): ResourceContext {
+    const group =
+      context.resourceDefinition.group !== 'core.platform-mesh.io'
+        ? ''
+        : context.resourceDefinition.group;
+
+    const accountPath =
+      context.resourceDefinition.kind === 'Account'
+        ? context.kcpPath?.replace(`:${context.entityName}`, '')
+        : context.kcpPath;
+
+    const namespace =
+      context.resourceDefinition.scope === 'Namespaced'
+        ? context.namespaceId
+        : undefined;
+
+    return {
+      group,
+      kind: context.resourceDefinition.kind,
+      resource: {
+        name: context.entityName,
+        namespace,
+      },
+      accountPath,
+    };
   }
 }

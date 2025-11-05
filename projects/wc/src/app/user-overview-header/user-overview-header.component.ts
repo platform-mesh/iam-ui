@@ -79,12 +79,10 @@ export class UserOverviewHeaderComponent implements OnInit {
       },
       error: (error) => {
         this.user.set({
-          userId: this.ctx?.profileUserId,
-          invitationOutstanding: false,
+          userId: this.ctx?.userId,
           email: 'test@test.com',
           firstName: 'First',
           lastName: 'Last',
-          title: 'Title',
         });
       },
     });
@@ -115,8 +113,6 @@ export class UserOverviewHeaderComponent implements OnInit {
 
   getUserContactsHeaderText(): string {
     const user = this.user();
-    return user?.firstName
-      ? `See ${user?.firstName} on:`
-      : 'Check on:';
+    return user?.firstName ? `See ${user?.firstName} on:` : 'Check on:';
   }
 }

@@ -4,10 +4,17 @@ export interface EntityConfig {
   contextProperty: string;
 }
 
+export interface ResourceDefinition {
+  group: string;
+  kind: string;
+  scope: string;
+  namespace?: string;
+}
+
 // eslint-disable-line @typescript-eslint/no-explicit-any
 export interface NodeContext extends Record<string, any> {
   token: string;
-  userid: string;
+  userId: string;
   tenantId: string;
   organization: string;
   organizationId: string; // to be removed once migrated to the organizationId
@@ -20,6 +27,10 @@ export interface NodeContext extends Record<string, any> {
   componentId?: string;
   profileUserId?: string;
   analyticsTrackerConfig: AnalyzerTrackingConfig;
+  entityName: string;
+  kcpPath: string;
+  namespaceId: string;
+  resourceDefinition: ResourceDefinition;
   dashboard?: {
     sections: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     sidebar: any; // eslint-disable-line @typescript-eslint/no-explicit-any

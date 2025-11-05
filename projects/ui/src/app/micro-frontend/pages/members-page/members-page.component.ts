@@ -1,5 +1,3 @@
-import { SearchResultItem } from '../../../../../../lib/src/lib/models/search/search-result.item';
-import { RoutingService } from '../../../../../../lib/src/lib/services/routing/routing.service';
 import { ConfirmationMessagesService } from '../../services/confirmation-messages/confirmation-messages.service';
 import {
   ConfirmationDialogDecision,
@@ -42,11 +40,9 @@ import {
   ToolbarItemDirective,
 } from '@fundamental-ngx/core/toolbar';
 import {
-  CollectionSort,
   DynamicPageContentComponent,
   DynamicPageTitleComponent,
   SearchFieldComponent,
-  SortDirection,
   TableColumnComponent,
   TableSortChangeEvent,
 } from '@fundamental-ngx/platform';
@@ -66,16 +62,23 @@ import {
 } from '@fundamental-ngx/platform/table-helpers';
 import {
   ClaimEntityService,
-  GrantedUsers,
   AvatarComponent as IAMAvatarComponent,
   IamLuigiContextService,
   LuigiClient,
   Member,
   MemberService,
+  NodeContext,
   NotificationService,
   PolicyDirective,
   Role,
+  RoutingService,
+  SearchResultItem,
+  SortByInput,
+  SortDirection,
+  UIRole,
   User,
+  UserConnection,
+  UserSortField,
   UserUtils,
 } from '@platform-mesh/iam-lib';
 import { Observable, Subscription, combineLatest, filter, map } from 'rxjs';
@@ -83,11 +86,6 @@ import { Observable, Subscription, combineLatest, filter, map } from 'rxjs';
 export interface AddMembersData {
   error?: string;
   addedMembers?: User[];
-}
-
-export interface UIRole extends Role {
-  id: string;
-  label: string;
 }
 
 type CoreSearchParams = Record<string, string>;
@@ -138,22 +136,24 @@ export interface SearchResultItemLink {
   providers: [ConfirmationService, ConfirmationMessagesService],
 })
 export class MembersPageComponent implements OnInit, OnDestroy {
-  public currentUserIsOwner = false;
   public countOwners?: number;
   public scopeDisplayName?: string;
   public currentEntity?: string;
   public iamClaimEntityUrl?: string;
 
   private subscriptions: Subscription = new Subscription();
-  private currentUserId?: string;
+  private currentUserId!: string;
   private lockView = false;
 
   members = signal<Member[]>([]);
   rolesForEntity = signal<UIRole[]>([]);
   totalItems = signal<number>(10);
   searchTerm = '';
-  selectedFilterRoles: UIRole[] = [];
-  sortBy: CollectionSort = { field: 'user', direction: SortDirection.ASC };
+  selectedFilterRoles: string[] = [];
+  sortBy: SortByInput = {
+    field: UserSortField.lastName,
+    direction: SortDirection.asc,
+  };
   initialSortOrder = [this.sortBy];
   itemsPerPage = 10;
   currentPage = 1;
@@ -181,6 +181,9 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       id: 'sapIllus-Dialog-NoSearchResults',
     },
   };
+  private context!: NodeContext;
+  private currentUser: Member | undefined;
+  private currentUserIsOwner: boolean = false;
 
   constructor(
     private memberService: MemberService,
@@ -193,81 +196,24 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     private routingService: RoutingService,
   ) {}
 
-  ngOnInit() {
-    this.subscriptions.add(
-      combineLatest([
-        this.memberService.currentEntity(),
-        this.luigiContextService.contextObservable(),
-      ]).subscribe({
-        next: ([entity, context]) => {
-          this.currentEntity = entity;
-          this.currentUserId = context.context.userid;
-          this.iamClaimEntityUrl =
-            context.context.portalContext.iamClaimEntityUrl;
+  async ngOnInit() {
+    this.context = await this.luigiContextService.getContextAsync();
+    this.currentUserId = this.context.userId;
+    this.iamClaimEntityUrl = this.context.portalContext.iamClaimEntityUrl;
+    this.scopeDisplayName = this.context.entityId;
 
-          if (entity && context.context?.entityContext) {
-            this.scopeDisplayName =
-              context.context.entityContext[entity]?.displayName ||
-              context.context.entityContext[entity]?.id ||
-              context.context.organization;
-            this.currentUserIsOwner =
-              context.context.entityContext[entity]?.policies?.includes(
-                'iamAdmin',
-              );
-          }
-        },
-        error: (error) => {
-          console.error(error);
-          console.log('test');
-        },
-      }),
-    );
+    // todo gkr
+    //   this.context.entityContext[entity]?.policies?.includes('iamAdmin');
 
-    this.subscriptions.add(
-      this.memberService
-        .getAvailableRolesForEntityType()
-        .subscribe((groups) => {
-          this.rolesForEntity.set(
-            groups.map((g) => ({
-              label: g.displayName,
-              id: g.technicalName,
-              ...g,
-            })),
-          );
-          this.readMembers();
-        }),
-    );
+    this.memberService.roles().subscribe({
+      next: (uiRoles) => this.rolesForEntity.set(uiRoles),
+    });
 
-    this.subscriptions.add(
-      this.luigiContextService
-        .contextObservable()
-        .pipe(filter((data) => !!data.context.goBackContext))
-        .subscribe((data) => {
-          const goBackContext = data.context.goBackContext as AddMembersData;
-          if (goBackContext.error) {
-            this.openErrorToast(goBackContext.error);
-          }
-          if (goBackContext.addedMembers) {
-            this.readMembers();
-            this.openSuccessToast(goBackContext);
-          }
-        }),
-    );
+    this.readMembers();
   }
 
-  public isCurrentUserMember(): Observable<boolean> {
-    return this.luigiContextService.contextObservable().pipe(
-      map((data) => {
-        const projectPolicies =
-          data.context.entityContext?.['project']?.policies;
-        const isProjectMember =
-          Array.isArray(projectPolicies) && projectPolicies.length > 0;
-        const teamPolicies = data.context.entityContext?.['team']?.policies;
-        const isTeamMember =
-          Array.isArray(teamPolicies) && teamPolicies.length > 0;
-        return isProjectMember || isTeamMember;
-      }),
-    );
+  public isCurrentUserMember(member: Member) {
+    return member.roles.some((r) => r.id === 'member');
   }
 
   navigateToUserProfile(userId: string): void {
@@ -300,34 +246,27 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
   readMembers(): void {
     this.memberService
-      .usersOfEntity({
-        limit: this.itemsPerPage,
-        page: this.currentPage,
-        showInvitees: true,
-        searchTerm: this.searchTerm,
-        roles: this.selectedFilterRoles,
+      .users({
+        page: { page: this.currentPage, limit: this.itemsPerPage },
+        roleFilters: this.selectedFilterRoles || ['owner'], // todo gkr
         sortBy: this.sortBy,
       })
       .subscribe({
-        next: (members: GrantedUsers) => {
+        next: (members: UserConnection) => {
+          this.isLoading.set(false);
           if (!members) {
             return;
           }
 
-          this.members.set([
-            ...(members?.users.map((user) => {
-              return {
-                user: user.user,
-                roles: this.rolesForEntity().filter((role) =>
-                  user.roles?.some((r) => r.displayName === role.displayName),
-                ),
-              };
-            }) || []),
-          ]);
+          this.members.set(members.users);
           this.totalItems.set(members.pageInfo.totalCount || 0);
-
           this.countOwners = members.pageInfo.ownerCount;
-          this.isLoading.set(false);
+          this.currentUser = (members.users || []).find(
+            (m) => m.user.userId === this.currentUserId,
+          );
+          this.currentUserIsOwner = !!this.currentUser?.roles.some(
+            (r) => r.id === 'owner',
+          );
         },
         error: (error) => {
           this.isLoading.set(false);
@@ -363,11 +302,12 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
   openRemoveMemberDialog(member: Member): void {
     this.confirmationService
-      .showRemoveMemberDialog(member.user, this.scopeDisplayName ?? '')
+      .showRemoveMemberDialog(member.user)
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.subscriptions.add(
-            this.memberService.removeFromEntity(member.user).subscribe({
+          this.memberService
+            .removeRole(member.user, { id: 'member' }) //todo gkr
+            .subscribe({
               next: () => {
                 this.removeMemberSuccessNotification(member.user);
                 this.readMembers();
@@ -375,8 +315,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
               error: (error: Error) => {
                 this.removeMemberErrorNotification(error);
               },
-            }),
-          );
+            });
         }
       })
       .catch((error: Error) => {
@@ -404,15 +343,16 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
           this.subscriptions.add(
-            this.memberService.leaveEntity().subscribe({
-              next: () => {
-                this.leaveSuccessNotification();
-                this.memberService.navigateToList();
-              },
-              error: (error: Error) => {
-                this.leaveErrorNotification(error);
-              },
-            }),
+            this.memberService
+              .removeRole({ userId: this.currentUserId }, { id: 'member' }) //todo gkr
+              .subscribe({
+                next: () => {
+                  this.leaveSuccessNotification();
+                },
+                error: (error: Error) => {
+                  this.leaveErrorNotification(error);
+                },
+              }),
           );
         }
       })
@@ -440,7 +380,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     member: Member,
   ): void {
     const sortByRoleTechnicalName = (a: Role, b: Role) =>
-      a.technicalName?.localeCompare(b.technicalName, 'en');
+      a.id?.localeCompare(b.id, 'en');
     const selectedSortedRoles = [...(event.selectedItems as Role[])].sort(
       sortByRoleTechnicalName,
     );
@@ -464,7 +404,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
     // if the user is the owner, he cannot remove himself from the owner role
     const ownerRoleRemains = (event.selectedItems as Role[]).find(
-      (role) => role.technicalName === 'owner',
+      (role) => role.id === 'owner',
     );
 
     if (
@@ -484,30 +424,26 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     }
     this.lockView = true;
 
-    this.subscriptions.add(
-      this.memberService
-        .setMemberRoles(member.user, event.selectedItems as Role[], false)
-        .subscribe({
-          next: () => {
-            this.lockView = false;
-            if (member.user.userId === this.currentUserId) {
-              this.luigiClient.clearFrameCache();
-            }
-            this.notificationService.openSuccessToast(
-              SUCCESS_CHANGING_MEMBERS_ROLE,
-            );
-            this.readMembers();
-          },
-          error: (error) => {
-            console.error(error);
-            this.lockView = false;
-            this.notificationService.openErrorStrip(
-              ERROR_CHANGING_MEMBERS_ROLE,
-            );
-            this.readMembers();
-          },
-        }),
-    );
+    this.memberService
+      .assignRolesToUser(member.user, event.selectedItems as Role[])
+      .subscribe({
+        next: () => {
+          this.lockView = false;
+          if (member.user.userId === this.currentUserId) {
+            this.luigiClient.clearFrameCache();
+          }
+          this.notificationService.openSuccessToast(
+            SUCCESS_CHANGING_MEMBERS_ROLE,
+          );
+          this.readMembers();
+        },
+        error: (error) => {
+          console.error(error);
+          this.lockView = false;
+          this.notificationService.openErrorStrip(ERROR_CHANGING_MEMBERS_ROLE);
+          this.readMembers();
+        },
+      });
   }
 
   newPageClicked(pageNumber: number): void {
@@ -556,12 +492,18 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
   setRolesFilter(item: MultiComboboxSelectionChangeEvent): void {
     this.currentPage = 1;
-    this.selectedFilterRoles = item.selectedItems as UIRole[];
+    this.selectedFilterRoles = (item.selectedItems as UIRole[]).map(
+      (i) => i.label,
+    );
     this.readMembers();
   }
 
   sortChange(event: TableSortChangeEvent): void {
-    this.sortBy = event.current[0];
+    // gkr todo
+    this.sortBy = {
+      field: UserSortField.userId,
+      direction: SortDirection.desc,
+    };
     this.readMembers();
   }
 

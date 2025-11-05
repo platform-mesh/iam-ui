@@ -54,17 +54,16 @@ import {
 } from '@fundamental-ngx/core/table';
 import {
   AvatarComponent as IAMAvatarComponent,
+  IamLuigiContextService,
   LuigiClient,
   Member,
   MemberService,
   NotificationService,
   Role,
-  SearchService,
-  SuggestedUser,
-  TenantInfoService,
   User,
+  UserConnection,
 } from '@platform-mesh/iam-lib';
-import { BehaviorSubject, Subscription, debounceTime, take } from 'rxjs';
+import { BehaviorSubject, Subscription, debounceTime, forkJoin } from 'rxjs';
 
 export type DropDownValue =
   | { user: User }
@@ -129,9 +128,7 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     private luigiClient: LuigiClient,
-    private searchService: SearchService,
     private memberService: MemberService,
-    private tenantInfoService: TenantInfoService,
     private cdr: ChangeDetectorRef,
     private notificationService: NotificationService,
   ) {}
@@ -139,35 +136,19 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
   @ViewChild('typeahead')
   typeahead!: PopoverComponent;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.subscriptions.add(
       this.searchInput.pipe(debounceTime(500)).subscribe((searchTerm) => {
         this.filter(searchTerm);
       }),
     );
 
-    this.subscriptions.add(
-      this.memberService.getAvailableRolesForEntityType().subscribe((roles) => {
-        this.availableRoles = roles;
-        this.defaultRole = this.availableRoles.find(
-          (roles) =>
-            roles.technicalName === (RolesTechnicalName.MEMBER as string),
-        );
-      }),
-    );
-
-    this.subscriptions.add(
-      this.tenantInfoService.tenantInfo().subscribe((tenantInfo) => {
-        this.emailDomains = tenantInfo.emailDomains;
-        this.cdr.markForCheck();
-      }),
-    );
-
-    this.subscriptions.add(
-      this.memberService.currentEntity().subscribe((entity) => {
-        this.currentEntity = entity;
-      }),
-    );
+    this.memberService.roles().subscribe((roles) => {
+      this.availableRoles = roles;
+      this.defaultRole = this.availableRoles.find(
+        (roles) => roles.id === (RolesTechnicalName.MEMBER as string),
+      );
+    });
   }
 
   onRoleChange(
@@ -190,21 +171,24 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
     if (!input.length) {
       return;
     }
-    this.subscriptions.add(
-      this.memberService.addMembersWithFga(input).subscribe({
-        next: () => {
-          const addedMembers = input.map((i) => i.user);
-          if ((addedMembers || []).length > 0) {
-            this.closeDialogSuccess(addedMembers);
-            return;
-          }
-          this.closeDialogError();
-        },
-        error: (error: Error) => {
-          this.closeDialogError(error.toString());
-        },
-      }),
+
+    let roleSettingObservables = input.map((member) =>
+      this.memberService.assignRolesToUser(member.user, member.roles),
     );
+
+    forkJoin(roleSettingObservables).subscribe({
+      next: (results) => {
+        const addedMembers = results.filter(Boolean);
+        if (addedMembers.length > 0) {
+          this.closeDialogSuccess(addedMembers as any);
+        } else {
+          this.closeDialogError();
+        }
+      },
+      error: (error: Error) => {
+        this.closeDialogError(error.toString());
+      },
+    });
   }
 
   public deleteMemberFromList(userId: string | undefined): void {
@@ -238,8 +222,8 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
   }
 
   public filter(searchTerm: string): void {
-    const mapUser = (user: SuggestedUser): DropDownValue => {
-      return { user };
+    const mapUser = (member: Member): DropDownValue => {
+      return { user: member.user };
     };
 
     if (!searchTerm || searchTerm.length === 0) {
@@ -249,33 +233,29 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const getSuggestedUsers =
-      this.searchService.getSuggestedUsersForAccountWithFga(
-        searchTerm,
-        MAX_USERS_SHOWN,
-      );
-
-    getSuggestedUsers.pipe(take(1)).subscribe((response) => {
-      this.filteredUsersCollectionLength = response.numFound;
-      if (response.responseSize > 0) {
-        if (this.isEmail(searchTerm)) {
-          const emailMatches = response.docs.filter(
-            (user) => user.email === searchTerm,
-          );
-          this.filteredUsersCollectionLength = emailMatches.length;
-          this.dropDownValues =
-            emailMatches.length === 0
-              ? [{ email: searchTerm }]
-              : emailMatches.map(mapUser);
+    this.memberService.knownUsers().subscribe({
+      next: (response) => {
+        this.filteredUsersCollectionLength = response.pageInfo.totalCount;
+        if (response.users.length > 0) {
+          if (this.isEmail(searchTerm)) {
+            const emailMatches = response.users.filter(
+              (member) => member.user.email === searchTerm,
+            );
+            this.filteredUsersCollectionLength = emailMatches.length;
+            this.dropDownValues =
+              emailMatches.length === 0
+                ? [{ email: searchTerm }]
+                : emailMatches.map(mapUser);
+          } else {
+            this.dropDownValues = response.users.map(mapUser);
+          }
+        } else if (this.isEmail(searchTerm)) {
+          this.dropDownValues = [{ email: searchTerm }];
         } else {
-          this.dropDownValues = response.docs.map(mapUser);
+          this.dropDownValues = [{ noData: true }];
         }
-      } else if (this.isEmail(searchTerm)) {
-        this.dropDownValues = [{ email: searchTerm }];
-      } else {
-        this.dropDownValues = [{ noData: true }];
-      }
-      this.cdr.detectChanges();
+        this.cdr.detectChanges();
+      },
     });
   }
 

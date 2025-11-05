@@ -1,5 +1,4 @@
 import { IamLuigiContextService } from '../services/luigi';
-import { MemberService } from '../services/member.service';
 import { PolicyObject } from './authorization.constants';
 import { Injectable } from '@angular/core';
 import { Observable, combineLatest } from 'rxjs';
@@ -11,17 +10,14 @@ import { map } from 'rxjs/operators';
 export class PolicyAdapter {
   private readonly policies: Observable<PolicyObject>;
 
-  constructor(
-    private luigiContextService: IamLuigiContextService,
-    private memberService: MemberService,
-  ) {
+  constructor(private luigiContextService: IamLuigiContextService) {
     this.policies = combineLatest([
-      this.memberService.currentEntity(),
       this.luigiContextService.contextObservable(),
     ]).pipe(
-      map(([entity, data]) => {
-        const entityContext = data?.context?.entityContext;
-        const userPolicies: string[] = entityContext?.[entity]?.policies || [];
+      map(([data]) => {
+        const entityContext = data?.context?.entityContext || {};
+        const userPolicies: string[] =
+          Object.entries(entityContext)?.[0]?.[1]?.policies || [];
         const currentPolicyState = new PolicyObject();
         userPolicies.forEach((activePolicy) => {
           currentPolicyState[activePolicy] = true;

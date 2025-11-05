@@ -38,7 +38,7 @@ export class AnalyticsTrackerService {
             return of(null);
           }
 
-          const hashedUserId = from(this.digestMessage(c.context.userid));
+          const hashedUserId = from(this.digestMessage(c.context.userId));
           return hashedUserId.pipe(
             map((hashedUserId) => {
               const matomoContainerId = useJukeboxMatomoId

@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ConfirmationModalSettings } from '@luigi-project/client';
-import {
-  LuigiClient,
-  MemberService,
-  User,
-  UserUtils,
-} from '@platform-mesh/iam-lib';
-import { firstValueFrom } from 'rxjs';
+import { LuigiClient, User, UserUtils } from '@platform-mesh/iam-lib';
 
 export enum ConfirmationDialogDecision {
   CONFIRMED,
@@ -15,24 +9,17 @@ export enum ConfirmationDialogDecision {
 
 @Injectable()
 export class ConfirmationService {
-  constructor(
-    private luigiClient: LuigiClient,
-    private memberService: MemberService,
-  ) {}
+  constructor(private luigiClient: LuigiClient) {}
 
   public async showRemoveMemberDialog(
     member: User,
-    scopeDisplayName: string,
   ): Promise<ConfirmationDialogDecision> {
-    const entity = await firstValueFrom(this.memberService.currentEntity());
     const settings = {
       type: 'warning',
       header: $localize`Remove Member`,
       body:
-        $localize`Are you sure you want to remove the member` +
-        ` <b>${UserUtils.getNameOrId(member)}</b>?<br/><br/>` +
-        $localize`The member will no longer have access to the ${entity}` +
-        ` <b>${scopeDisplayName}</b>.`,
+        $localize`Are you sure you want to remove the member:` +
+        ` </br><b>${UserUtils.getNameOrId(member)}</b>?<br/><br/>`,
       buttonConfirm: $localize`Remove`,
       buttonDismiss: $localize`Cancel`,
     };
@@ -42,15 +29,10 @@ export class ConfirmationService {
   public async showLeaveScopeDialog(
     scopeDisplayName: string,
   ): Promise<ConfirmationDialogDecision> {
-    const entity = await firstValueFrom(this.memberService.currentEntity());
     const settings = {
       type: 'warning',
       header: $localize`Leave`,
-      body:
-        $localize`Are you sure you want to leave?` +
-        '<br/><br/>' +
-        $localize`You will no longer have access to the ${entity}` +
-        ` <b>${scopeDisplayName}</b>.`,
+      body: $localize`Are you sure you want to leave?`,
       buttonConfirm: $localize`Leave`,
       buttonDismiss: $localize`Cancel`,
     };
