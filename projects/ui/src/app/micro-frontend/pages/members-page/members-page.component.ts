@@ -10,7 +10,6 @@ import {
   SUCCESS_CHANGING_MEMBERS_ROLE,
 } from './string-variables';
 import { CdkScrollable } from '@angular/cdk/scrolling';
-import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -75,7 +74,6 @@ import {
   SearchResultItem,
   SortByInput,
   SortDirection,
-  UIRole,
   User,
   UserConnection,
   UserSortField,
@@ -128,7 +126,6 @@ export interface SearchResultItemLink {
     FormItemComponent,
     FormLabelComponent,
     MultiComboboxComponent,
-    AsyncPipe,
   ],
   templateUrl: './members-page.component.html',
   styleUrl: './members-page.component.scss',
@@ -146,10 +143,10 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   private lockView = false;
 
   members = signal<Member[]>([]);
-  rolesForEntity = signal<UIRole[]>([]);
+  rolesForEntity = signal<Role[]>([]);
   totalItems = signal<number>(10);
   searchTerm = '';
-  selectedFilterRoles: string[] = [];
+  selectedFilterRoleIds: string[] = [];
   sortBy: SortByInput = {
     field: UserSortField.lastName,
     direction: SortDirection.asc,
@@ -206,7 +203,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     //   this.context.entityContext[entity]?.policies?.includes('iamAdmin');
 
     this.memberService.roles().subscribe({
-      next: (uiRoles) => this.rolesForEntity.set(uiRoles),
+      next: (roles) => this.rolesForEntity.set(roles),
     });
 
     this.readMembers();
@@ -248,7 +245,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.memberService
       .users({
         page: { page: this.currentPage, limit: this.itemsPerPage },
-        roleFilters: this.selectedFilterRoles || ['owner'], // todo gkr
+        roleFilters: this.selectedFilterRoleIds,
         sortBy: this.sortBy,
       })
       .subscribe({
@@ -306,7 +303,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
           this.memberService
-            .removeRole(member.user, { id: 'member' }) //todo gkr
+            .removeRole(member.user, 'member') //todo gkr
             .subscribe({
               next: () => {
                 this.removeMemberSuccessNotification(member.user);
@@ -344,7 +341,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
           this.subscriptions.add(
             this.memberService
-              .removeRole({ userId: this.currentUserId }, { id: 'member' }) //todo gkr
+              .removeRole({ userId: this.currentUserId }, 'member') //todo gkr
               .subscribe({
                 next: () => {
                   this.leaveSuccessNotification();
@@ -446,6 +443,14 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  selectedRoles(member: Member): Role[] {
+    return (
+      this.rolesForEntity().filter((r) =>
+        member.roles.map((mr) => mr.id).includes(r.id),
+      ) || []
+    );
+  }
+
   newPageClicked(pageNumber: number): void {
     this.currentPage = pageNumber;
     this.readMembers();
@@ -492,8 +497,8 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
   setRolesFilter(item: MultiComboboxSelectionChangeEvent): void {
     this.currentPage = 1;
-    this.selectedFilterRoles = (item.selectedItems as UIRole[]).map(
-      (i) => i.label,
+    this.selectedFilterRoleIds = (item.selectedItems as Role[]).map(
+      (i) => i.id,
     );
     this.readMembers();
   }
@@ -508,6 +513,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   }
 
   noFiltersApplied(): boolean {
-    return this.selectedFilterRoles.length === 0 && !this.searchTerm;
+    return this.selectedFilterRoleIds.length === 0 && !this.searchTerm;
   }
 }

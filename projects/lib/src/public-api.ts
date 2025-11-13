@@ -4,7 +4,6 @@
 
 export * from './lib/services/member.service';
 export * from './lib/services/claim-entity.service';
-export * from './lib/services/team.service';
 export * from './lib/models/groups';
 
 export * from './lib/authorization';

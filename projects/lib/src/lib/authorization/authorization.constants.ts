@@ -8,8 +8,6 @@ export enum Groups {
   PROJECT_MEMBER = 'projectMembers',
 }
 
-export const DEFAULT_USER_ROLE = Groups.PROJECT_MEMBER;
-
 export class PolicyObject {
   [key: string]: boolean;
 

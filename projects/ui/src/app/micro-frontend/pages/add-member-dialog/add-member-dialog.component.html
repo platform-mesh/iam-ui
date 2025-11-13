@@ -238,19 +238,15 @@
                   <!-- TODO remove $any -->
                   <fd-multi-combobox
                     displayKey="displayName"
-                    lookupKey="technicalName"
+                    lookupKey="id"
                     placeholder=""
                     [attr.data-testid]="
-                      member.user
-                        ? 'app-iam-member-add-dialog-user-' +
-                          member.user.userId +
-                          '-role-select'
-                        : 'app-iam-member-add-dialog-team-' +
-                          $any(member).team?.name +
-                          '-role-select'
+                      'app-iam-member-add-dialog-user-' +
+                      member.user.userId +
+                      '-role-select'
                     "
                     [dataSource]="availableRoles"
-                    [selectedItems]="member.roles"
+                    [selectedItems]="selectedRoles(member)"
                     (selectionChange)="onRoleChange($event, member)"
                   />
                 </td>

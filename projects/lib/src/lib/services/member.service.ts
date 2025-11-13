@@ -21,10 +21,6 @@ import { Injectable } from '@angular/core';
 import { Observable, combineLatest, first, forkJoin, mergeMap } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
-export interface UIRole extends Role {
-  label: string;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -120,7 +116,7 @@ export class MemberService {
     );
   }
 
-  roles(): Observable<UIRole[]> {
+  roles(): Observable<Role[]> {
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
@@ -135,12 +131,7 @@ export class MemberService {
         });
       }),
       map((apolloResponse) => {
-        return apolloResponse.data.roles.map(
-          (r): UIRole => ({
-            label: r.displayName || '',
-            ...r,
-          }),
-        );
+        return apolloResponse.data.roles;
       }),
     );
   }
@@ -177,7 +168,7 @@ export class MemberService {
 
   removeRole(
     user: User,
-    role: Role,
+    roleId: string,
   ): Observable<RoleRemovalResult | undefined> {
     return combineLatest([
       this.apolloClientService.apollo(),
@@ -190,7 +181,7 @@ export class MemberService {
             mutation: REMOVE_ROLE,
             variables: {
               context: this.getResourceContext(ctx.context),
-              input: { userId: user.userId, role: role.id },
+              input: { userId: user.userId, role: roleId },
             },
           })
           .pipe(map((response) => response.data?.removeRole));

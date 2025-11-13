@@ -20,6 +20,7 @@
       </fd-toolbar>
     </fdp-dynamic-page-global-actions>
   </fdp-dynamic-page-title>
+
   <fdp-dynamic-page-header [pinnable]="true">
     <div class="members-filter-group">
       <div class="members-filter-group-search-term">
@@ -42,10 +43,10 @@
           <div fd-form-item>
             <label fd-form-label [colon]="true">Roles</label>
             <fd-multi-combobox
-              contentDensity="compact"
-              displayKey="label"
-              lookupKey="id"
               name="Roles"
+              contentDensity="compact"
+              displayKey="displayName"
+              lookupKey="id"
               placeholder="All"
               [autoResize]="true"
               [dataSource]="rolesForEntity()"
@@ -56,6 +57,7 @@
       }
     </div>
   </fdp-dynamic-page-header>
+
   <fdp-dynamic-page-content cdkScrollable id="iam-members-content">
     @if (members() && !isLoading()) {
       <fdp-table
@@ -183,31 +185,24 @@
           width="20rem"
         >
           <fdp-table-cell *fdpCellDef="let member">
-            <!--            <div *requiredPolicies="'iamAdmin'"> todo gkr -->
             <fd-multi-combobox
               displayKey="displayName"
-              lookupKey="technicalName"
-              placeholder=""
+              lookupKey="id"
               [attr.data-testid]="
                 'app-iam-member-list-user-' +
                 member.user?.userId +
                 '-role-select'
               "
               [dataSource]="rolesForEntity()"
-              [selectedItems]="member.roles"
+              [selectedItems]="selectedRoles(member)"
               (selectionChange)="saveMember($event, member)"
             />
-            <!--            </div>-->
-            <!--            <div *requiredPolicies="'!iamAdmin'"> todo gkr -->
-            <ng-container>
-              @for (role of member.roles; track role) {
-                <span>{{ role.displayName }}</span>
-                @if (!$last) {
-                  <span>, </span>
-                }
-              }
-            </ng-container>
-            <!--            </div>-->
+            <!--            @for (role of member.roles; track role) {-->
+            <!--              <span>{{ role.displayName }}</span>-->
+            <!--              @if (!$last) {-->
+            <!--                <span>, </span>-->
+            <!--              }-->
+            <!--            }-->
           </fdp-table-cell>
         </fdp-column>
 
@@ -222,7 +217,6 @@
         >
           <fdp-table-cell *fdpCellDef="let member">
             @if (isCurrentUserMember(member)) {
-              <!--              <div *dxpRequiredPolicies="'iamAdmin'"> todo gkr -->
               @if (!equalsCurrentUser(member)) {
                 <button
                   fd-button
@@ -231,20 +225,14 @@
                   id="remove-member-button"
                   title="Remove member"
                   [attr.data-testid]="
-                    member.user
-                      ? 'dxp-iam-member-list-user-' +
-                        member.user?.userId +
-                        '-remove-button'
-                      : 'dxp-iam-member-list-team-' +
-                        member.team?.name +
-                        '-remove-button'
+                    'dxp-iam-member-list-user-' +
+                    member.user?.userId +
+                    '-remove-button'
                   "
                   (click)="openRemoveMemberDialog(member)"
                 ></button>
               }
-              <!--              </div>-->
 
-              <!--         todo gkr    -->
               @if (equalsCurrentUser(member) || true) {
                 <button
                   fd-button

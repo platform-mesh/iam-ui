@@ -816,28 +816,28 @@ describe('MembersPageComponent', () => {
 
   describe('noFiltersApplied method', () => {
     it('should return true when no roles are selected and no search term', () => {
-      component.selectedFilterRoles = [];
+      component.selectedFilterRoleIds = [];
       component.searchTerm = '';
 
       expect(component.noFiltersApplied()).toBeTruthy();
     });
 
     it('should return false when roles are selected', () => {
-      component.selectedFilterRoles = [roleMember];
+      component.selectedFilterRoleIds = [roleMember];
       component.searchTerm = '';
 
       expect(component.noFiltersApplied()).toBeFalsy();
     });
 
     it('should return false when search term is present', () => {
-      component.selectedFilterRoles = [];
+      component.selectedFilterRoleIds = [];
       component.searchTerm = 'test';
 
       expect(component.noFiltersApplied()).toBeFalsy();
     });
 
     it('should return false when both roles are selected and search term is present', () => {
-      component.selectedFilterRoles = [roleMember, roleOwner];
+      component.selectedFilterRoleIds = [roleMember, roleOwner];
       component.searchTerm = 'test';
 
       expect(component.noFiltersApplied()).toBeFalsy();
@@ -858,7 +858,7 @@ describe('MembersPageComponent', () => {
     const readMembersMock = jest.fn();
     component.readMembers = readMembersMock;
     component.currentPage = 5;
-    component.selectedFilterRoles = [];
+    component.selectedFilterRoleIds = [];
 
     const event = {
       selectedItems: [roleOwner, roleMember],
@@ -867,7 +867,7 @@ describe('MembersPageComponent', () => {
     component.setRolesFilter(event);
 
     expect(component.currentPage).toBe(1);
-    expect(component.selectedFilterRoles).toEqual([roleOwner, roleMember]);
+    expect(component.selectedFilterRoleIds).toEqual([roleOwner, roleMember]);
     expect(readMembersMock).toHaveBeenCalled();
   });
 
