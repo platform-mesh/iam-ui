@@ -184,6 +184,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.context = await this.luigiContextService.getContextAsync();
+    this.currentEntity = this.context.entityName;
     this.currentUserId = this.context.userId;
     this.iamClaimEntityUrl = this.context.portalContext.iamClaimEntityUrl;
     this.scopeDisplayName = this.context.entityId;
@@ -306,7 +307,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   private removeMemberSuccessNotification(user: User): void {
     this.notificationService.openSuccessToast(
       UserUtils.getNameOrId(user) +
-        $localize` was removed from the ${this.currentEntity}.`,
+        $localize` has been removed from the ${this.currentEntity}.`,
     );
   }
 

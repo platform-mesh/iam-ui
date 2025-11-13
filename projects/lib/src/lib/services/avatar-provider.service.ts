@@ -1,5 +1,5 @@
-import { imageLoadable } from '../components/image-loadable/image-loadable';
 import { User } from '../models';
+import { imageLoadable } from '../utils';
 import { Injectable } from '@angular/core';
 
 @Injectable({
