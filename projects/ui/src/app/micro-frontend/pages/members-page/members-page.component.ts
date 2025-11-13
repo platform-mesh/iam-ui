@@ -70,7 +70,6 @@ import {
   NotificationService,
   Role,
   RoutingService,
-  SearchResultItem,
   SortByInput,
   SortDirection,
   User,
@@ -83,14 +82,6 @@ import { Subscription } from 'rxjs';
 export interface AddMembersData {
   error?: string;
   addedMembers?: User[];
-}
-
-type CoreSearchParams = Record<string, string>;
-
-export interface SearchResultItemLink {
-  url: string;
-  external: boolean;
-  queryParam?: CoreSearchParams;
 }
 
 @Component({
@@ -209,13 +200,12 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   }
 
   navigateToUserProfile(userId: string): void {
-    const link: SearchResultItemLink = {
-      url: `/users/${userId}/overview`,
-      external: false,
-    };
-    const searchItemLink: SearchResultItem = {
+    const searchItemLink = {
       displayName: userId,
-      link,
+      link: {
+        url: `/users/${userId}/overview`,
+        external: false,
+      },
     };
     this.routingService.openLink(searchItemLink);
   }

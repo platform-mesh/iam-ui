@@ -10,5 +10,3 @@ export * from './users';
 export * from './member';
 export * from './role';
 export * from './groups';
-
-export * from './search/search-result.item';
