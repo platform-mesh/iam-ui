@@ -1,9 +1,10 @@
-import { Member, Role, UserConnection } from '../authorization';
 import {
   NodeContext,
+  Role,
   RoleAssignmentResult,
   RoleRemovalResult,
   User,
+  UserConnection,
 } from '../models';
 import { PageInput, ResourceContext, SortByInput } from '../models/resource';
 import {
@@ -15,11 +16,11 @@ import {
   USER,
   USERS,
 } from '../queries/iam-queries';
-import { IamApolloClientService } from '../services/apollo';
-import { IamLuigiContextService, LuigiClient } from '../services/luigi';
+import { IamApolloClientService } from './apollo';
+import { IamLuigiContextService } from './luigi';
 import { Injectable } from '@angular/core';
 import { Observable, combineLatest, first, forkJoin, mergeMap } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -37,8 +38,6 @@ export class MemberService {
       page?: PageInput;
     } = {},
   ): Observable<UserConnection> {
-    const context = this.luigiContextService.getContext();
-
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
@@ -105,13 +104,13 @@ export class MemberService {
   me(): Observable<User> {
     return this.apolloClientService.apollo().pipe(
       mergeMap((apollo) =>
-        apollo.query<{ user: User }>({
+        apollo.query<{ me: User }>({
           query: ME,
           fetchPolicy: 'no-cache',
         }),
       ),
       map((apolloResponse) => {
-        return apolloResponse.data.user;
+        return apolloResponse.data.me;
       }),
     );
   }

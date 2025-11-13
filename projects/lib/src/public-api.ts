@@ -6,7 +6,6 @@ export * from './lib/services/member.service';
 export * from './lib/services/claim-entity.service';
 export * from './lib/models/groups';
 
-export * from './lib/authorization';
 export * from './lib/services';
 export * from './lib/utils';
 export * from './lib/models';

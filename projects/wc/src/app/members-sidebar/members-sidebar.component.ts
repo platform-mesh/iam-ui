@@ -32,7 +32,6 @@ import {
   IamLuigiContextService,
   MemberService,
   NodeContext,
-  ProjectGroupTechnicalNames,
   RolesTechnicalName,
   User,
   UserConnection,
@@ -65,10 +64,7 @@ import { map } from 'rxjs';
 })
 export class MembersSidebarComponent implements OnInit {
   private avatarProviderService = inject(AvatarProviderService);
-  rolesAllowedForEdit = [
-    ProjectGroupTechnicalNames.PROJECT_OWNER,
-    RolesTechnicalName.OWNER,
-  ];
+  rolesAllowedForEdit = [RolesTechnicalName.OWNER];
   members: User[] = [];
   loading = true;
   ctx?: NodeContext;

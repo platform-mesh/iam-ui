@@ -32,7 +32,7 @@ export class AnalyticsTrackerService {
             c.context?.analyticsTrackerConfig;
           const serviceProviderConfig: ServiceProviderConfig =
             c.context?.serviceProviderConfig;
-          const tenantId = c.context?.tenantId || c.context.organizationId;
+          const tenantId = c.context?.tenantId || c.context['organizationId'];
 
           if (!analyticsTrackerConfig?.tenantIds?.includes(tenantId)) {
             return of(null);

@@ -1,4 +1,3 @@
-import { PolicyDirective } from '../../../authorization';
 import { CustomButton, Header } from '../../../models';
 import { IamLuigiContextService } from '../../../services';
 import { StatusInfoPopoverComponent } from '../../status-info-popover';
@@ -56,7 +55,6 @@ import { ToolbarComponent } from '@fundamental-ngx/core/toolbar';
     InfoLabelComponent,
     DynamicPageGlobalActionsComponent,
     ToolbarComponent,
-    PolicyDirective,
     ButtonComponent,
     ContentDensityDirective,
     SplitButtonComponent,
@@ -160,20 +158,13 @@ export class DashboardComponent implements OnInit {
     showEditButton: boolean,
     secondaryButtonText: string,
   ): boolean {
-    return (
-      showEditButton &&
-      typeof secondaryButtonText === 'string' &&
-      secondaryButtonText !== ''
-    );
+    return showEditButton && secondaryButtonText !== '';
   }
 
   showStandardEditButton(
     showEditButton: boolean,
     secondaryButtonText: string,
   ): boolean {
-    return (
-      showEditButton &&
-      (secondaryButtonText === '' || typeof secondaryButtonText !== 'string')
-    );
+    return showEditButton && secondaryButtonText === '';
   }
 }

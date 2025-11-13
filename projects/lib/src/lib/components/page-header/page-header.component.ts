@@ -1,4 +1,3 @@
-import { PolicyDirective } from '../../authorization';
 import { CustomButton, Header } from '../../models';
 import { StatusInfoPopoverComponent } from '../status-info-popover';
 import { AsyncPipe } from '@angular/common';
@@ -50,7 +49,6 @@ import { ButtonComponent } from '@fundamental-ngx/platform';
     StatusInfoPopoverComponent,
     DynamicPageGlobalActionsComponent,
     ToolbarComponent,
-    PolicyDirective,
     ButtonComponent,
     ContentDensityDirective,
     SplitButtonComponent,

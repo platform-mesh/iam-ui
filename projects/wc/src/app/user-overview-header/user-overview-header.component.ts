@@ -20,9 +20,9 @@ import {
   DashboardComponent,
   Header,
   IamLuigiContextService,
+  MemberService,
   NodeContext,
   User,
-  UserService,
   UserUtils,
 } from '@platform-mesh/iam-lib';
 
@@ -69,11 +69,11 @@ export class UserOverviewHeaderComponent implements OnInit {
 
   constructor(
     private luigiContextService: IamLuigiContextService,
-    private userService: UserService,
+    private memberService: MemberService,
   ) {}
 
   ngOnInit(): void {
-    this.userService.getUser(this.ctx?.profileUserId ?? '').subscribe({
+    this.memberService.me().subscribe({
       next: (user) => {
         this.user.set(user);
       },

@@ -1,4 +1,4 @@
-import { User } from '../../models';
+import { User } from '../models';
 
 export class UserUtils {
   static getNameOrId = (user: User): string =>

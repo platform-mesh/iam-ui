@@ -1,4 +1,3 @@
-import { RolesTechnicalName } from '../../../../../../lib/src/lib/models/groups';
 import { ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE } from '../members-page/string-variables';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import {
@@ -54,14 +53,13 @@ import {
 } from '@fundamental-ngx/core/table';
 import {
   AvatarComponent as IAMAvatarComponent,
-  IamLuigiContextService,
   LuigiClient,
   Member,
   MemberService,
   NotificationService,
   Role,
+  RolesTechnicalName,
   User,
-  UserConnection,
 } from '@platform-mesh/iam-lib';
 import { BehaviorSubject, Subscription, debounceTime, forkJoin } from 'rxjs';
 

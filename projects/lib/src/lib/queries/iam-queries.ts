@@ -84,11 +84,13 @@ export const USER = gql`
 `;
 
 export const ME = gql`
-  query me {
-    userId
-    email
-    firstName
-    lastName
+  query {
+    me {
+      userId
+      email
+      firstName
+      lastName
+    }
   }
 `;
 

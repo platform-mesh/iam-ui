@@ -68,7 +68,6 @@ import {
   MemberService,
   NodeContext,
   NotificationService,
-  PolicyDirective,
   Role,
   RoutingService,
   SearchResultItem,
@@ -79,7 +78,7 @@ import {
   UserSortField,
   UserUtils,
 } from '@platform-mesh/iam-lib';
-import { Observable, Subscription, combineLatest, filter, map } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 export interface AddMembersData {
   error?: string;
@@ -98,7 +97,6 @@ export interface SearchResultItemLink {
   selector: 'app-members-page',
   imports: [
     ToolbarComponent,
-    PolicyDirective,
     ButtonComponent,
     CdkScrollable,
     TableComponent,
@@ -198,9 +196,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.currentUserId = this.context.userId;
     this.iamClaimEntityUrl = this.context.portalContext.iamClaimEntityUrl;
     this.scopeDisplayName = this.context.entityId;
-
-    // todo gkr
-    //   this.context.entityContext[entity]?.policies?.includes('iamAdmin');
 
     this.memberService.roles().subscribe({
       next: (roles) => this.rolesForEntity.set(roles),
@@ -302,17 +297,15 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       .showRemoveMemberDialog(member.user)
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.memberService
-            .removeRole(member.user, 'member') //todo gkr
-            .subscribe({
-              next: () => {
-                this.removeMemberSuccessNotification(member.user);
-                this.readMembers();
-              },
-              error: (error: Error) => {
-                this.removeMemberErrorNotification(error);
-              },
-            });
+          this.memberService.removeRole(member.user, 'member').subscribe({
+            next: () => {
+              this.removeMemberSuccessNotification(member.user);
+              this.readMembers();
+            },
+            error: (error: Error) => {
+              this.removeMemberErrorNotification(error);
+            },
+          });
         }
       })
       .catch((error: Error) => {
@@ -341,7 +334,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
           this.subscriptions.add(
             this.memberService
-              .removeRole({ userId: this.currentUserId }, 'member') //todo gkr
+              .removeRole({ userId: this.currentUserId }, 'member')
               .subscribe({
                 next: () => {
                   this.leaveSuccessNotification();
