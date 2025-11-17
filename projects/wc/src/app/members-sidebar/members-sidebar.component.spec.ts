@@ -23,8 +23,8 @@ describe('MembersSidebarComponent', () => {
     luigiContextService = MockService(IamLuigiContextService);
 
     memberService = MockService(MemberService, {
-      getUsersOfEntity: jest.fn().mockReturnValue(of([])),
-      getMembers: jest.fn().mockReturnValue(of([])),
+      users: jest.fn().mockReturnValue(of([])),
+      user: jest.fn().mockReturnValue(of([])),
     } as any);
 
     cdr = MockService(ChangeDetectorRef, {
@@ -87,7 +87,7 @@ describe('MembersSidebarComponent', () => {
     const expectedUsers: User = {
       userId: 'foo',
     };
-    memberService.usersOfEntity = jest
+    memberService.users = jest
       .fn()
       .mockReturnValue(of({ users: [{ user: expectedUsers }] }));
     component.loading = true;

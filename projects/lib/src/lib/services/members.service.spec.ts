@@ -1,398 +1,225 @@
-import { GrantedUsers, Member, Role } from '../authorization';
-import { User } from '../models';
 import {
-  ASSIGN_ROLE_BINDINGS,
-  DELETE_INVITE,
-  GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
-  LEAVE_ENTITY,
-  REMOVE_FROM_ENTITY,
-  USERS_OF_ENTITY,
+  ASSIGN_ROLES_TO_USERS,
+  KNOWN_USERS,
+  ME,
+  REMOVE_ROLE,
+  ROLES,
+  USER,
+  USERS,
 } from '../queries/iam-queries';
-import {
-  IamApolloClientService,
-  IamLuigiContextService,
-  LuigiClient,
-} from '../services';
-import { TestUtils } from '../test';
+import { IamApolloClientService } from './apollo';
+import { IamLuigiContextService } from './luigi';
 import { MemberService } from './member.service';
-import { TeamService } from './team.service';
-import { TestBed, fakeAsync } from '@angular/core/testing';
-import { mock } from 'jest-mock-extended';
-import { MockProvider } from 'ng-mocks';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-
-const mockContext = {
-  parentNavigationContexts: ['project', 'projects'],
-  portalContext: {
-    iamEntityConfig: `{
-      "team": { "contextProperty": "teamId" },
-      "project": { "contextProperty": "projectId" }
-    }`,
-  },
-  token: 'some-token',
-  tenantId: 'tenantId',
-  projectId: 'projectId',
-};
 
 describe('MemberService', () => {
   let service: MemberService;
 
+  const mockApollo = {
+    query: jest.fn(),
+    mutate: jest.fn(),
+  };
+
+  const mockApolloClientService = {
+    apollo: jest.fn(() => of(mockApollo)),
+  };
+
+  const mockLuigiContextService = {
+    contextObservable: jest.fn(() =>
+      of({
+        context: {
+          resourceDefinition: {
+            group: 'core.platform-mesh.io',
+            kind: 'Account',
+            scope: 'Namespaced',
+          },
+          entityName: 'account1',
+          namespaceId: 'test-ns',
+          kcpPath: 'root:account1',
+        },
+      }),
+    ),
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        MockProvider(IamLuigiContextService, {
-          contextObservable: jest
-            .fn()
-            .mockReturnValue(of({ context: mockContext })),
-        }),
-        MockProvider(IamApolloClientService),
-        MockProvider(LuigiClient),
-        MockProvider(TeamService),
+        MemberService,
+        { provide: IamApolloClientService, useValue: mockApolloClientService },
+        { provide: IamLuigiContextService, useValue: mockLuigiContextService },
       ],
     });
+
     service = TestBed.inject(MemberService);
+    jest.clearAllMocks();
   });
 
-  it('should add multiple members to project', fakeAsync(() => {
-    const user = mock<User>({ userId: 'userId' });
-    const roles = mock<Role[]>([{ technicalName: 'member' }]);
-    const member: Member = { user, roles };
-    const mutate = jest.fn().mockReturnValue(of({ foo: 'bar' }));
-    TestBed.inject(IamApolloClientService).apollo = jest
-      .fn()
-      .mockReturnValue(of({ mutate }));
-
-    TestUtils.getLastValue(service.addMembersWithFga([member, member, member]));
-
-    expect(mutate).toHaveBeenCalledTimes(3);
-    expect(mutate).toHaveBeenCalledWith({
-      mutation: ASSIGN_ROLE_BINDINGS,
-      variables: {
-        tenantId: mockContext.tenantId,
-        entityType: 'project',
-        entityId: mockContext.projectId,
-        input: [
-          {
-            userId: user.userId,
-            roles: roles.map((role) => role.technicalName),
-          },
-        ],
-      },
-    });
-  }));
-
-  it('should remove member from project', fakeAsync(() => {
-    const mockUser: User = {
-      userId: 'user-a',
-      firstName: 'firstName',
-      lastName: 'lastName',
-      email: 'email@email.com',
-    };
-
-    const removeFromEntity = jest.fn().mockReturnValue(
-      of({
-        data: {
-          removeFromEntity: true,
-        },
-      }),
-    );
-    TestBed.inject(IamApolloClientService).apollo = jest
-      .fn()
-      .mockReturnValue(of({ mutate: removeFromEntity }));
-
-    const result = TestUtils.getLastValue(service.removeFromEntity(mockUser));
-
-    expect(removeFromEntity).toHaveBeenCalledWith({
-      mutation: REMOVE_FROM_ENTITY,
-      variables: {
-        tenantId: mockContext.tenantId,
-        entityType: 'project',
-        entityId: mockContext.projectId,
-        userId: mockUser.userId,
-      },
-    });
-    expect(result).toEqual(true);
-  }));
-
-  it('should remove users without id from invites', fakeAsync(() => {
-    const deleteInvite = jest.fn().mockReturnValue(
-      of({
-        data: {
-          deleteInvite: true,
-        },
-      }),
-    );
-    TestBed.inject(IamApolloClientService).apollo = jest
-      .fn()
-      .mockReturnValue(of({ mutate: deleteInvite }));
-    const userWithoutId: User = {
-      userId: undefined,
-      email: 'user@sap.com',
-    };
-    const result = TestUtils.getLastValue(
-      service.removeFromEntity(userWithoutId),
+  it('users() should call apollo.query with correct variables', (done) => {
+    mockApollo.query.mockReturnValue(
+      of({ data: { users: { items: [], total: 0 } } }),
     );
 
-    expect(deleteInvite).toHaveBeenCalledWith({
-      mutation: DELETE_INVITE,
-      variables: {
-        tenantId: mockContext.tenantId,
-        invite: {
-          email: 'user@sap.com',
-          entity: {
-            entityType: 'project',
-            entityId: mockContext.projectId,
-          },
-          roles: [],
-        },
-      },
-    });
-    expect(result).toEqual(true);
-  }));
-
-  it('should allow leaving', fakeAsync(() => {
-    const mutate = jest.fn().mockReturnValue(of({ data: {} }));
-    TestBed.inject(IamApolloClientService).apollo = jest
-      .fn()
-      .mockReturnValue(of({ mutate }));
-
-    TestUtils.getLastValue(service.leaveEntity());
-
-    expect(mutate).toHaveBeenCalledWith({
-      mutation: LEAVE_ENTITY,
-      variables: {
-        tenantId: mockContext.tenantId,
-        entityType: 'project',
-        entityId: mockContext.projectId,
-      },
-    });
-  }));
-
-  describe('usersOfEntity', () => {
-    let apolloClientServiceMock: IamApolloClientService;
-
-    beforeEach(() => {
-      apolloClientServiceMock = TestBed.inject(IamApolloClientService);
-    });
-
-    it('should fetch users with default parameters', fakeAsync(() => {
-      const mockGrantedUsers: GrantedUsers = {
-        users: [],
-        pageInfo: {
-          totalCount: 0,
-          ownerCount: 0,
-        },
-      };
-
-      const query = jest.fn().mockReturnValue(
-        of({
-          data: {
-            usersOfEntity: mockGrantedUsers,
-          },
-        }),
-      );
-
-      apolloClientServiceMock.apollo = jest.fn().mockReturnValue(of({ query }));
-
-      const result = TestUtils.getLastValue(service.usersOfEntity());
-
-      expect(query).toHaveBeenCalledWith({
-        query: USERS_OF_ENTITY,
+    service.users().subscribe((result) => {
+      expect(result).toEqual({ items: [], total: 0 });
+      expect(mockApollo.query).toHaveBeenCalledWith({
+        query: USERS,
         variables: {
-          tenantId: mockContext.tenantId,
-          entity: {
-            entityType: 'project',
-            entityId: mockContext.projectId,
+          context: {
+            group: 'core.platform-mesh.io',
+            kind: 'Account',
+            resource: { name: 'account1', namespace: 'test-ns' },
+            accountPath: 'root',
           },
-          limit: 10,
-          page: 1,
-          showInvitees: false,
-          searchTerm: undefined,
-          roles: [],
+          roleFilters: undefined,
+          sortBy: undefined,
+          page: undefined,
         },
         fetchPolicy: 'no-cache',
       });
-      expect(result).toEqual(mockGrantedUsers);
-    }));
+      done();
+    });
+  });
 
-    it('should fetch users with custom parameters', fakeAsync(() => {
-      const mockGrantedUsers: GrantedUsers = {
-        users: [],
-        pageInfo: {
-          totalCount: 0,
-          ownerCount: 0,
-        },
-      };
+  it('knownUsers() should query known users', (done) => {
+    mockApollo.query.mockReturnValue(
+      of({ data: { knownUsers: { items: [], total: 0 } } }),
+    );
 
-      const mockRoles: Role[] = [
-        {
-          technicalName: 'admin',
-          displayName: 'Administrator',
-        },
-      ];
-
-      const query = jest.fn().mockReturnValue(
-        of({
-          data: {
-            usersOfEntity: mockGrantedUsers,
-          },
-        }),
-      );
-
-      apolloClientServiceMock.apollo = jest.fn().mockReturnValue(of({ query }));
-
-      const result = TestUtils.getLastValue(
-        service.usersOfEntity({
-          limit: 20,
-          page: 2,
-          showInvitees: true,
-          searchTerm: 'john',
-          roles: mockRoles,
-        }),
-      );
-
-      expect(query).toHaveBeenCalledWith({
-        query: USERS_OF_ENTITY,
+    service.knownUsers().subscribe((result) => {
+      expect(result).toEqual({ items: [], total: 0 });
+      expect(mockApollo.query).toHaveBeenCalledWith({
+        query: KNOWN_USERS,
         variables: {
-          tenantId: mockContext.tenantId,
-          entity: {
-            entityType: 'project',
-            entityId: mockContext.projectId,
+          sortBy: undefined,
+          page: undefined,
+        },
+        fetchPolicy: 'no-cache',
+      });
+      done();
+    });
+  });
+
+  it('user() should query user by id', (done) => {
+    mockApollo.query.mockReturnValue(of({ data: { user: { userId: 'u1' } } }));
+
+    service.user('u1').subscribe((result) => {
+      expect(result).toEqual({ userId: 'u1' });
+      expect(mockApollo.query).toHaveBeenCalledWith({
+        query: USER,
+        variables: { userId: 'u1' },
+        fetchPolicy: 'no-cache',
+      });
+      done();
+    });
+  });
+
+  it('me() should query current user', (done) => {
+    mockApollo.query.mockReturnValue(of({ data: { me: { userId: 'me' } } }));
+
+    service.me().subscribe((result) => {
+      expect(result).toEqual({ userId: 'me' });
+      expect(mockApollo.query).toHaveBeenCalledWith({
+        query: ME,
+        fetchPolicy: 'no-cache',
+      });
+      done();
+    });
+  });
+
+  it('roles() should query roles with context', (done) => {
+    mockApollo.query.mockReturnValue(of({ data: { roles: [] } }));
+
+    service.roles().subscribe((result) => {
+      expect(result).toEqual([]);
+      expect(mockApollo.query).toHaveBeenCalledWith({
+        query: ROLES,
+        variables: {
+          context: {
+            group: 'core.platform-mesh.io',
+            kind: 'Account',
+            resource: { name: 'account1', namespace: 'test-ns' },
+            accountPath: 'root',
           },
-          limit: 20,
-          page: 2,
-          showInvitees: true,
-          searchTerm: 'john',
-          roles: [
-            {
-              technicalName: 'admin',
-              displayName: 'Administrator',
+        },
+        fetchPolicy: 'no-cache',
+      });
+      done();
+    });
+  });
+
+  it('assignRolesToUser() should call mutation', (done) => {
+    mockApollo.mutate.mockReturnValue(
+      of({ data: { assignRolesToUsers: { success: true } } }),
+    );
+
+    const user = { userId: 'u1' };
+    const roles = [{ id: 'r1' }];
+
+    service
+      .assignRolesToUser(user as any, roles as any)
+      .subscribe((response) => {
+        expect(response).toEqual({ success: true });
+        expect(mockApollo.mutate).toHaveBeenCalledWith({
+          mutation: ASSIGN_ROLES_TO_USERS,
+          variables: {
+            context: {
+              group: 'core.platform-mesh.io',
+              kind: 'Account',
+              resource: { name: 'account1', namespace: 'test-ns' },
+              accountPath: 'root',
             },
-          ],
-        },
-        fetchPolicy: 'no-cache',
-      });
-      expect(result).toEqual(mockGrantedUsers);
-    }));
-
-    it('should handle empty roles array correctly', fakeAsync(() => {
-      const mockGrantedUsers: GrantedUsers = {
-        users: [],
-        pageInfo: {
-          totalCount: 0,
-          ownerCount: 0,
-        },
-      };
-
-      const query = jest.fn().mockReturnValue(
-        of({
-          data: {
-            usersOfEntity: mockGrantedUsers,
+            changes: [{ userId: 'u1', roles: ['r1'] }],
           },
-        }),
-      );
+        });
+        done();
+      });
+  });
 
-      apolloClientServiceMock.apollo = jest.fn().mockReturnValue(of({ query }));
+  it('removeRole() should call mutation', (done) => {
+    mockApollo.mutate.mockReturnValue(
+      of({ data: { removeRole: { success: true } } }),
+    );
 
-      const result = TestUtils.getLastValue(
-        service.usersOfEntity({
-          roles: [],
-        }),
-      );
+    const user = { userId: 'u1' };
 
-      expect(query).toHaveBeenCalledWith({
-        query: USERS_OF_ENTITY,
+    service.removeRole(user as any, 'r1').subscribe((result) => {
+      expect(result).toEqual({ success: true });
+      expect(mockApollo.mutate).toHaveBeenCalledWith({
+        mutation: REMOVE_ROLE,
         variables: {
-          tenantId: mockContext.tenantId,
-          entity: {
-            entityType: 'project',
-            entityId: mockContext.projectId,
+          context: {
+            group: 'core.platform-mesh.io',
+            kind: 'Account',
+            resource: { name: 'account1', namespace: 'test-ns' },
+            accountPath: 'root',
           },
-          limit: 10,
-          page: 1,
-          showInvitees: false,
-          searchTerm: undefined,
-          roles: [],
+          input: { userId: 'u1', role: 'r1' },
         },
-        fetchPolicy: 'no-cache',
       });
-      expect(result).toEqual(mockGrantedUsers);
-    }));
+      done();
+    });
   });
 
-  describe('navigateToList', () => {
-    let navigate: jest.Mock;
-    beforeEach(() => {
-      navigate = jest.fn();
-      TestBed.inject(LuigiClient).linkManager = jest
-        .fn()
-        .mockReturnValue({ navigate });
+  it('getResourceContext() should build correct context object', () => {
+    const ctx: any = {
+      resourceDefinition: {
+        group: 'core.platform-mesh.io',
+        kind: 'Account',
+        scope: 'Namespaced',
+      },
+      entityName: 'abc',
+      namespaceId: 'ns1',
+      kcpPath: 'root:abc',
+    };
+
+    const result = (service as any).getResourceContext(ctx);
+
+    expect(result).toEqual({
+      group: 'core.platform-mesh.io',
+      kind: 'Account',
+      resource: { name: 'abc', namespace: 'ns1' },
+      accountPath: 'root',
     });
-
-    it('should work for teams', fakeAsync(() => {
-      // @ts-ignore
-      service['entity'] = of('team');
-      service.navigateToList();
-      expect(navigate).toHaveBeenCalledWith('/teams');
-    }));
-
-    it('should work for projects', fakeAsync(() => {
-      // @ts-ignore
-      service['entity'] = of('project');
-      service.navigateToList();
-      expect(navigate).toHaveBeenCalledWith('/projects');
-    }));
   });
-
-  it('should get roles for an entity', fakeAsync(() => {
-    const availableRolesForEntityType = mock<Role[]>();
-    const query = jest.fn().mockReturnValue(
-      of({
-        data: { availableRolesForEntityType },
-      }),
-    );
-    TestBed.inject(IamApolloClientService).apollo = jest
-      .fn()
-      .mockReturnValue(of({ query }));
-
-    const result = TestUtils.getLastValue(
-      service.getAvailableRolesForEntityType(),
-    );
-
-    expect(query).toHaveBeenCalledWith({
-      query: GET_AVAILABLE_ROLES_FOR_ENTITY_TYPE,
-      variables: {
-        tenantId: mockContext.tenantId,
-        entityType: 'project',
-      },
-      fetchPolicy: 'no-cache',
-    });
-    expect(result).toEqual(availableRolesForEntityType);
-  }));
-
-  it('should set the roles of a member', fakeAsync(() => {
-    const user = mock<User>({ userId: 'foo' });
-    const roles = mock<Role[]>([{ technicalName: 'bar' }]);
-    const mutate = jest.fn().mockReturnValue(of({ foo: 'bar' }));
-    TestBed.inject(IamApolloClientService).apollo = jest
-      .fn()
-      .mockReturnValue(of({ mutate }));
-
-    TestUtils.getLastValue(service.setMemberRoles(user, roles, false));
-
-    expect(mutate).toHaveBeenCalledWith({
-      mutation: ASSIGN_ROLE_BINDINGS,
-      variables: {
-        tenantId: mockContext.tenantId,
-        entityType: 'project',
-        entityId: mockContext.projectId,
-        input: [
-          {
-            userId: user.userId,
-            roles: roles.map((role) => role.technicalName),
-          },
-        ],
-      },
-    });
-  }));
 });

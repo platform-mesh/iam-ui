@@ -6,7 +6,7 @@ import {
   User,
   UserConnection,
 } from '../models';
-import { PageInput, ResourceContext, SortByInput } from '../models/resource';
+import { PageInput, ResourceContext, SortByInput } from '../models';
 import {
   ASSIGN_ROLES_TO_USERS,
   KNOWN_USERS,
@@ -19,7 +19,7 @@ import {
 import { IamApolloClientService } from './apollo';
 import { IamLuigiContextService } from './luigi';
 import { Injectable } from '@angular/core';
-import { Observable, combineLatest, first, forkJoin, mergeMap } from 'rxjs';
+import { Observable, combineLatest, first, mergeMap } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable({

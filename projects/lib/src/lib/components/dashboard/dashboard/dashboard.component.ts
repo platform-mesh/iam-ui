@@ -158,13 +158,20 @@ export class DashboardComponent implements OnInit {
     showEditButton: boolean,
     secondaryButtonText: string,
   ): boolean {
-    return showEditButton && secondaryButtonText !== '';
+    return (
+      showEditButton &&
+      typeof secondaryButtonText === 'string' &&
+      secondaryButtonText !== ''
+    );
   }
 
   showStandardEditButton(
     showEditButton: boolean,
     secondaryButtonText: string,
   ): boolean {
-    return showEditButton && secondaryButtonText === '';
+    return (
+      showEditButton &&
+      (secondaryButtonText === '' || typeof secondaryButtonText !== 'string')
+    );
   }
 }

@@ -128,7 +128,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   public iamClaimEntityUrl?: string;
 
   private subscriptions: Subscription = new Subscription();
-  private currentUserId!: string;
+  currentUserId!: string;
   private lockView = false;
 
   members = signal<Member[]>([]);
@@ -167,9 +167,9 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       id: 'sapIllus-Dialog-NoSearchResults',
     },
   };
-  private context!: NodeContext;
-  private currentUser: Member | undefined;
-  private currentUserIsOwner: boolean = false;
+  context!: NodeContext;
+  currentUser: Member | undefined;
+  currentUserIsOwner: boolean = false;
 
   constructor(
     private memberService: MemberService,
