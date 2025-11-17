@@ -77,26 +77,14 @@ describe('UserOverviewHeaderComponent', () => {
     );
   });
 
-  describe('When ngOnInit should call userService.getUser', () => {
-    it.skip('should fetch user with profileUserId from ctx and update user', () => {
+  describe('When ngOnInit should call memberService me - reading the user', () => {
+    it('should fetch user', () => {
       const user = { userId: 'D123456', firstName: 'John' } as User;
-      component.ctx = { profileUserId: 'D123456' } as NodeContext;
       (mockUserService.me as jest.Mock).mockReturnValue(of(user));
 
-      fixture.detectChanges();
+      component.ngOnInit();
 
-      expect(mockUserService.me).toHaveBeenCalledWith('D123456');
-      expect(component.user()).toBe(user);
-    });
-
-    it.skip('should fetch user with empty string if ctx or profileUserId is missing', () => {
-      const user = { userId: 'D000000', firstName: 'Jane' } as User;
-      component.ctx = undefined;
-      (mockUserService.me as jest.Mock).mockReturnValue(of(user));
-
-      fixture.detectChanges();
-
-      expect(mockUserService.me).toHaveBeenCalledWith('');
+      expect(mockUserService.me).toHaveBeenCalled();
       expect(component.user()).toBe(user);
     });
   });
