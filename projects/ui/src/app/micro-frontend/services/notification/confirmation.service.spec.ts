@@ -2,9 +2,8 @@ import {
   ConfirmationDialogDecision,
   ConfirmationService,
 } from './confirmation.service';
-import { LuigiClient, MemberService, User } from '@platform-mesh/iam-lib';
+import { LuigiClient, User } from '@platform-mesh/iam-lib';
 import { mock } from 'jest-mock-extended';
-import { of } from 'rxjs';
 
 describe('ConfirmationService', () => {
   const luigiClientMock = mock<LuigiClient>({
@@ -15,13 +14,8 @@ describe('ConfirmationService', () => {
     }),
   });
 
-  const memberServiceMock = mock<MemberService>({
-    currentEntity: jest.fn().mockReturnValue(of('project')),
-  });
-
   const confirmationService: ConfirmationService = new ConfirmationService(
     luigiClientMock,
-    memberServiceMock,
   );
 
   afterEach(() => {
@@ -40,21 +34,18 @@ describe('ConfirmationService', () => {
 
     await confirmationService.showRemoveMemberDialog(
       mock<User>({ firstName: 'Mr', lastName: 'Bob' }),
-      'aProject',
     );
     expect(confirmationModalSpy).toHaveBeenCalledTimes(1);
     expect(confirmationModalSpy).toHaveBeenCalledWith({
       type: 'warning',
       header: 'Remove Member',
-      body:
-        'Are you sure you want to remove the member <b>Mr Bob</b>?<br/><br/>' +
-        'The member will no longer have access to the project <b>aProject</b>.',
+      body: 'Are you sure you want to remove the member: </br><b>Mr Bob</b>?<br/><br/>',
       buttonDismiss: 'Cancel',
       buttonConfirm: 'Remove',
     });
   });
 
-  it('should provide a leave project confirmation dialog', async () => {
+  it('should provide a leave confirmation dialog', async () => {
     const confirmationModalSpy = jest.spyOn(
       luigiClientMock.uxManager(),
       'showConfirmationModal',
@@ -66,9 +57,7 @@ describe('ConfirmationService', () => {
     expect(confirmationModalSpy).toHaveBeenCalledWith({
       type: 'warning',
       header: 'Leave',
-      body:
-        'Are you sure you want to leave?<br/><br/>' +
-        'You will no longer have access to the project <b>aProject</b>.',
+      body: 'Are you sure you want to leave?',
       buttonDismiss: 'Cancel',
       buttonConfirm: 'Leave',
     });

@@ -1,6 +1,15 @@
-import { SearchResultItem } from '../../models/search/search-result.item';
-import { Injectable } from '@angular/core';
 import { LuigiClient } from '../luigi';
+import { Injectable } from '@angular/core';
+
+interface SearchResultItemLink {
+  url: string;
+  external: boolean;
+}
+
+interface SearchResultItem {
+  displayName: string;
+  link?: SearchResultItemLink;
+}
 
 @Injectable({
   providedIn: 'root',

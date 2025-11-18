@@ -28,14 +28,13 @@ import { LuigiClient } from '@luigi-project/client/luigi-element';
 import {
   AvatarProviderService,
   DashboardSidebarItemComponent,
-  GrantedUsers,
   AvatarComponent as IAMAvatarComponent,
   IamLuigiContextService,
   MemberService,
   NodeContext,
-  ProjectGroupTechnicalNames,
   RolesTechnicalName,
   User,
+  UserConnection,
 } from '@platform-mesh/iam-lib';
 import { map } from 'rxjs';
 
@@ -65,10 +64,7 @@ import { map } from 'rxjs';
 })
 export class MembersSidebarComponent implements OnInit {
   private avatarProviderService = inject(AvatarProviderService);
-  rolesAllowedForEdit = [
-    ProjectGroupTechnicalNames.PROJECT_OWNER,
-    RolesTechnicalName.OWNER,
-  ];
+  rolesAllowedForEdit = [RolesTechnicalName.OWNER];
   members: User[] = [];
   loading = true;
   ctx?: NodeContext;
@@ -102,13 +98,11 @@ export class MembersSidebarComponent implements OnInit {
 
   getUsersOfEntity(): void {
     this.memberService
-      .usersOfEntity({
-        limit: -1,
-        page: 1,
-        showInvitees: false,
+      .users({
+        page: { page: 1, limit: -1 },
       })
       .pipe(
-        map((grantedUsers: GrantedUsers) =>
+        map((grantedUsers: UserConnection) =>
           grantedUsers.users.map((u) => u.user),
         ),
       )
@@ -120,6 +114,9 @@ export class MembersSidebarComponent implements OnInit {
   }
 
   public getUserAvatarImgUrl(user: User): Promise<string | undefined> {
-    return this.avatarProviderService.getAvatarImageUrl(user, this.ctx?.portalContext.avatarImgUrl);
+    return this.avatarProviderService.getAvatarImageUrl(
+      user,
+      this.ctx?.portalContext.avatarImgUrl,
+    );
   }
 }

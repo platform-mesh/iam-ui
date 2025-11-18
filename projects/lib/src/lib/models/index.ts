@@ -5,3 +5,8 @@ export * from './portal-context';
 export * from './custom-button';
 export * from './header';
 export * from './status-info';
+export * from './resource';
+export * from './users';
+export * from './member';
+export * from './role';
+export * from './groups';

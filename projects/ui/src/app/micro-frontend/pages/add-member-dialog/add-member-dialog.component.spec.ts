@@ -1,434 +1,667 @@
-import { ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE } from '../members-page/string-variables';
 import {
   AddMemberDialogComponent,
   DropDownValue,
 } from './add-member-dialog.component';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ChangeDetectorRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { MultiComboboxSelectionChangeEvent } from '@fundamental-ngx/core';
 import {
   LuigiClient,
-  LuigiDialogUtil,
   Member,
   MemberService,
   NotificationService,
   Role,
-  SearchService,
-  SuggestedUser,
-  SuggestedUserResponse,
-  TenantInfoService,
   User,
-  UserService,
+  UserConnection,
 } from '@platform-mesh/iam-lib';
-import { MockProvider } from 'ng-mocks';
-import { Subject, Subscription, of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('AddMemberDialogComponent', () => {
   let component: AddMemberDialogComponent;
-  let fixture: ComponentFixture<AddMemberDialogComponent>;
+  let memberService: jest.Mocked<MemberService>;
+  let notificationService: jest.Mocked<NotificationService>;
+  let luigiClient: jest.Mocked<LuigiClient>;
+  let cdr: jest.Mocked<ChangeDetectorRef>;
 
-  let mockAddMembersToProject: Subject<Member[]>;
-  let mockGetAvailableRoles: Subject<Role[]>;
-  let mockGetUsers: Subject<User[]>;
-  let mockMembersService: Partial<MemberService>;
-  let mockNotificationService: Partial<NotificationService>;
-  let mockLuigiClient: Partial<LuigiClient>;
+  const mockRoles: Role[] = [
+    { id: 'owner', displayName: 'Owner' } as Role,
+    { id: 'member', displayName: 'Member' } as Role,
+    { id: 'viewer', displayName: 'Viewer' } as Role,
+  ];
 
-  const mockUserA: SuggestedUser = {
-    id: 'tenantID/userAId',
-    userId: 'userAId',
-    email: 'hundekuchen@sap.com',
-    firstName: 'userAFirstName',
-    lastName: 'userALastName',
-  };
-  const mockUserB: SuggestedUser = {
-    id: 'tenantID/userBId',
-    userId: 'userBId',
-    email: 'email@sap.com',
-    firstName: 'userBFirstName',
-    lastName: 'userBLastName',
-  };
-  const mockSuggestedUserResponse: SuggestedUserResponse = {
-    docs: [mockUserA, mockUserB],
-    numFound: 2,
-    responseSize: 2,
-    status: 0,
-  };
+  const mockUser: User = {
+    userId: 'user-123',
+    email: 'test@example.com',
+    firstName: 'John',
+    lastName: 'Doe',
+  } as User;
 
-  const defaultRole = { displayName: 'Member', technicalName: 'member' };
-  const ownerRole = { displayName: 'Owner', technicalName: 'owner' };
-  const allAvailableRoles = [defaultRole, ownerRole];
+  const mockMember: Member = {
+    user: mockUser,
+    roles: [mockRoles[1]],
+  } as Member;
 
-  const mockMembersA: Member = { user: mockUserA, roles: [defaultRole] };
-  const mockMembersB: Member = { user: mockUserB, roles: [defaultRole] };
+  const mockUserConnection: UserConnection = {
+    users: [mockMember],
+    pageInfo: {
+      totalCount: 1,
+    },
+  } as UserConnection;
 
   beforeEach(() => {
-    mockAddMembersToProject = new Subject<Member[]>();
-    mockGetAvailableRoles = new Subject<Role[]>();
-    mockGetUsers = new Subject<User[]>();
-    mockNotificationService = { openErrorStrip: jest.fn() };
-    mockMembersService = {
-      addMembersWithFga: jest.fn().mockReturnValue(mockAddMembersToProject),
-      currentEntity: jest.fn().mockReturnValue(of('project')),
-      getAvailableRolesForEntityType: jest
-        .fn()
-        .mockReturnValue(mockGetAvailableRoles),
-    };
-    mockLuigiClient = {
-      linkManager: jest.fn().mockReturnValue({
-        goBack: jest.fn(),
-      }),
+    memberService = {
+      roles: jest.fn().mockReturnValue(of(mockRoles)),
+      knownUsers: jest.fn().mockReturnValue(of(mockUserConnection)),
+      assignRolesToUser: jest.fn().mockReturnValue(of({})),
+    } as any;
+
+    notificationService = {
+      openErrorStrip: jest.fn(),
+      openSuccessToast: jest.fn(),
+    } as any;
+
+    const linkManager = {
+      goBack: jest.fn(),
     };
 
-    void TestBed.configureTestingModule({
+    luigiClient = {
+      linkManager: jest.fn().mockReturnValue(linkManager),
+    } as any;
+
+    cdr = {
+      detectChanges: jest.fn(),
+    } as any;
+
+    TestBed.configureTestingModule({
       providers: [
-        MockProvider(LuigiClient, mockLuigiClient),
-        MockProvider(LuigiDialogUtil, {
-          manageLuigiBackdrops: jest.fn(),
-        }),
-        MockProvider(UserService, {
-          getUsers: jest.fn().mockReturnValue(mockGetUsers),
-        }),
-        MockProvider(SearchService, {
-          getSuggestedUsersForAccountWithFga: jest
-            .fn()
-            .mockReturnValue(of(mockSuggestedUserResponse)),
-        }),
-        MockProvider(MemberService, mockMembersService),
-        MockProvider(NotificationService, mockNotificationService),
-        MockProvider(TenantInfoService, {
-          tenantInfo: jest
-            .fn()
-            .mockReturnValue(
-              of({ emailDomains: ['sap.com', 'global.corp.sap'] }),
-            ),
-        }),
+        AddMemberDialogComponent,
+        { provide: MemberService, useValue: memberService },
+        { provide: NotificationService, useValue: notificationService },
+        { provide: LuigiClient, useValue: luigiClient },
+        { provide: ChangeDetectorRef, useValue: cdr },
       ],
-      imports: [AddMemberDialogComponent],
-    }).compileComponents();
-    Subscription.prototype.unsubscribe = jest.fn();
-    fixture = TestBed.createComponent(AddMemberDialogComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    });
 
-    mockGetAvailableRoles.next(allAvailableRoles);
+    component = TestBed.inject(AddMemberDialogComponent);
   });
 
-  it('should call filter after debounce when searchInput emits', fakeAsync(() => {
-    const filterSpy = jest.spyOn(component, 'filter');
+  describe('ngOnInit', () => {
+    it('should initialize roles and set default role', async () => {
+      await component.ngOnInit();
 
-    component.ngOnInit();
+      expect(memberService.roles).toHaveBeenCalled();
+      expect(component.availableRoles).toEqual(mockRoles);
+      expect(component.defaultRole?.id).toBe('member');
+    });
 
-    component.searchInput.next('hello');
+    it('should setup search input debounce', async () => {
+      await component.ngOnInit();
+      jest.spyOn(component, 'filter');
 
-    expect(filterSpy).not.toHaveBeenCalled();
+      component.searchInput.next('test');
 
-    tick(500);
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith('hello');
-  }));
-
-  describe('when roles are emitted', () => {
-    it('should initialize availableRoles and defaultRole is member', () => {
-      mockGetAvailableRoles.next(allAvailableRoles);
-
-      expect(component.availableRoles).toEqual(allAvailableRoles);
-      expect(component.defaultRole).toEqual(defaultRole);
+      expect(component.filter).toHaveBeenCalledWith('test');
     });
   });
-
-  describe('when addMembers is called', () => {
-    describe('and addMembersToProject succeed', () => {
-      it('should add expected members and close dialog with added userId', fakeAsync(() => {
-        component.selectedMembers = [mockMembersA];
-
-        component.addMembers();
-        mockAddMembersToProject.next([mockMembersA]);
-        tick();
-
-        expect(mockMembersService.addMembersWithFga).toHaveBeenCalledWith([
-          mockMembersA,
-        ]);
-        expect(mockLuigiClient.linkManager!().goBack).toHaveBeenCalledWith({
-          addedMembers: [mockUserA],
-        });
-      }));
-
-      it('should not close dialog if no members were added', () => {
-        component.selectedMembers = [];
-
-        component.addMembers();
-
-        expect(mockMembersService.addMembersWithFga).toHaveBeenCalledTimes(0);
-        expect(component.touched).toEqual(true);
-      });
-
-      describe('and addMembersToProject fails', () => {
-        it('should call dialog dismiss with "error"', fakeAsync(() => {
-          component.selectedMembers = [mockMembersA];
-          component.addMembers();
-          mockAddMembersToProject.error(new Error('ups'));
-          tick();
-
-          expect(mockLuigiClient.linkManager!().goBack).toHaveBeenCalledWith({
-            error: 'Error: ups',
-          });
-        }));
-      });
-    });
-  });
-
-  describe('when deleteMemberFromList is called', () => {
-    it.each([
-      [[mockMembersA], mockUserA.userId, []],
-      [[mockMembersA], mockUserB.userId, [mockMembersA]],
-      [[mockMembersA, mockMembersB], mockUserB.userId, [mockMembersA]],
-      [[mockMembersA, mockMembersB], undefined, [mockMembersA, mockMembersB]],
-    ])(
-      'removes users from selectedMembers for passed userId',
-      (
-        selectedMembers: Member[],
-        userIdToDelete: string | undefined,
-        expectedMembers: Member[],
-      ) => {
-        component.selectedMembers = selectedMembers;
-
-        component.deleteMemberFromList(userIdToDelete);
-
-        expect(component.selectedMembers).toEqual(expectedMembers);
-      },
-    );
-  });
-
-  describe('when deleteInviteeFromList is called', () => {
-    it.each([
-      [[mockMembersA], mockUserA.email, []],
-      [[mockMembersA], mockUserB.email, [mockMembersA]],
-      [[mockMembersA, mockMembersB], mockUserB.email, [mockMembersA]],
-      [[mockMembersA, mockMembersB], undefined, [mockMembersA, mockMembersB]],
-    ])(
-      'removes users from selectedInvitees for passed email',
-      (
-        selectedInvitees: Member[],
-        emailToDelete: string | undefined,
-        expectedSelectedInvitees: Member[],
-      ) => {
-        component.selectedInvitees = selectedInvitees;
-
-        component.deleteInviteeFromList(emailToDelete);
-
-        expect(component.selectedInvitees).toEqual(expectedSelectedInvitees);
-      },
-    );
-  });
-
-  it('should push lowercased value to searchInput', fakeAsync(() => {
-    const nextSpy = jest.spyOn(component.searchInput, 'next');
-
-    component.inputChange('HelloWorld');
-
-    expect(nextSpy).toHaveBeenCalledWith('helloworld');
-  }));
 
   describe('onRoleChange', () => {
-    let potentialMember: Member;
-    let eventMock: MultiComboboxSelectionChangeEvent;
-    let notificationService: NotificationService;
-
-    beforeEach(() => {
-      potentialMember = {
-        user: {
-          userId: 'u1',
-          email: 'u1@sap.com',
-          firstName: '',
-          lastName: '',
-        },
-        roles: [defaultRole],
-      };
-
-      eventMock = {
-        selectedItems: [] as Role[],
+    it('should update member roles when roles selected', () => {
+      const potentialMember: Member = {
+        user: mockUser,
+        roles: [mockRoles[1]],
+      } as Member;
+      const event = {
+        selectedItems: [mockRoles[0], mockRoles[2]],
         source: { setValue: jest.fn() },
       } as unknown as MultiComboboxSelectionChangeEvent;
 
-      notificationService = TestBed.inject(NotificationService);
-      jest
-        .spyOn(notificationService, 'openErrorStrip')
-        .mockImplementation(jest.fn());
+      component.onRoleChange(event, potentialMember);
+
+      expect(potentialMember.roles).toEqual([mockRoles[0], mockRoles[2]]);
     });
 
-    it('should update roles when selectedItems is not empty', () => {
-      const newRoles: Role[] = [ownerRole];
-      eventMock.selectedItems = newRoles;
+    it('should show error and reset when no roles selected', () => {
+      const potentialMember: Member = {
+        user: mockUser,
+        roles: [mockRoles[1]],
+      } as Member;
+      const event = {
+        selectedItems: [],
+        source: { setValue: jest.fn() },
+      } as unknown as MultiComboboxSelectionChangeEvent;
 
-      component.onRoleChange(
-        eventMock as unknown as MultiComboboxSelectionChangeEvent,
-        potentialMember,
-      );
+      component.onRoleChange(event, potentialMember);
 
-      expect(potentialMember.roles).toEqual(newRoles);
-      expect(mockNotificationService.openErrorStrip).not.toHaveBeenCalled();
-      expect(eventMock.source.setValue).not.toHaveBeenCalled();
-    });
-
-    it('should call error and restore roles when selectedItems is empty', () => {
-      const oldRoles = [...potentialMember.roles];
-      eventMock.selectedItems = [];
-
-      component.onRoleChange(eventMock, potentialMember);
-
-      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
-        ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
-      );
-      expect(eventMock.source.setValue).toHaveBeenCalledWith(oldRoles);
-      expect(potentialMember.roles).toEqual(oldRoles);
+      expect(notificationService.openErrorStrip).toHaveBeenCalled();
+      expect(event.source.setValue).toHaveBeenCalledWith([mockRoles[1]]);
     });
   });
 
-  describe('when filterUsers is called', () => {
-    it.each([
-      [mockUserA.email, [{ user: mockUserA }], 1],
-      [mockUserB.email, [{ user: mockUserB }], 1],
-      ['unknown.user@sap.com', [{ email: 'unknown.user@sap.com' }], 0],
-      ['non-email search term', [{ user: mockUserA }, { user: mockUserB }], 2],
-    ])(
-      'set dropDownValues and the length with users fulfilling the search term',
-      (
-        searchTerm: string,
-        expectedDropDownValues: DropDownValue[],
-        expectedUsersCollectionLength: number,
-      ) => {
-        component.filter(searchTerm);
+  describe('selectedRoles', () => {
+    it('should return filtered roles for member', async () => {
+      await component.ngOnInit();
+      const member: Member = {
+        user: mockUser,
+        roles: [{ id: 'owner' } as Role, { id: 'viewer' } as Role],
+      } as Member;
 
-        expect(component.dropDownValues).toEqual(expectedDropDownValues);
-        expect(component.filteredUsersCollectionLength).toEqual(
-          expectedUsersCollectionLength,
-        );
-      },
-    );
+      const result = component.selectedRoles(member);
+
+      expect(result).toHaveLength(2);
+      expect(result.map((r) => r.id)).toEqual(['owner', 'viewer']);
+    });
+
+    it('should return empty array when member has no roles', async () => {
+      await component.ngOnInit();
+      const member: Member = {
+        user: mockUser,
+        roles: [],
+      } as Member;
+
+      const result = component.selectedRoles(member);
+
+      expect(result).toEqual([]);
+    });
   });
 
-  describe('when itemClicked is called', () => {
-    it.each([
-      {
-        selectedMembers: [],
-        selectedInvitees: [],
-        value: { user: mockUserA },
-        expectedSelectedMembers: [mockMembersA],
-        expectedSelectedInvitees: [],
-      },
-      {
-        selectedMembers: [mockMembersA],
-        selectedInvitees: [],
-        value: { user: mockUserA } as DropDownValue,
-        expectedSelectedMembers: [mockMembersA],
-        expectedSelectedInvitees: [],
-      },
-      {
-        selectedMembers: [mockMembersA],
-        selectedInvitees: [],
-        value: { user: mockUserB },
-        expectedSelectedMembers: [mockMembersA, mockMembersB],
-        expectedSelectedInvitees: [],
-      },
-      {
-        selectedMembers: [mockMembersA],
-        selectedInvitees: [],
-        value: { noData: true },
-        expectedSelectedMembers: [mockMembersA],
-        expectedSelectedInvitees: [],
-      },
-      {
-        selectedMembers: [mockMembersA],
-        selectedInvitees: [],
-        value: { email: 'new-email@sap.com' },
-        expectedSelectedMembers: [mockMembersA],
-        expectedSelectedInvitees: [
-          {
-            user: { email: 'new-email@sap.com', userId: '' },
-            roles: [defaultRole],
-          },
-        ],
-      },
-    ])(
-      'add users to selectedMembers or selectedInvitees for a provided user',
-      ({
-        selectedMembers,
-        selectedInvitees,
-        value,
-        expectedSelectedMembers,
-        expectedSelectedInvitees,
-      }) => {
-        mockGetAvailableRoles.next(allAvailableRoles);
+  describe('addMembers', () => {
+    it('should add members successfully', async () => {
+      await component.ngOnInit();
+      component.selectedMembers = [mockMember];
 
-        component.selectedMembers = selectedMembers;
-        component.selectedInvitees = selectedInvitees;
+      component.addMembers();
 
-        component.itemClicked(value as DropDownValue);
+      expect(component.touched).toBe(true);
+      expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
+        mockUser,
+        mockMember.roles,
+      );
+    });
 
-        expect(component.selectedMembers).toEqual(expectedSelectedMembers);
-        expect(component.selectedInvitees).toEqual(expectedSelectedInvitees);
-      },
-    );
+    it('should add invitees successfully', async () => {
+      await component.ngOnInit();
+      const invitee: Member = {
+        user: { email: 'invitee@example.com', userId: '' } as User,
+        roles: [mockRoles[1]],
+      } as Member;
+      component.selectedInvitees = [invitee];
+
+      component.addMembers();
+
+      expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
+        invitee.user,
+        invitee.roles,
+      );
+    });
+
+    it('should add both members and invitees', async () => {
+      await component.ngOnInit();
+      const invitee: Member = {
+        user: { email: 'invitee@example.com', userId: '' } as User,
+        roles: [mockRoles[1]],
+      } as Member;
+      component.selectedMembers = [mockMember];
+      component.selectedInvitees = [invitee];
+
+      component.addMembers();
+
+      expect(memberService.assignRolesToUser).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not add when no members selected', () => {
+      component.selectedMembers = [];
+      component.selectedInvitees = [];
+
+      component.addMembers();
+
+      expect(component.touched).toBe(true);
+      expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
+    });
+
+    it('should close dialog with success on successful addition', async () => {
+      await component.ngOnInit();
+      component.selectedMembers = [mockMember];
+      const linkManager = luigiClient.linkManager();
+
+      component.addMembers();
+
+      expect(linkManager.goBack).toHaveBeenCalledWith({ addedMembers: [{}] });
+    });
+
+    it('should close dialog with error on failure', async () => {
+      await component.ngOnInit();
+      memberService.assignRolesToUser.mockReturnValue(
+        throwError(() => new Error('Add failed')),
+      );
+      component.selectedMembers = [mockMember];
+      const linkManager = luigiClient.linkManager();
+
+      component.addMembers();
+
+      expect(linkManager.goBack).toHaveBeenCalledWith({
+        error: expect.stringContaining('Add failed'),
+      });
+    });
+
+    it('should close dialog with error when no members added', async () => {
+      await component.ngOnInit();
+      memberService.assignRolesToUser.mockReturnValue(of(undefined));
+      component.selectedMembers = [mockMember];
+      const linkManager = luigiClient.linkManager();
+
+      component.addMembers();
+
+      expect(linkManager.goBack).toHaveBeenCalledWith({ error: undefined });
+    });
+  });
+
+  describe('deleteMemberFromList', () => {
+    it('should delete member from list', () => {
+      component.selectedMembers = [mockMember];
+
+      component.deleteMemberFromList('user-123');
+
+      expect(component.selectedMembers).toHaveLength(0);
+    });
+
+    it('should not delete when userId is undefined', () => {
+      component.selectedMembers = [mockMember];
+
+      component.deleteMemberFromList(undefined);
+
+      expect(component.selectedMembers).toHaveLength(1);
+    });
+
+    it('should not delete when member not found', () => {
+      component.selectedMembers = [mockMember];
+
+      component.deleteMemberFromList('non-existent');
+
+      expect(component.selectedMembers).toHaveLength(1);
+    });
+  });
+
+  describe('deleteInviteeFromList', () => {
+    it('should delete invitee from list', () => {
+      const invitee: Member = {
+        user: { email: 'test@example.com', userId: '' } as User,
+        roles: [],
+      } as Member;
+      component.selectedInvitees = [invitee];
+
+      component.deleteInviteeFromList('test@example.com');
+
+      expect(component.selectedInvitees).toHaveLength(0);
+    });
+
+    it('should not delete when email is undefined', () => {
+      const invitee: Member = {
+        user: { email: 'test@example.com', userId: '' } as User,
+        roles: [],
+      } as Member;
+      component.selectedInvitees = [invitee];
+
+      component.deleteInviteeFromList(undefined);
+
+      expect(component.selectedInvitees).toHaveLength(1);
+    });
+
+    it('should not delete when invitee not found', () => {
+      const invitee: Member = {
+        user: { email: 'test@example.com', userId: '' } as User,
+        roles: [],
+      } as Member;
+      component.selectedInvitees = [invitee];
+
+      component.deleteInviteeFromList('other@example.com');
+
+      expect(component.selectedInvitees).toHaveLength(1);
+    });
+  });
+
+  describe('inputChange', () => {
+    it('should update search input with lowercase', () => {
+      jest.spyOn(component.searchInput, 'next');
+
+      component.inputChange('TEST Search');
+
+      expect(component.searchInput.next).toHaveBeenCalledWith('test search');
+    });
+
+    it('should handle empty search term', () => {
+      jest.spyOn(component.searchInput, 'next');
+
+      component.inputChange('');
+
+      expect(component.searchInput.next).toHaveBeenCalledWith('');
+    });
+  });
+
+  describe('filter', () => {
+    it('should clear dropdown when search term is empty', () => {
+      component.filter('');
+
+      expect(component.dropDownValues).toEqual([]);
+      expect(component.filteredUsersCollectionLength).toBe(0);
+      expect(cdr.detectChanges).toHaveBeenCalled();
+    });
+
+    it('should filter users by search term', () => {
+      component.filter('test');
+
+      expect(memberService.knownUsers).toHaveBeenCalled();
+      expect(component.dropDownValues).toHaveLength(1);
+      expect(component.dropDownValues[0]).toEqual({ user: mockUser });
+    });
+
+    it('should show email option when email not found', () => {
+      memberService.knownUsers.mockReturnValue(
+        of({
+          users: [],
+          pageInfo: { totalCount: 0, ownerCount: 0 },
+        } as UserConnection),
+      );
+
+      component.filter('new@example.com');
+
+      expect(component.dropDownValues).toEqual([{ email: 'new@example.com' }]);
+    });
+
+    it('should show email match when exact email found', () => {
+      component.filter('test@example.com');
+
+      expect(component.dropDownValues[0]).toEqual({ user: mockUser });
+    });
+
+    it('should show no data message for non-email without matches', () => {
+      memberService.knownUsers.mockReturnValue(
+        of({
+          users: [],
+          pageInfo: { totalCount: 0, ownerCount: 0 },
+        } as UserConnection),
+      );
+
+      component.filter('nonexistent');
+
+      expect(component.dropDownValues).toEqual([{ noData: true }]);
+    });
   });
 
   describe('isEmail', () => {
-    beforeEach(() => {
-      component.emailDomains = ['sap.com', 'global.corp.sap'];
+    it('should validate correct email', () => {
+      expect(component.isEmail('test@example.com')).toBe(true);
     });
 
-    it('should return true for valid unquoted local-part emails', () => {
-      expect(component.isEmail('john.doe@sap.com')).toBe(true);
-      expect(
-        component.isEmail('user+mailbox/department=shipping@sap.com'),
-      ).toBe(true);
-      expect(component.isEmail("a!#$%&'*+-/=?^_`{|}~@sap.com")).toBe(true);
-      expect(component.isEmail('a.b.c.d.e@sap.com')).toBe(true);
+    it('should validate email with dots in local part', () => {
+      expect(component.isEmail('test.name@example.com')).toBe(true);
     });
 
-    it('should return false for unquoted local-part with consecutive dots', () => {
-      expect(component.isEmail('john..doe@sap.com')).toBe(false);
+    it('should validate email with special characters', () => {
+      expect(component.isEmail('test+tag@example.com')).toBe(true);
     });
 
-    it('should return false for unquoted local-part starting or ending with dot', () => {
-      expect(component.isEmail('.johndoe@sap.com')).toBe(false);
-      expect(component.isEmail('johndoe.@sap.com')).toBe(false);
+    it('should validate quoted local part', () => {
+      expect(component.isEmail('"test name"@example.com')).toBe(true);
     });
 
-    it('should return true for quoted local-part with special chars and dots', () => {
-      expect(component.isEmail('".John..Doe."@sap.com')).toBe(true);
-      expect(component.isEmail('"John Doe"@sap.com')).toBe(true);
-      expect(component.isEmail('"John\tDoe"@sap.com')).toBe(true);
+    it('should reject email without @', () => {
+      expect(component.isEmail('testexample.com')).toBe(false);
     });
 
-    it('should return false for missing @ or domain', () => {
-      expect(component.isEmail('johndoe')).toBe(false);
-      expect(component.isEmail('johndoe@')).toBe(false);
-      expect(component.isEmail('@sap.com')).toBe(false);
+    it('should reject email without domain', () => {
+      expect(component.isEmail('test@')).toBe(false);
     });
 
-    it('should return false for local-part exceeding 64 chars', () => {
-      const longLocal = 'a'.repeat(65) + '@sap.com';
-      expect(component.isEmail(longLocal)).toBe(false);
+    it('should reject email without local part', () => {
+      expect(component.isEmail('@example.com')).toBe(false);
     });
 
-    it('should return false for disallowed domain', () => {
-      expect(component.isEmail('john.doe@notallowed.com')).toBe(false);
+    it('should reject email with local part longer than 64 chars', () => {
+      const longLocal = 'a'.repeat(65);
+      expect(component.isEmail(`${longLocal}@example.com`)).toBe(false);
     });
 
-    it('should return false for invalid unquoted local-part chars', () => {
-      expect(component.isEmail('john(doe)@sap.com')).toBe(false);
-      expect(component.isEmail('john<doe>@sap.com')).toBe(false);
-      expect(component.isEmail('john,doe@sap.com')).toBe(false);
+    it('should reject email with invalid characters', () => {
+      expect(component.isEmail('test name@example.com')).toBe(false);
     });
 
-    it('should return false for empty string', () => {
+    it('should reject empty string', () => {
       expect(component.isEmail('')).toBe(false);
+    });
+
+    it('should reject null', () => {
+      expect(component.isEmail(null as any)).toBe(false);
+    });
+
+    it('should reject email from non-allowed domain', () => {
+      component.emailDomains = ['allowed.com'];
+
+      expect(component.isEmail('test@notallowed.com')).toBe(false);
+    });
+
+    it('should accept email from allowed domain', () => {
+      component.emailDomains = ['example.com'];
+
+      expect(component.isEmail('test@example.com')).toBe(true);
+    });
+
+    it('should accept any domain when emailDomains is empty', () => {
+      component.emailDomains = [];
+
+      expect(component.isEmail('test@anydomain.com')).toBe(true);
+    });
+  });
+
+  describe('fakeFilterFunc', () => {
+    it('should return content unchanged', () => {
+      const users = [mockUser];
+
+      const result = component.fakeFilterFunc(users);
+
+      expect(result).toBe(users);
+    });
+  });
+
+  describe('displayFunc', () => {
+    it('should display full name when available', () => {
+      const result = component.displayFunc(mockUser);
+
+      expect(result).toBe('John Doe');
+    });
+
+    it('should display userId when name not available', () => {
+      const userWithoutName: User = {
+        userId: 'user-456',
+        email: 'test@example.com',
+      } as User;
+
+      const result = component.displayFunc(userWithoutName);
+
+      expect(result).toBe('user-456');
+    });
+
+    it('should return empty string when user is null', () => {
+      const result = component.displayFunc(null as any);
+
+      expect(result).toBe('');
+    });
+
+    it('should return empty string when user is undefined', () => {
+      const result = component.displayFunc(undefined as any);
+
+      expect(result).toBe('');
+    });
+  });
+
+  describe('itemClicked', () => {
+    beforeEach(async () => {
+      await component.ngOnInit();
+    });
+
+    it('should add invitee when email clicked', () => {
+      const emailValue: DropDownValue = { email: 'new@example.com' };
+
+      component.itemClicked(emailValue);
+
+      expect(component.selectedInvitees).toHaveLength(1);
+      expect(component.selectedInvitees[0].user.email).toBe('new@example.com');
+      expect(component.selectedInvitees[0].roles).toEqual([mockRoles[1]]);
+    });
+
+    it('should not add duplicate invitee', () => {
+      const emailValue: DropDownValue = { email: 'new@example.com' };
+      component.selectedInvitees = [
+        {
+          user: { email: 'new@example.com', userId: '' } as User,
+          roles: [],
+        } as Member,
+      ];
+
+      component.itemClicked(emailValue);
+
+      expect(component.selectedInvitees).toHaveLength(1);
+    });
+
+    it('should add member when user clicked', () => {
+      const userValue: DropDownValue = { user: mockUser };
+
+      component.itemClicked(userValue);
+
+      expect(component.selectedMembers).toHaveLength(1);
+      expect(component.selectedMembers[0].user).toBe(mockUser);
+      expect(component.selectedMembers[0].roles).toEqual([mockRoles[1]]);
+    });
+
+    it('should not add duplicate member', () => {
+      const userValue: DropDownValue = { user: mockUser };
+      component.selectedMembers = [mockMember];
+
+      component.itemClicked(userValue);
+
+      expect(component.selectedMembers).toHaveLength(1);
+    });
+
+    it('should clear search after item clicked', () => {
+      jest.spyOn(component, 'clearSearch');
+      const userValue: DropDownValue = { user: mockUser };
+
+      component.itemClicked(userValue);
+
+      expect(component.clearSearch).toHaveBeenCalled();
+    });
+
+    it('should handle noData value gracefully', () => {
+      const noDataValue: DropDownValue = { noData: true };
+
+      component.itemClicked(noDataValue);
+
+      expect(component.selectedMembers).toHaveLength(0);
+      expect(component.selectedInvitees).toHaveLength(0);
+    });
+  });
+
+  describe('clearSearch', () => {
+    it('should clear search input and dropdown', () => {
+      jest.spyOn(component, 'filter');
+      component.currentInput = 'test';
+
+      component.clearSearch();
+
+      expect(component.filter).toHaveBeenCalledWith('');
+      expect(component.currentInput).toBe('');
+    });
+  });
+
+  describe('closeDialogError', () => {
+    it('should close dialog with error reason', () => {
+      const linkManager = luigiClient.linkManager();
+
+      component.closeDialogError('Test error');
+
+      expect(linkManager.goBack).toHaveBeenCalledWith({ error: 'Test error' });
+    });
+
+    it('should close dialog without error reason', () => {
+      const linkManager = luigiClient.linkManager();
+
+      component.closeDialogError();
+
+      expect(linkManager.goBack).toHaveBeenCalledWith({ error: undefined });
+    });
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should unsubscribe from subscriptions', () => {
+      const unsubscribeSpy = jest.spyOn(
+        component['subscriptions'],
+        'unsubscribe',
+      );
+
+      component.ngOnDestroy();
+
+      expect(unsubscribeSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('hasError', () => {
+    it('should return true when no members selected and touched', () => {
+      component.selectedMembers = [];
+      component.selectedInvitees = [];
+      component.touched = true;
+
+      expect(component.hasError()).toBe(true);
+    });
+
+    it('should return false when members selected', () => {
+      component.selectedMembers = [mockMember];
+      component.selectedInvitees = [];
+      component.touched = true;
+
+      expect(component.hasError()).toBe(false);
+    });
+
+    it('should return false when invitees selected', () => {
+      component.selectedMembers = [];
+      component.selectedInvitees = [mockMember];
+      component.touched = true;
+
+      expect(component.hasError()).toBe(false);
+    });
+
+    it('should return false when not touched', () => {
+      component.selectedMembers = [];
+      component.selectedInvitees = [];
+      component.touched = false;
+
+      expect(component.hasError()).toBe(false);
+    });
+  });
+
+  describe('showByline', () => {
+    it('should return false when dropdown has email value', () => {
+      component.dropDownValues = [{ email: 'test@example.com' }];
+
+      expect(component.showByline).toBe(false);
+    });
+
+    it('should return true when dropdown has user value', () => {
+      component.dropDownValues = [{ user: mockUser }];
+
+      expect(component.showByline).toBe(true);
+    });
+
+    it('should return true when dropdown has noData value', () => {
+      component.dropDownValues = [{ noData: true }];
+
+      expect(component.showByline).toBe(true);
+    });
+
+    it('should return true when dropdown is empty', () => {
+      component.dropDownValues = [];
+
+      expect(component.showByline).toBe(true);
     });
   });
 });

@@ -1,4 +1,3 @@
-import { Groups, PolicyDirective } from '../../../authorization';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -16,12 +15,7 @@ import { ContentDensityDirective } from '@fundamental-ngx/core/content-density';
   templateUrl: './dashboard-sidebar-item.component.html',
   styleUrls: ['./dashboard-sidebar-item.component.scss'],
   standalone: true,
-  imports: [
-    ButtonComponent,
-    ContentDensityDirective,
-    PolicyDirective,
-    BusyIndicatorComponent,
-  ],
+  imports: [ButtonComponent, ContentDensityDirective, BusyIndicatorComponent],
 })
 export class DashboardSidebarItemComponent {
   collapsed = false;
@@ -48,12 +42,7 @@ export class DashboardSidebarItemComponent {
    * List of roles allowed to trigger the callback action.
    */
   @Input()
-  rolesAllowedForCallback: string[] = [
-    Groups.PROJECT_MEMBER,
-    Groups.PROJECT_OWNER,
-    'projectMember',
-    'projectAdmin',
-  ];
+  rolesAllowedForCallback: string[] = ['projectMember', 'projectAdmin'];
 
   /**
    * Emits an event when the edit action is triggered.

@@ -10,7 +10,6 @@
           "entityType": "main",
           "urlSuffix": "/#/organization/members",
           "context": {
-            "entityType": "account",
             "entityContext": {
               "account": {
                 "policies": ["iamAdmin", "projectAdmin", "projectMember"]
@@ -23,32 +22,35 @@
           "entityType": "main",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/organization/add-members",
-          "context": {
-            "entityType": "account"
-          }
+          "urlSuffix": "/#/organization/add-members"
         },
         {
           "pathSegment": "members",
           "label": "{{members}}",
           "icon": "company-view",
-          "entityType": "main.account",
-          "urlSuffix": "/#/:accountId/members",
-          "context": {
-            "accountId": ":accountId",
-            "entityType": "account"
-          }
+          "entityType": "main.core_platform-mesh_io_account",
+          "urlSuffix": "/#/:accountId/members"
         },
         {
           "pathSegment": "add-members",
-          "entityType": "main.account",
+          "entityType": "main.core_platform-mesh_io_account",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/:accountId/add-members",
-          "context": {
-            "accountId": ":accountId",
-            "entityType": "account"
-          }
+          "urlSuffix": "/#/:accountId/add-members"
+        },
+        {
+          "pathSegment": "members",
+          "label": "{{members}}",
+          "icon": "company-view",
+          "entityType": "main.core_platform-mesh_io_account.core_namespace",
+          "urlSuffix": "/#/:accountId/members"
+        },
+        {
+          "pathSegment": "add-members",
+          "entityType": "main.core_platform-mesh_io_account.core_namespace",
+          "label": "{{members}}",
+          "hideFromNav": true,
+          "urlSuffix": "/#/:accountId/add-members"
         }
       ],
       "texts": [

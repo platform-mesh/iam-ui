@@ -1,4 +1,4 @@
-import { imageLoadable } from './image-loadable';
+import { imageLoadable } from '../../utils';
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({

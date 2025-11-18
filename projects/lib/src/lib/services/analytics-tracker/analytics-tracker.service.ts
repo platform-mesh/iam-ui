@@ -32,13 +32,13 @@ export class AnalyticsTrackerService {
             c.context?.analyticsTrackerConfig;
           const serviceProviderConfig: ServiceProviderConfig =
             c.context?.serviceProviderConfig;
-          const tenantId = c.context?.tenantId || c.context.organizationId;
+          const tenantId = c.context?.tenantId || c.context['organizationId'];
 
           if (!analyticsTrackerConfig?.tenantIds?.includes(tenantId)) {
             return of(null);
           }
 
-          const hashedUserId = from(this.digestMessage(c.context.userid));
+          const hashedUserId = from(this.digestMessage(c.context.userId));
           return hashedUserId.pipe(
             map((hashedUserId) => {
               const matomoContainerId = useJukeboxMatomoId

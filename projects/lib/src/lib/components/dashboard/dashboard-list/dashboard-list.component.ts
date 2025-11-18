@@ -1,4 +1,3 @@
-import { Groups } from '../../../authorization';
 import { AvatarComponent as IAMAvatarComponent } from '../../avatar';
 import { ListItem } from './models/list-item';
 import { SvgConfigType } from './models/svg-config-type';
@@ -96,10 +95,7 @@ export class DashboardListComponent {
   /**
    * Roles allowed to trigger the add callback.
    */
-  @Input() rolesAllowedForAddCallback: string[] = [
-    Groups.PROJECT_OWNER,
-    'projectAdmin',
-  ];
+  @Input() rolesAllowedForAddCallback: string[] = ['projectAdmin'];
 
   /**
    * Event emitted when the add button is clicked.
