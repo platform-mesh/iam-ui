@@ -1,4 +1,4 @@
-@if (!disablePopover) {
+@if (!disablePopover()) {
   <app-user-quick-view [user]="user()">
     <ng-container *ngTemplateOutlet="avatarTemplate"></ng-container>
   </app-user-quick-view>
