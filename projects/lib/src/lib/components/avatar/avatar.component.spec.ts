@@ -1,16 +1,21 @@
 import { User } from '../../models';
-import { AvatarProviderService, IamLuigiContextService } from '../../services';
-import { UserQuickViewComponent } from '../user-quick-view';
+import {
+  AvatarProviderService,
+  IamLuigiContextService,
+  LuigiClient,
+} from '../../services';
 import { AvatarComponent } from './avatar.component';
 import { AvatarMode } from './avatar.model';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AvatarModule } from '@fundamental-ngx/core';
-import { MockComponent, MockModule } from 'ng-mocks';
+import { MockModule } from 'ng-mocks';
 import { of } from 'rxjs';
 
 jest.mock('../../services', () => ({
   AvatarProviderService: jest.fn(),
   IamLuigiContextService: jest.fn(),
+  LuigiClient: jest.fn(),
 }));
 
 describe('AvatarComponent', () => {
@@ -35,6 +40,12 @@ describe('AvatarComponent', () => {
       ),
     };
 
+    const mockLuigiClient = {
+      linkManager: jest.fn().mockReturnValue({
+        navigate: jest.fn(),
+      }),
+    };
+
     void TestBed.configureTestingModule({
       providers: [
         { provide: AvatarProviderService, useValue: mockService },
@@ -42,12 +53,10 @@ describe('AvatarComponent', () => {
           provide: IamLuigiContextService,
           useValue: mockIamLuigiContextService,
         },
+        { provide: LuigiClient, useValue: mockLuigiClient },
       ],
-      imports: [
-        AvatarComponent,
-        MockComponent(UserQuickViewComponent),
-        MockModule(AvatarModule),
-      ],
+      imports: [AvatarComponent, MockModule(AvatarModule)],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AvatarComponent);
