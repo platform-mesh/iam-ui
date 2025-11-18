@@ -7,7 +7,7 @@ import {
   InMemoryCache,
   Operation,
 } from '@apollo/client/core';
-import { ApolloLink, split } from '@apollo/client/link/core';
+import { ApolloLink, split } from '@apollo/client/core';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { Context } from '@luigi-project/client';
 import { Apollo, ApolloBase } from 'apollo-angular';
@@ -51,10 +51,6 @@ export abstract class BaseApolloClientService {
     const apolloInternal = injector.get(Apollo);
     const httpLink = injector.get(HttpLink);
 
-    apolloInternal.createNamed(this.apolloClientName, {
-      cache: new InMemoryCache(),
-    });
-
     luigiContextService
       .contextObservable()
       .pipe(
@@ -62,6 +58,11 @@ export abstract class BaseApolloClientService {
         filter((c) => !!c.token),
       )
       .subscribe((luigiContext) => {
+        apolloInternal.createNamed(this.apolloClientName, {
+          cache: new InMemoryCache(),
+          link: httpLink.create({ uri: this.getApiUrl(luigiContext) }),
+        });
+
         const authPayload = {
           authorization: `Bearer ${luigiContext.token}`,
         };

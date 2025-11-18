@@ -190,7 +190,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.scopeDisplayName = this.context.entityId;
 
     this.memberService.roles().subscribe({
-      next: (roles) => this.rolesForEntity.set(roles),
+      next: (roles) => this.rolesForEntity.set(roles || []),
     });
 
     this.readMembers();
@@ -235,7 +235,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
         sortBy: this.sortBy,
       })
       .subscribe({
-        next: (members: UserConnection) => {
+        next: (members: UserConnection | undefined) => {
           this.isLoading.set(false);
           if (!members) {
             return;

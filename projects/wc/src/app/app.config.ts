@@ -4,6 +4,7 @@ import {
   ApplicationConfig,
   ErrorHandler,
   provideAppInitializer,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import { createErrorHandler } from '@sentry/angular';
 import { provideNamedApollo } from 'apollo-angular';
@@ -13,6 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => {
       initializeWC();
     }),
+    provideZonelessChangeDetection(),
     provideNamedApollo(() => ({})),
     provideHttpClient(),
     {
