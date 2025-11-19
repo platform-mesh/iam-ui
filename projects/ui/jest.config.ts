@@ -1,9 +1,7 @@
 import type { Config } from 'jest';
 import presets from 'jest-preset-angular/presets/index.js';
 
-const presetConfig = presets.createCjsPreset({
-  isolatedModules: true,
-});
+const presetConfig = presets.createCjsPreset();
 
 const jestConfig: Config = {
   ...presetConfig,
