@@ -19,3 +19,4 @@ jobs:
     with:
       imageTagName: ghcr.io/platform-mesh/iam-ui
       componentVersionKey: iam-ui
+      repoVersionUpdate: platform-mesh/helm-charts-priv
