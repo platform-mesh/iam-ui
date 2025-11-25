@@ -102,12 +102,12 @@ export class MembersSidebarComponent implements OnInit {
         page: { page: 1, limit: -1 },
       })
       .pipe(
-        map((grantedUsers: UserConnection) =>
-          grantedUsers.users.map((u) => u.user),
+        map((grantedUsers: UserConnection | undefined) =>
+          grantedUsers?.users.map((u) => u.user),
         ),
       )
-      .subscribe((users: User[]) => {
-        this.members = users;
+      .subscribe((users: User[] | undefined) => {
+        this.members = users || [];
         this.loading = false;
         this.cdr.detectChanges();
       });

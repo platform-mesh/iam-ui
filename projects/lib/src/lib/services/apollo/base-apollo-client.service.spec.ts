@@ -17,7 +17,7 @@ class TestingApolloClientService extends BaseApolloClientService {
     super(injector, apolloClientName);
   }
 
-  protected getApiUrl(): string {
+  protected getApiUrl(luigiContext: any): string {
     return url;
   }
 }
@@ -27,7 +27,17 @@ const url = 'http://apiurl.sap/';
 const link = { request: 'LINK' };
 
 expect.extend({
-  httpHeadersMatcher(given: HttpHeaders, expected: Record<string, string>) {
+  httpHeadersMatcher(
+    given: HttpHeaders | undefined,
+    expected: Record<string, string>,
+  ) {
+    if (!given) {
+      return {
+        pass: false,
+        message: () => `Expected HttpHeaders but received undefined`,
+      };
+    }
+
     for (const key in expected) {
       if (given.get(key) !== expected[key]) {
         return {

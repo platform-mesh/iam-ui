@@ -37,7 +37,7 @@ export class MemberService {
       sortBy?: SortByInput;
       page?: PageInput;
     } = {},
-  ): Observable<UserConnection> {
+  ): Observable<UserConnection | undefined> {
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
@@ -55,7 +55,7 @@ export class MemberService {
         }),
       ),
       map((apolloResponse) => {
-        return apolloResponse.data.users;
+        return apolloResponse?.data?.users;
       }),
     );
   }
@@ -66,7 +66,7 @@ export class MemberService {
       sortBy?: SortByInput;
       page?: PageInput;
     } = {},
-  ): Observable<UserConnection> {
+  ): Observable<UserConnection | undefined> {
     return this.apolloClientService.apollo().pipe(
       mergeMap((apollo) =>
         apollo.query<{ knownUsers: UserConnection }>({
@@ -79,12 +79,12 @@ export class MemberService {
         }),
       ),
       map((apolloResponse) => {
-        return apolloResponse.data.knownUsers;
+        return apolloResponse?.data?.knownUsers;
       }),
     );
   }
 
-  user(userId: string): Observable<User> {
+  user(userId: string): Observable<User | undefined> {
     return this.apolloClientService.apollo().pipe(
       mergeMap((apollo) =>
         apollo.query<{ user: User }>({
@@ -96,12 +96,12 @@ export class MemberService {
         }),
       ),
       map((apolloResponse) => {
-        return apolloResponse.data.user;
+        return apolloResponse?.data?.user;
       }),
     );
   }
 
-  me(): Observable<User> {
+  me(): Observable<User | undefined> {
     return this.apolloClientService.apollo().pipe(
       mergeMap((apollo) =>
         apollo.query<{ me: User }>({
@@ -110,12 +110,12 @@ export class MemberService {
         }),
       ),
       map((apolloResponse) => {
-        return apolloResponse.data.me;
+        return apolloResponse?.data?.me;
       }),
     );
   }
 
-  roles(): Observable<Role[]> {
+  roles(): Observable<Role[] | undefined> {
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
@@ -130,7 +130,7 @@ export class MemberService {
         });
       }),
       map((apolloResponse) => {
-        return apolloResponse.data.roles;
+        return apolloResponse?.data?.roles;
       }),
     );
   }

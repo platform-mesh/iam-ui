@@ -142,7 +142,7 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
     );
 
     this.memberService.roles().subscribe((roles) => {
-      this.availableRoles = roles;
+      this.availableRoles = roles || [];
       this.defaultRole = this.availableRoles.find(
         (roles) => roles.id === (RolesTechnicalName.MEMBER as string),
       );
@@ -241,19 +241,19 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
 
     this.memberService.knownUsers().subscribe({
       next: (response) => {
-        this.filteredUsersCollectionLength = response.pageInfo.totalCount;
-        if (response.users.length > 0) {
+        this.filteredUsersCollectionLength = response?.pageInfo.totalCount;
+        if (response && response.users?.length > 0) {
           if (this.isEmail(searchTerm)) {
-            const emailMatches = response.users.filter(
+            const emailMatches = response?.users.filter(
               (member) => member.user.email === searchTerm,
             );
-            this.filteredUsersCollectionLength = emailMatches.length;
+            this.filteredUsersCollectionLength = emailMatches?.length;
             this.dropDownValues =
-              emailMatches.length === 0
+              emailMatches?.length === 0
                 ? [{ email: searchTerm }]
-                : emailMatches.map(mapUser);
+                : emailMatches?.map(mapUser) || [];
           } else {
-            this.dropDownValues = response.users.map(mapUser);
+            this.dropDownValues = response?.users.map(mapUser) || [];
           }
         } else if (this.isEmail(searchTerm)) {
           this.dropDownValues = [{ email: searchTerm }];
