@@ -16,8 +16,7 @@ import { BehaviorSubject, of } from 'rxjs';
 
 const mockContext = {
   token: 'some-token',
-  tenantid: 'tenantId',
-  userid: 'userId',
+  userId: 'userId',
   entityContext: {
     project: {
       policies: [],
@@ -41,7 +40,7 @@ describe('UserOverviewHeaderComponent', () => {
 
   beforeEach(() => {
     mockUserService = {
-      me: jest.fn(),
+      user: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -79,12 +78,13 @@ describe('UserOverviewHeaderComponent', () => {
 
   describe('When ngOnInit should call memberService me - reading the user', () => {
     it('should fetch user', () => {
-      const user = { userId: 'D123456', firstName: 'John' } as User;
-      (mockUserService.me as jest.Mock).mockReturnValue(of(user));
+      const user = { userId: 'userId', firstName: 'John' } as User;
+      (mockUserService.user as jest.Mock).mockReturnValue(of(user));
+      component.context = mockContext;
 
       component.ngOnInit();
 
-      expect(mockUserService.me).toHaveBeenCalled();
+      expect(mockUserService.user).toHaveBeenCalledWith('userId');
       expect(component.user()).toBe(user);
     });
   });

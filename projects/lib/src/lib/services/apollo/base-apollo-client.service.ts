@@ -15,7 +15,6 @@ import { HttpLink } from 'apollo-angular/http';
 import { print } from 'graphql';
 import { Client, ClientOptions, createClient } from 'graphql-sse';
 import { Observable, ReplaySubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 class SSELink extends ApolloLink {
   private client: Client;
@@ -52,6 +51,10 @@ export abstract class BaseApolloClientService {
     const httpLink = injector.get(HttpLink);
 
     luigiContextService.getContextAsync().then((luigiContext) => {
+      if (!luigiContext || !luigiContext.token) {
+        return;
+      }
+
       apolloInternal.createNamed(this.apolloClientName, {
         cache: new InMemoryCache(),
         link: httpLink.create({ uri: this.getApiUrl(luigiContext) }),

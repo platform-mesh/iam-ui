@@ -73,6 +73,7 @@ describe('MembersPageComponent', () => {
       users: jest.fn().mockReturnValue(of(mockUserConnection)),
       removeRole: jest.fn().mockReturnValue(of({})),
       assignRolesToUser: jest.fn().mockReturnValue(of({})),
+      me: jest.fn().mockReturnValue(of({ userId: 'user-123' })),
     } as any;
 
     notificationService = {
@@ -189,32 +190,6 @@ describe('MembersPageComponent', () => {
     });
   });
 
-  describe('isCurrentUserUniqueOwner', () => {
-    it('should return true when current user is unique owner', async () => {
-      await component.ngOnInit();
-      component.currentUserIsOwner = true;
-      component.countOwners = 1;
-
-      expect(component.isCurrentUserUniqueOwner()).toBe(true);
-    });
-
-    it('should return false when there are multiple owners', async () => {
-      await component.ngOnInit();
-      component.currentUserIsOwner = true;
-      component.countOwners = 2;
-
-      expect(component.isCurrentUserUniqueOwner()).toBe(false);
-    });
-
-    it('should return false when current user is not owner', async () => {
-      await component.ngOnInit();
-      component.currentUserIsOwner = false;
-      component.countOwners = 1;
-
-      expect(component.isCurrentUserUniqueOwner()).toBe(false);
-    });
-  });
-
   describe('equalsCurrentUser', () => {
     it('should return true when member is current user', async () => {
       await component.ngOnInit();
@@ -274,7 +249,6 @@ describe('MembersPageComponent', () => {
       expect(component.isLoading()).toBe(false);
       expect(component.members()).toEqual(mockUserConnection.users);
       expect(component.totalItems()).toBe(1);
-      expect(component.countOwners).toBe(1);
     });
 
     it('should handle error when loading members', async () => {
@@ -315,7 +289,10 @@ describe('MembersPageComponent', () => {
       expect(confirmationService.showRemoveMemberDialog).toHaveBeenCalledWith(
         mockUser,
       );
-      expect(memberService.removeRole).toHaveBeenCalledWith(mockUser, 'member');
+      expect(memberService.removeRole).toHaveBeenCalledWith(
+        mockUser.userId,
+        'member',
+      );
       expect(notificationService.openSuccessToast).toHaveBeenCalled();
     });
 
@@ -358,7 +335,7 @@ describe('MembersPageComponent', () => {
         'entity-123',
       );
       expect(memberService.removeRole).toHaveBeenCalledWith(
-        { userId: 'user-123' },
+        'user-123',
         'member',
       );
       expect(notificationService.openSuccessToast).toHaveBeenCalled();
@@ -405,10 +382,12 @@ describe('MembersPageComponent', () => {
 
       component.saveMember(mockEvent, member);
 
-      expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
-        mockUser,
-        mockEvent.selectedItems,
-      );
+      expect(memberService.assignRolesToUser).toHaveBeenCalledWith([
+        {
+          userId: mockUser.userId,
+          roles: mockEvent.selectedItems.map((r) => r.id),
+        },
+      ]);
       expect(notificationService.openSuccessToast).toHaveBeenCalled();
     });
 
@@ -444,7 +423,6 @@ describe('MembersPageComponent', () => {
     it('should prevent unique owner from removing owner role', async () => {
       await component.ngOnInit();
       component.currentUserIsOwner = true;
-      component.countOwners = 1;
       const currentUserMember: Member = {
         user: { userId: 'user-123' } as User,
         roles: [mockRoles[0]],

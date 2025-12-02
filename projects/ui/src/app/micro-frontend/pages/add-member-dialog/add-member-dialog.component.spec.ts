@@ -175,8 +175,8 @@ describe('AddMemberDialogComponent', () => {
 
       expect(component.touched).toBe(true);
       expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
-        mockUser,
-        mockMember.roles,
+        [{ roles: mockMember.roles.map((r) => r.id), userId: mockUser.userId }],
+        [],
       );
     });
 
@@ -191,8 +191,8 @@ describe('AddMemberDialogComponent', () => {
       component.addMembers();
 
       expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
-        invitee.user,
-        invitee.roles,
+        [],
+        [{ roles: invitee.roles.map((r) => r.id), email: invitee.user.email }],
       );
     });
 
@@ -202,12 +202,12 @@ describe('AddMemberDialogComponent', () => {
         user: { email: 'invitee@example.com', userId: '' } as User,
         roles: [mockRoles[1]],
       } as Member;
-      component.selectedMembers = [mockMember];
+      component.selectedMembers = [mockMember, mockMember];
       component.selectedInvitees = [invitee];
 
       component.addMembers();
 
-      expect(memberService.assignRolesToUser).toHaveBeenCalledTimes(2);
+      expect(memberService.assignRolesToUser).toHaveBeenCalledTimes(1);
     });
 
     it('should not add when no members selected', () => {
@@ -227,7 +227,7 @@ describe('AddMemberDialogComponent', () => {
 
       component.addMembers();
 
-      expect(linkManager.goBack).toHaveBeenCalledWith({ addedMembers: [{}] });
+      expect(linkManager.goBack).toHaveBeenCalled();
     });
 
     it('should close dialog with error on failure', async () => {

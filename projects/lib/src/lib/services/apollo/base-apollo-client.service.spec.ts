@@ -10,7 +10,6 @@ import { Apollo, ApolloBase } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { mock } from 'jest-mock-extended';
 import { MockProvider } from 'ng-mocks';
-import { of } from 'rxjs';
 
 class TestingApolloClientService extends BaseApolloClientService {
   constructor(injector: Injector) {
@@ -93,14 +92,10 @@ describe('BaseApolloClientService', () => {
   it('should return apollo client for correct context', fakeAsync(() => {
     const token = 'foo';
 
-    luigiContextService.contextObservable = jest.fn().mockReturnValue(
-      of({
-        context: {
-          token: token,
-          portalContext: {},
-        },
-      }),
-    );
+    luigiContextService.getContextAsync = jest.fn().mockResolvedValue({
+      token: token,
+      portalContext: {},
+    });
 
     const service = new TestingApolloClientService(injector);
     tick();
@@ -125,9 +120,7 @@ describe('BaseApolloClientService', () => {
   }));
 
   it('should return no apollo client for incorrect context', fakeAsync(() => {
-    luigiContextService.contextObservable = jest
-      .fn()
-      .mockReturnValue(of({ context: {} }));
+    luigiContextService.getContextAsync = jest.fn().mockResolvedValue({});
 
     const service = new TestingApolloClientService(injector);
     tick();
