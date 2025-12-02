@@ -95,8 +95,16 @@ export const ME = gql`
 `;
 
 export const ASSIGN_ROLES_TO_USERS = gql`
-  mutation ($context: ResourceContext!, $changes: [UserRoleChange!]!) {
-    assignRolesToUsers(context: $context, changes: $changes) {
+  mutation (
+    $context: ResourceContext!
+    $changes: [UserRoleChange!]
+    $invites: [InviteInput!]
+  ) {
+    assignRolesToUsers(
+      context: $context
+      changes: $changes
+      invites: $invites
+    ) {
       success
       errors
       assignedCount

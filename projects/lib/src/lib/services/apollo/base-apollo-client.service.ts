@@ -51,47 +51,41 @@ export abstract class BaseApolloClientService {
     const apolloInternal = injector.get(Apollo);
     const httpLink = injector.get(HttpLink);
 
-    luigiContextService
-      .contextObservable()
-      .pipe(
-        map((c) => c.context),
-        filter((c) => !!c.token),
-      )
-      .subscribe((luigiContext) => {
-        apolloInternal.createNamed(this.apolloClientName, {
-          cache: new InMemoryCache(),
-          link: httpLink.create({ uri: this.getApiUrl(luigiContext) }),
-        });
-
-        const authPayload = {
-          authorization: `Bearer ${luigiContext.token}`,
-        };
-
-        const httpAuthHeader = new HttpHeaders(authPayload);
-
-        const httpUrl = new URL(this.getApiUrl(luigiContext));
-        const clientLink = split(
-          ({ query }) => {
-            const definition = getMainDefinition(query);
-            return (
-              definition.kind === 'OperationDefinition' &&
-              definition.operation === 'subscription'
-            );
-          },
-          new SSELink({
-            url: httpUrl.toString(),
-            headers: authPayload,
-          }),
-          httpLink.create({
-            uri: httpUrl.toString(),
-            headers: httpAuthHeader,
-          }),
-        );
-
-        const apolloClient = apolloInternal.use(this.apolloClientName);
-        apolloClient.client.setLink(clientLink);
-        this.apolloClient.next(apolloClient);
+    luigiContextService.getContextAsync().then((luigiContext) => {
+      apolloInternal.createNamed(this.apolloClientName, {
+        cache: new InMemoryCache(),
+        link: httpLink.create({ uri: this.getApiUrl(luigiContext) }),
       });
+
+      const authPayload = {
+        authorization: `Bearer ${luigiContext.token}`,
+      };
+
+      const httpAuthHeader = new HttpHeaders(authPayload);
+
+      const httpUrl = new URL(this.getApiUrl(luigiContext));
+      const clientLink = split(
+        ({ query }) => {
+          const definition = getMainDefinition(query);
+          return (
+            definition.kind === 'OperationDefinition' &&
+            definition.operation === 'subscription'
+          );
+        },
+        new SSELink({
+          url: httpUrl.toString(),
+          headers: authPayload,
+        }),
+        httpLink.create({
+          uri: httpUrl.toString(),
+          headers: httpAuthHeader,
+        }),
+      );
+
+      const apolloClient = apolloInternal.use(this.apolloClientName);
+      apolloClient.client.setLink(clientLink);
+      this.apolloClient.next(apolloClient);
+    });
   }
 
   public apollo(): Observable<ApolloBase> {

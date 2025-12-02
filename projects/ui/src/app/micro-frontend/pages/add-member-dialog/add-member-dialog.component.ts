@@ -61,7 +61,7 @@ import {
   RolesTechnicalName,
   User,
 } from '@platform-mesh/iam-lib';
-import { BehaviorSubject, Subscription, debounceTime, forkJoin } from 'rxjs';
+import { BehaviorSubject, Subscription, debounceTime } from 'rxjs';
 
 export type DropDownValue =
   | { user: User }
@@ -178,23 +178,30 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let roleSettingObservables = input.map((member) =>
-      this.memberService.assignRolesToUser(member.user, member.roles),
-    );
-
-    forkJoin(roleSettingObservables).subscribe({
-      next: (results) => {
-        const addedMembers = results.filter(Boolean);
-        if (addedMembers.length > 0) {
-          this.closeDialogSuccess(addedMembers as any);
-        } else {
-          this.closeDialogError();
-        }
-      },
-      error: (error: Error) => {
-        this.closeDialogError(error.toString());
-      },
-    });
+    this.memberService
+      .assignRolesToUser(
+        this.selectedMembers.map((m) => ({
+          userId: m.user.userId,
+          roles: m.roles.map((role) => role.id),
+        })),
+        this.selectedInvitees.map((m) => ({
+          email: m.user.email,
+          roles: m.roles.map((role) => role.id),
+        })),
+      )
+      .subscribe({
+        next: (results) => {
+          const addedMembers = results?.assignedCount;
+          if (addedMembers && addedMembers > 0) {
+            this.closeDialogSuccess(addedMembers);
+          } else {
+            this.closeDialogError();
+          }
+        },
+        error: (error: Error) => {
+          this.closeDialogError(error.toString());
+        },
+      });
   }
 
   public deleteMemberFromList(userId: string | undefined): void {
@@ -343,7 +350,7 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
     this.currentInput = '';
   }
 
-  private closeDialogSuccess(addedMembers: User[]): void {
+  private closeDialogSuccess(addedMembers: number): void {
     this.luigiClient.linkManager().goBack({ addedMembers });
   }
 

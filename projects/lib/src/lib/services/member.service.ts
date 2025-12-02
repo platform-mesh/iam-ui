@@ -5,8 +5,10 @@ import {
   RoleRemovalResult,
   User,
   UserConnection,
+  UserRoleChange,
 } from '../models';
 import { PageInput, ResourceContext, SortByInput } from '../models';
+import { InviteInput } from '../models/invites';
 import {
   ASSIGN_ROLES_TO_USERS,
   KNOWN_USERS,
@@ -136,10 +138,9 @@ export class MemberService {
   }
 
   assignRolesToUser(
-    user: User,
-    roles: Role[],
+    changes?: UserRoleChange[],
+    invites?: InviteInput[],
   ): Observable<RoleAssignmentResult | undefined> {
-    const rolesTechnicalNames = roles.map((role) => role.id);
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),
@@ -150,12 +151,8 @@ export class MemberService {
           mutation: ASSIGN_ROLES_TO_USERS,
           variables: {
             context: this.getResourceContext(ctx.context),
-            changes: [
-              {
-                userId: user.userId,
-                roles: rolesTechnicalNames,
-              },
-            ],
+            changes,
+            invites,
           },
         });
       }),
@@ -166,8 +163,8 @@ export class MemberService {
   }
 
   removeRole(
-    user: User,
-    roleId: string,
+    userId: string,
+    role: string,
   ): Observable<RoleRemovalResult | undefined> {
     return combineLatest([
       this.apolloClientService.apollo(),
@@ -180,7 +177,7 @@ export class MemberService {
             mutation: REMOVE_ROLE,
             variables: {
               context: this.getResourceContext(ctx.context),
-              input: { userId: user.userId, role: roleId },
+              input: { userId, role },
             },
           })
           .pipe(map((response) => response.data?.removeRole));

@@ -162,7 +162,7 @@ describe('MembersPageComponent', () => {
         roles: [{ id: 'member' } as Role],
       } as Member;
 
-      expect(component.isCurrentUserMember(member)).toBe(true);
+      expect(component.isUserMember(member)).toBe(true);
     });
 
     it('should return false when user does not have member role', () => {
@@ -171,7 +171,7 @@ describe('MembersPageComponent', () => {
         roles: [{ id: 'viewer' } as Role],
       } as Member;
 
-      expect(component.isCurrentUserMember(member)).toBe(false);
+      expect(component.isUserMember(member)).toBe(false);
     });
   });
 
@@ -222,7 +222,7 @@ describe('MembersPageComponent', () => {
         user: { userId: 'user-123' } as User,
       } as Member;
 
-      expect(component.equalsCurrentUser(member)).toBe(true);
+      expect(component.isCurrentUser(member)).toBe(true);
     });
 
     it('should return false when member is not current user', async () => {
@@ -231,7 +231,7 @@ describe('MembersPageComponent', () => {
         user: { userId: 'user-456' } as User,
       } as Member;
 
-      expect(component.equalsCurrentUser(member)).toBe(false);
+      expect(component.isCurrentUser(member)).toBe(false);
     });
   });
 
