@@ -1,38 +1,38 @@
-# Platform Mesh - IAM-UI
+> [!WARNING]
+> This Repository is under development and not ready for productive use. It is in an alpha stage. That means APIs and concepts may change on short notice including breaking changes or complete removal of apis.
+
+# Platform Mesh - iam-ui
+![Build Status](https://github.com/platform-mesh/iam-ui/actions/workflows/pipeline.yml/badge.svg)
 
 ## Description
 
-The IAM-UI project provides the user interface for managing users.
-It is based on [Angular](https://github.com/angular), uses [SAP Fundamental](https://github.com/SAP/fundamental-ngx) and [SAP Luigi](https://github.com/SAP/luigi).
+The platform-mesh iam-ui provides the user interface for managing users and roles within the Platform Mesh ecosystem. It offers both a standalone UI and web components for flexible integration. The application is based on [Angular](https://github.com/angular), uses [SAP Fundamental](https://github.com/SAP/fundamental-ngx) for UI components, and [SAP Luigi](https://github.com/SAP/luigi) for micro-frontend orchestration.
 
-## Installation
+## Features
+- User management interface with GraphQL API integration
+- Role and permission management
+- Multi-tenant support
+- Web components for modular integration
+- Luigi micro-frontend support
+- SAP Fundamental design system
 
-```bash
-$ npm install
-```
+## Getting Started
+- For running and building the iam-ui, please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file in this repository.
+- To deploy the iam-ui to kubernetes, please refer to the [helm-charts](https://github.com/platform-mesh/helm-charts) repository.
 
-## Running the app
+## Releasing
 
-First build the library project
+The release is performed automatically through a GitHub Actions Workflow.
+All the released versions will be available through access to GitHub.
 
-```bash
-$ npm run build:lib
-```
+## Requirements
 
-And afterward run the ui or wc part of the application.
+The iam-ui requires an installation of Node.js and npm. Checkout the [package.json](package.json) for the required Node.js version and dependencies.
 
-```bash
-$ npm run start:ui
+## Contributing
 
-$ npm run start:wc
-```
+Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file in this repository for instructions on how to contribute to Platform Mesh.
 
-## Test
+## Code of Conduct
 
-```bash
-# unit tests
-$ npm run test:unit
-
-# test coverage
-$ npm run test:cov
-```
+Please refer to the [CODE_OF_CONDUCT.md](https://github.com/platform-mesh/.github/blob/main/CODE_OF_CONDUCT.md) information on the expected Code of Conduct for contributing to Platform Mesh.
