@@ -137,10 +137,11 @@ export class MemberService {
     );
   }
 
-  assignRolesToUser(
-    changes?: UserRoleChange[],
-    invites?: InviteInput[],
-  ): Observable<RoleAssignmentResult | undefined> {
+  assignRolesToUser(users: {
+    changes?: UserRoleChange[];
+    invites?: InviteInput[];
+  }): Observable<RoleAssignmentResult | undefined> {
+    const { changes, invites } = users;
     return combineLatest([
       this.apolloClientService.apollo(),
       this.luigiContextService.contextObservable(),

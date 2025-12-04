@@ -154,7 +154,7 @@ describe('MemberService', () => {
     );
 
     service
-      .assignRolesToUser([{ roles: ['r1'], userId: 'u1' }])
+      .assignRolesToUser({ changes: [{ roles: ['r1'], userId: 'u1' }] })
       .subscribe((response) => {
         expect(response).toEqual({ success: true });
         expect(mockApollo.mutate).toHaveBeenCalledWith({

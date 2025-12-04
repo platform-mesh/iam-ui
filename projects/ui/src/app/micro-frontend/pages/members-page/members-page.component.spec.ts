@@ -382,12 +382,14 @@ describe('MembersPageComponent', () => {
 
       component.saveMember(mockEvent, member);
 
-      expect(memberService.assignRolesToUser).toHaveBeenCalledWith([
-        {
-          userId: mockUser.userId,
-          roles: mockEvent.selectedItems.map((r) => r.id),
-        },
-      ]);
+      expect(memberService.assignRolesToUser).toHaveBeenCalledWith({
+        changes: [
+          {
+            userId: mockUser.userId,
+            roles: mockEvent.selectedItems.map((r: any) => r.id),
+          },
+        ],
+      });
       expect(notificationService.openSuccessToast).toHaveBeenCalled();
     });
 
@@ -610,19 +612,6 @@ describe('MembersPageComponent', () => {
       component.searchTerm = 'test';
 
       expect(component.noFiltersApplied()).toBe(false);
-    });
-  });
-
-  describe('ngOnDestroy', () => {
-    it('should unsubscribe from subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(
-        component['subscriptions'],
-        'unsubscribe',
-      );
-
-      component.ngOnDestroy();
-
-      expect(unsubscribeSpy).toHaveBeenCalled();
     });
   });
 });

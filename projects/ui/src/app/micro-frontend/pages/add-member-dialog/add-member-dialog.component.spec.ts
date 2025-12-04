@@ -174,10 +174,12 @@ describe('AddMemberDialogComponent', () => {
       component.addMembers();
 
       expect(component.touched).toBe(true);
-      expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
-        [{ roles: mockMember.roles.map((r) => r.id), userId: mockUser.userId }],
-        [],
-      );
+      expect(memberService.assignRolesToUser).toHaveBeenCalledWith({
+        changes: [
+          { roles: mockMember.roles.map((r) => r.id), userId: mockUser.userId },
+        ],
+        invites: [],
+      });
     });
 
     it('should add invitees successfully', async () => {
@@ -190,10 +192,12 @@ describe('AddMemberDialogComponent', () => {
 
       component.addMembers();
 
-      expect(memberService.assignRolesToUser).toHaveBeenCalledWith(
-        [],
-        [{ roles: invitee.roles.map((r) => r.id), email: invitee.user.email }],
-      );
+      expect(memberService.assignRolesToUser).toHaveBeenCalledWith({
+        changes: [],
+        invites: [
+          { roles: invitee.roles.map((r) => r.id), email: invitee.user.email },
+        ],
+      });
     });
 
     it('should add both members and invitees', async () => {

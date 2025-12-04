@@ -179,16 +179,16 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
     }
 
     this.memberService
-      .assignRolesToUser(
-        this.selectedMembers.map((m) => ({
+      .assignRolesToUser({
+        changes: this.selectedMembers.map((m) => ({
           userId: m.user.userId,
           roles: m.roles.map((role) => role.id),
         })),
-        this.selectedInvitees.map((m) => ({
+        invites: this.selectedInvitees.map((m) => ({
           email: m.user.email,
           roles: m.roles.map((role) => role.id),
         })),
-      )
+      })
       .subscribe({
         next: (results) => {
           const addedMembers = results?.assignedCount;

@@ -13,7 +13,6 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   OnInit,
   signal,
 } from '@angular/core';
@@ -77,7 +76,6 @@ import {
   UserSortField,
   UserUtils,
 } from '@platform-mesh/iam-lib';
-import { Subscription } from 'rxjs';
 
 export interface AddMembersData {
   error?: string;
@@ -121,12 +119,10 @@ export interface AddMembersData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService, ConfirmationMessagesService],
 })
-export class MembersPageComponent implements OnInit, OnDestroy {
+export class MembersPageComponent implements OnInit {
   public scopeDisplayName?: string;
   public currentEntity?: string;
   public iamClaimEntityUrl?: string;
-
-  private subscriptions: Subscription = new Subscription();
   private lockView = false;
 
   members = signal<Member[]>([]);
@@ -322,18 +318,16 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       .showLeaveScopeDialog(this.scopeDisplayName ?? '')
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.subscriptions.add(
-            this.memberService
-              .removeRole(this.currentUserId, 'member')
-              .subscribe({
-                next: () => {
-                  this.leaveSuccessNotification();
-                },
-                error: (error: Error) => {
-                  this.leaveErrorNotification(error);
-                },
-              }),
-          );
+          this.memberService
+            .removeRole(this.currentUserId, 'member')
+            .subscribe({
+              next: () => {
+                this.leaveSuccessNotification();
+              },
+              error: (error: Error) => {
+                this.leaveErrorNotification(error);
+              },
+            });
         }
       })
       .catch((error: Error) => {
@@ -401,12 +395,14 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.lockView = true;
 
     this.memberService
-      .assignRolesToUser([
-        {
-          userId: member.user.userId,
-          roles: (event.selectedItems as Role[]).map((r) => r.id),
-        },
-      ])
+      .assignRolesToUser({
+        changes: [
+          {
+            userId: member.user.userId,
+            roles: (event.selectedItems as Role[]).map((r) => r.id),
+          },
+        ],
+      })
       .subscribe({
         next: () => {
           this.lockView = false;
@@ -463,10 +459,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   itemsPerPageChange(value: number): void {
     this.itemsPerPage = value;
     this.newPageClicked(1);
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 
   claim(): void {
