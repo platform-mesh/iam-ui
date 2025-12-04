@@ -50,17 +50,11 @@ export class UserOverviewHeaderComponent implements OnInit {
     subtitle: '',
   };
 
-  ctx?: NodeContext;
+  ctx!: NodeContext;
 
-  /**
-   * Set by Luigi itself.
-   */
   @Input()
   LuigiClient!: LuigiClient;
 
-  /**
-   * Set by Luigi itself.
-   */
   @Input()
   set context(context: NodeContext) {
     this.ctx = context;
@@ -73,13 +67,13 @@ export class UserOverviewHeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.memberService.me().subscribe({
+    this.memberService.user(this.ctx.userId).subscribe({
       next: (user) => {
         this.user.set(user);
       },
       error: (error) => {
         this.user.set({
-          userId: this.ctx?.userId,
+          userId: this.ctx.userId,
           email: 'test@test.com',
           firstName: 'First',
           lastName: 'Last',

@@ -153,11 +153,8 @@ describe('MemberService', () => {
       of({ data: { assignRolesToUsers: { success: true } } }),
     );
 
-    const user = { userId: 'u1' };
-    const roles = [{ id: 'r1' }];
-
     service
-      .assignRolesToUser(user as any, roles as any)
+      .assignRolesToUser({ changes: [{ roles: ['r1'], userId: 'u1' }] })
       .subscribe((response) => {
         expect(response).toEqual({ success: true });
         expect(mockApollo.mutate).toHaveBeenCalledWith({
@@ -181,9 +178,7 @@ describe('MemberService', () => {
       of({ data: { removeRole: { success: true } } }),
     );
 
-    const user = { userId: 'u1' };
-
-    service.removeRole(user as any, 'r1').subscribe((result) => {
+    service.removeRole('u1', 'r1').subscribe((result) => {
       expect(result).toEqual({ success: true });
       expect(mockApollo.mutate).toHaveBeenCalledWith({
         mutation: REMOVE_ROLE,

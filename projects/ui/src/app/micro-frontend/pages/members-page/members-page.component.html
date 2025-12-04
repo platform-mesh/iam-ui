@@ -137,7 +137,7 @@
           name="contact"
         >
           <fdp-table-cell *fdpCellDef="let member">
-            @if (!!member.user && !equalsCurrentUser(member)) {
+            @if (!!member.user && !isCurrentUser(member)) {
               <button
                 fd-button
                 fdType="transparent"
@@ -185,70 +185,75 @@
           width="20rem"
         >
           <fdp-table-cell *fdpCellDef="let member">
-            <fd-multi-combobox
-              displayKey="displayName"
-              lookupKey="id"
-              [attr.data-testid]="
-                'app-iam-member-list-user-' +
-                member.user?.userId +
-                '-role-select'
-              "
-              [dataSource]="rolesForEntity()"
-              [selectedItems]="selectedRoles(member)"
-              (selectionChange)="saveMember($event, member)"
-            />
-            <!--            @for (role of member.roles; track role) {-->
-            <!--              <span>{{ role.displayName }}</span>-->
-            <!--              @if (!$last) {-->
-            <!--                <span>, </span>-->
-            <!--              }-->
-            <!--            }-->
-          </fdp-table-cell>
-        </fdp-column>
-
-        <fdp-column
-          align="end"
-          key="actions"
-          label="Actions"
-          i18n-label="
-            actions table cell|Actions table cell text on the members page
-          "
-          name="actions"
-        >
-          <fdp-table-cell *fdpCellDef="let member">
-            @if (isCurrentUserMember(member)) {
-              @if (!equalsCurrentUser(member)) {
-                <button
-                  fd-button
-                  fdType="transparent"
-                  glyph="sys-cancel"
-                  id="remove-member-button"
-                  title="Remove member"
-                  [attr.data-testid]="
-                    'dxp-iam-member-list-user-' +
-                    member.user?.userId +
-                    '-remove-button'
-                  "
-                  (click)="openRemoveMemberDialog(member)"
-                ></button>
-              }
-
-              @if (equalsCurrentUser(member)) {
-                <button
-                  fd-button
-                  fdType="transparent"
-                  glyph="visits"
-                  title="Leave"
-                  [attr.data-testid]="
-                    'dxp-iam-member-list-leave-' + currentEntity + '-button'
-                  "
-                  [disabled]="isCurrentUserUniqueOwner()"
-                  (click)="openLeaveDialog()"
-                ></button>
+            @if (currentUserIsOwner) {
+              <fd-multi-combobox
+                displayKey="displayName"
+                lookupKey="id"
+                [attr.data-testid]="
+                  'app-iam-member-list-user-' +
+                  member.user?.userId +
+                  '-role-select'
+                "
+                [dataSource]="rolesForEntity()"
+                [selectedItems]="selectedRoles(member)"
+                (selectionChange)="saveMember($event, member)"
+              />
+            } @else {
+              @for (role of member.roles; track role) {
+                <span>{{ role.displayName }}</span>
+                @if (!$last) {
+                  <span>, </span>
+                }
               }
             }
           </fdp-table-cell>
         </fdp-column>
+
+        @if (currentUser) {
+          <fdp-column
+            align="end"
+            key="actions"
+            label="Actions"
+            i18n-label="
+              actions table cell|Actions table cell text on the members page
+            "
+            name="actions"
+          >
+            <fdp-table-cell *fdpCellDef="let member">
+              @if (isUserMember(member)) {
+                @if (!isCurrentUser(member) && currentUserIsOwner) {
+                  <button
+                    fd-button
+                    fdType="transparent"
+                    glyph="sys-cancel"
+                    id="remove-member-button"
+                    title="Remove member"
+                    [attr.data-testid]="
+                      'dxp-iam-member-list-user-' +
+                      member.user?.userId +
+                      '-remove-button'
+                    "
+                    (click)="openRemoveMemberDialog(member)"
+                  ></button>
+                }
+
+                @if (isCurrentUser(member)) {
+                  <button
+                    fd-button
+                    fdType="transparent"
+                    glyph="visits"
+                    title="Leave"
+                    [attr.data-testid]="
+                      'dxp-iam-member-list-leave-' + currentEntity + '-button'
+                    "
+                    (click)="openLeaveDialog()"
+                  ></button>
+                }
+              }
+            </fdp-table-cell>
+          </fdp-column>
+        }
+
         @if (members().length === 0) {
           <fdp-table-no-data-wrapper>
             @if (noFiltersApplied()) {

@@ -13,7 +13,6 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   OnInit,
   signal,
 } from '@angular/core';
@@ -77,7 +76,6 @@ import {
   UserSortField,
   UserUtils,
 } from '@platform-mesh/iam-lib';
-import { Subscription } from 'rxjs';
 
 export interface AddMembersData {
   error?: string;
@@ -121,14 +119,10 @@ export interface AddMembersData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService, ConfirmationMessagesService],
 })
-export class MembersPageComponent implements OnInit, OnDestroy {
-  public countOwners?: number;
+export class MembersPageComponent implements OnInit {
   public scopeDisplayName?: string;
   public currentEntity?: string;
   public iamClaimEntityUrl?: string;
-
-  private subscriptions: Subscription = new Subscription();
-  currentUserId!: string;
   private lockView = false;
 
   members = signal<Member[]>([]);
@@ -168,6 +162,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     },
   };
   context!: NodeContext;
+  currentUserId!: string;
   currentUser: Member | undefined;
   currentUserIsOwner: boolean = false;
 
@@ -185,9 +180,14 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     this.context = await this.luigiContextService.getContextAsync();
     this.currentEntity = this.context.entityName;
-    this.currentUserId = this.context.userId;
     this.iamClaimEntityUrl = this.context.portalContext.iamClaimEntityUrl;
     this.scopeDisplayName = this.context.entityId;
+
+    this.memberService.me().subscribe({
+      next: (user) => {
+        this.currentUserId = user?.userId || '';
+      },
+    });
 
     this.memberService.roles().subscribe({
       next: (roles) => this.rolesForEntity.set(roles || []),
@@ -196,7 +196,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.readMembers();
   }
 
-  public isCurrentUserMember(member: Member) {
+  public isUserMember(member: Member) {
     return member.roles.some((r) => r.id === 'member');
   }
 
@@ -211,18 +211,12 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.routingService.openLink(searchItemLink);
   }
 
-  isCurrentUserUniqueOwner(): boolean {
-    return this.currentUserIsOwner && (this.countOwners ?? 0) < 2;
-  }
-
-  equalsCurrentUser(member: Member): boolean {
+  isCurrentUser(member: Member): boolean {
     return member.user && this.currentUserId === member.user.userId;
   }
 
   getUserNameOrId(member: Member): string {
-    const postFix = this.equalsCurrentUser(member)
-      ? ` (${$localize`You`})`
-      : '';
+    const postFix = this.isCurrentUser(member) ? ` (${$localize`You`})` : '';
     const userName = UserUtils.getNameOrId(member.user);
     return `${userName}${postFix}`;
   }
@@ -243,7 +237,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
 
           this.members.set(members.users);
           this.totalItems.set(members.pageInfo.totalCount || 0);
-          this.countOwners = members.pageInfo.ownerCount;
           this.currentUser = (members.users || []).find(
             (m) => m.user.userId === this.currentUserId,
           );
@@ -288,15 +281,17 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       .showRemoveMemberDialog(member.user)
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.memberService.removeRole(member.user, 'member').subscribe({
-            next: () => {
-              this.removeMemberSuccessNotification(member.user);
-              this.readMembers();
-            },
-            error: (error: Error) => {
-              this.removeMemberErrorNotification(error);
-            },
-          });
+          this.memberService
+            .removeRole(member.user.userId, 'member')
+            .subscribe({
+              next: () => {
+                this.removeMemberSuccessNotification(member.user);
+                this.readMembers();
+              },
+              error: (error: Error) => {
+                this.removeMemberErrorNotification(error);
+              },
+            });
         }
       })
       .catch((error: Error) => {
@@ -323,18 +318,16 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       .showLeaveScopeDialog(this.scopeDisplayName ?? '')
       .then((confirmation) => {
         if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.subscriptions.add(
-            this.memberService
-              .removeRole({ userId: this.currentUserId }, 'member')
-              .subscribe({
-                next: () => {
-                  this.leaveSuccessNotification();
-                },
-                error: (error: Error) => {
-                  this.leaveErrorNotification(error);
-                },
-              }),
-          );
+          this.memberService
+            .removeRole(this.currentUserId, 'member')
+            .subscribe({
+              next: () => {
+                this.leaveSuccessNotification();
+              },
+              error: (error: Error) => {
+                this.leaveErrorNotification(error);
+              },
+            });
         }
       })
       .catch((error: Error) => {
@@ -388,11 +381,7 @@ export class MembersPageComponent implements OnInit, OnDestroy {
       (role) => role.id === 'owner',
     );
 
-    if (
-      this.equalsCurrentUser(member) &&
-      this.isCurrentUserUniqueOwner() &&
-      !ownerRoleRemains
-    ) {
+    if (this.isCurrentUser(member) && !ownerRoleRemains) {
       this.notificationService.openErrorStrip(
         ERROR_MUST_HAVE_AT_LEAST_ONE_OWNER,
       );
@@ -406,7 +395,14 @@ export class MembersPageComponent implements OnInit, OnDestroy {
     this.lockView = true;
 
     this.memberService
-      .assignRolesToUser(member.user, event.selectedItems as Role[])
+      .assignRolesToUser({
+        changes: [
+          {
+            userId: member.user.userId,
+            roles: (event.selectedItems as Role[]).map((r) => r.id),
+          },
+        ],
+      })
       .subscribe({
         next: () => {
           this.lockView = false;
@@ -463,10 +459,6 @@ export class MembersPageComponent implements OnInit, OnDestroy {
   itemsPerPageChange(value: number): void {
     this.itemsPerPage = value;
     this.newPageClicked(1);
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
   }
 
   claim(): void {
