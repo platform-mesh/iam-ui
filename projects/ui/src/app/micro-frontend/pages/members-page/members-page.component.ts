@@ -76,6 +76,7 @@ import {
   UserSortField,
   UserUtils,
 } from '@platform-mesh/iam-lib';
+import { retry } from 'rxjs';
 
 export interface AddMembersData {
   error?: string;
@@ -116,8 +117,8 @@ export interface AddMembersData {
   ],
   templateUrl: './members-page.component.html',
   styleUrl: './members-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService, ConfirmationMessagesService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MembersPageComponent implements OnInit {
   public scopeDisplayName?: string;
@@ -164,7 +165,7 @@ export class MembersPageComponent implements OnInit {
   context!: NodeContext;
   currentUserId!: string;
   currentUser: Member | undefined;
-  currentUserIsOwner: boolean = false;
+  currentUserIsOwner = false;
 
   constructor(
     private memberService: MemberService,
@@ -190,7 +191,9 @@ export class MembersPageComponent implements OnInit {
     });
 
     this.memberService.roles().subscribe({
-      next: (roles) => this.rolesForEntity.set(roles || []),
+      next: (roles) => {
+        this.rolesForEntity.set(roles || []);
+      },
     });
 
     this.readMembers();
@@ -228,6 +231,7 @@ export class MembersPageComponent implements OnInit {
         roleFilters: this.selectedFilterRoleIds,
         sortBy: this.sortBy,
       })
+      .pipe(retry(3))
       .subscribe({
         next: (members: UserConnection | undefined) => {
           this.isLoading.set(false);
