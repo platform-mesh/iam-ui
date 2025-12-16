@@ -146,7 +146,7 @@
                 </td>
               </tr>
             }
-            @for (invitee of selectedInvitees; track invitee.user.userId) {
+            @for (invitee of selectedInvitees; track invitee.user.email) {
               <tr fd-table-row>
                 <td fd-table-cell>
                   <fd-avatar
@@ -171,7 +171,7 @@
                   <!-- TODO remove $any -->
                   <fd-multi-combobox
                     displayKey="displayName"
-                    lookupKey="technicalName"
+                    lookupKey="id"
                     placeholder=""
                     [attr.data-testid]="
                       invitee.user
@@ -246,7 +246,7 @@
                       '-role-select'
                     "
                     [dataSource]="availableRoles"
-                    [selectedItems]="selectedRoles(member)"
+                    [selectedItems]="member.roles"
                     (selectionChange)="onRoleChange($event, member)"
                   />
                 </td>
