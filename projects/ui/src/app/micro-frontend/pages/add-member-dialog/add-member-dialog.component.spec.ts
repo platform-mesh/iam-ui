@@ -139,33 +139,6 @@ describe('AddMemberDialogComponent', () => {
     });
   });
 
-  describe('selectedRoles', () => {
-    it('should return filtered roles for member', async () => {
-      await component.ngOnInit();
-      const member: Member = {
-        user: mockUser,
-        roles: [{ id: 'owner' } as Role, { id: 'viewer' } as Role],
-      } as Member;
-
-      const result = component.selectedRoles(member);
-
-      expect(result).toHaveLength(2);
-      expect(result.map((r) => r.id)).toEqual(['owner', 'viewer']);
-    });
-
-    it('should return empty array when member has no roles', async () => {
-      await component.ngOnInit();
-      const member: Member = {
-        user: mockUser,
-        roles: [],
-      } as Member;
-
-      const result = component.selectedRoles(member);
-
-      expect(result).toEqual([]);
-    });
-  });
-
   describe('addMembers', () => {
     it('should add members successfully', async () => {
       await component.ngOnInit();

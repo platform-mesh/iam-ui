@@ -163,14 +163,6 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectedRoles(member: Member): Role[] {
-    return (
-      this.availableRoles.filter((r) =>
-        member.roles.map((mr) => mr.id).includes(r.id),
-      ) || []
-    );
-  }
-
   addMembers(): void {
     this.touched = true;
     const input = this.selectedMembers.concat(this.selectedInvitees);
