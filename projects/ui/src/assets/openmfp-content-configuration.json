@@ -10,10 +10,9 @@
           "entityType": "main",
           "urlSuffix": "/#/organization/members",
           "context": {
-            "entityContext": {
-              "account": {
-                "policies": ["iamAdmin", "projectAdmin", "projectMember"]
-              }
+            "resourceDefinition": {
+              "kind": "Account",
+              "group": "core.platform-mesh.io"
             }
           }
         },
@@ -22,35 +21,65 @@
           "entityType": "main",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/organization/add-members"
+          "urlSuffix": "/#/organization/add-members",
+          "context": {
+            "resourceDefinition": {
+              "kind": "Account",
+              "group": "core.platform-mesh.io"
+            }
+          }
         },
         {
           "pathSegment": "members",
           "label": "{{members}}",
           "icon": "company-view",
           "entityType": "main.core_platform-mesh_io_account",
-          "urlSuffix": "/#/:accountId/members"
+          "urlSuffix": "/#/:accountId/members",
+          "context": {
+            "resourceDefinition": {
+              "kind": "Account",
+              "group": "core.platform-mesh.io"
+            }
+          }
         },
         {
           "pathSegment": "add-members",
           "entityType": "main.core_platform-mesh_io_account",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/:accountId/add-members"
+          "urlSuffix": "/#/:accountId/add-members",
+          "context": {
+            "resourceDefinition": {
+              "kind": "Account",
+              "group": "core.platform-mesh.io"
+            }
+          }
         },
         {
           "pathSegment": "members",
           "label": "{{members}}",
           "icon": "company-view",
-          "entityType": "main.core_platform-mesh_io_account.core_namespace",
-          "urlSuffix": "/#/:accountId/members"
+          "entityType": "main.core_platform-mesh_io_account.namespace",
+          "urlSuffix": "/#/:accountId/members",
+          "context": {
+            "resourceDefinition": {
+              "kind": "Account",
+              "group": "core.platform-mesh.io"
+            }
+          }
         },
         {
           "pathSegment": "add-members",
-          "entityType": "main.core_platform-mesh_io_account.core_namespace",
+          "entityType": "main.core_platform-mesh_io_account.namespace",
           "label": "{{members}}",
           "hideFromNav": true,
-          "urlSuffix": "/#/:accountId/add-members"
+          "urlSuffix": "/#/:accountId/add-members",
+          "context": {
+            "resourceDefinition": {
+              "kind": "Account",
+              "group": "core.platform-mesh.io"
+            }
+          }
         }
       ],
       "texts": [
