@@ -63,8 +63,8 @@
           "urlSuffix": "/#/:accountId/members",
           "context": {
             "resourceDefinition": {
-              "kind": "Account",
-              "group": "core.platform-mesh.io"
+              "kind": "Namespace",
+              "group": ""
             }
           }
         },
@@ -76,8 +76,8 @@
           "urlSuffix": "/#/:accountId/add-members",
           "context": {
             "resourceDefinition": {
-              "kind": "Account",
-              "group": "core.platform-mesh.io"
+              "kind": "Namespace",
+              "group": ""
             }
           }
         }
