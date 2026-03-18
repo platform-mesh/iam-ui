@@ -1,13 +1,15 @@
 import {
   NodeContext,
+  PageInput,
+  ResourceContext,
   Role,
   RoleAssignmentResult,
   RoleRemovalResult,
+  SortByInput,
   User,
   UserConnection,
   UserRoleChange,
 } from '../models';
-import { PageInput, ResourceContext, SortByInput } from '../models';
 import { InviteInput } from '../models/invites';
 import {
   ASSIGN_ROLES_TO_USERS,
@@ -20,7 +22,7 @@ import {
 } from '../queries/iam-queries';
 import { IamApolloClientService } from './apollo';
 import { IamLuigiContextService } from './luigi';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, combineLatest, first, mergeMap } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -28,10 +30,8 @@ import { map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class MemberService {
-  constructor(
-    private apolloClientService: IamApolloClientService,
-    private luigiContextService: IamLuigiContextService,
-  ) {}
+  private apolloClientService = inject(IamApolloClientService);
+  private luigiContextService = inject(IamLuigiContextService);
 
   users(
     cfg: {
@@ -187,14 +187,9 @@ export class MemberService {
   }
 
   private getResourceContext(context: NodeContext): ResourceContext {
-    const group =
-      context.resourceDefinition.group !== 'core.platform-mesh.io'
-        ? ''
-        : context.resourceDefinition.group;
-
     const accountPath =
       context.resourceDefinition.kind === 'Account'
-        ? context.kcpPath?.replace(`:${context.entityName}`, '')
+        ? context.kcpPath.split(':').slice(0, -1).join(':')
         : context.kcpPath;
 
     const namespace =
@@ -203,7 +198,7 @@ export class MemberService {
         : undefined;
 
     return {
-      group,
+      group: context.resourceDefinition.group,
       kind: context.resourceDefinition.kind,
       resource: {
         name: context.entityName,
