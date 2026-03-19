@@ -2,7 +2,7 @@ import { LuigiClient } from './luigi-client.service';
 import { LuigiDialogUtil } from './luigi-dialog-util.service';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DialogRef } from '@fundamental-ngx/core/dialog';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { Subject } from 'rxjs';
 
@@ -14,9 +14,9 @@ describe('LuigiDialogUtil', () => {
     TestBed.configureTestingModule({
       providers: [
         MockProvider(LuigiClient, {
-          uxManager: jest.fn().mockReturnValue({
-            addBackdrop: jest.fn(),
-            removeBackdrop: jest.fn(),
+          uxManager: vi.fn().mockReturnValue({
+            addBackdrop: vi.fn(),
+            removeBackdrop: vi.fn(),
           }),
         }),
       ],
@@ -31,8 +31,8 @@ describe('LuigiDialogUtil', () => {
     const afterClosed = new Subject();
     dialogRef.afterClosed = afterClosed;
 
-    const dialogOpened = jest.fn();
-    const dialogClosed = jest.fn();
+    const dialogOpened = vi.fn();
+    const dialogClosed = vi.fn();
     luigiDialogUtil['dialogOpened'] = dialogOpened;
     luigiDialogUtil['dialogClosed'] = dialogClosed;
 

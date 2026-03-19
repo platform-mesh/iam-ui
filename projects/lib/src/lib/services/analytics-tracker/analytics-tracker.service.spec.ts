@@ -3,7 +3,7 @@ import { IContextMessage, IamLuigiContextService } from '../luigi';
 import { AnalyticsTrackerService } from './analytics-tracker.service';
 import { TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { BehaviorSubject, Observable } from 'rxjs';
 

@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as wc from './wc';
+import { MockedFunction } from 'vitest';
 import { Injector, Type } from '@angular/core';
 import * as angularElements from '@angular/elements';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 
-jest.mock('@angular/elements', () => ({
-  createCustomElement: jest.fn(),
+vi.mock('@angular/elements', () => ({
+  createCustomElement: vi.fn(),
 }));
 
 describe('Luigi WebComponents Utils', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('registerLuigiWebComponent', () => {
@@ -20,15 +21,15 @@ describe('Luigi WebComponents Utils', () => {
     const src = 'src-of-the-script';
 
     const createCustomElementSpy = (
-      angularElements.createCustomElement as jest.MockedFunction<
+      angularElements.createCustomElement as MockedFunction<
         typeof angularElements.createCustomElement
       >
     ).mockReturnValue(element);
-    const _registerWebcomponent = jest.fn();
+    const _registerWebcomponent = vi.fn();
     // @ts-expect-error global
     window.Luigi = { _registerWebcomponent };
 
-    const getSrcSpy = jest.spyOn(wc, 'getSrc').mockReturnValue(src);
+    const getSrcSpy = vi.spyOn(wc, 'getSrc').mockReturnValue(src);
 
     wc.registerLuigiWebComponent(component, injector);
 
@@ -48,11 +49,11 @@ describe('Luigi WebComponents Utils', () => {
     };
     const injector = mock<Injector>();
 
-    const getSrcSpy = jest
+    const getSrcSpy = vi
       .spyOn(wc, 'getSrc')
       .mockReturnValue('http://localhost:12345/main.js#component1');
 
-    const registerLuigiWebComponentSpy = jest
+    const registerLuigiWebComponentSpy = vi
       .spyOn(wc, 'registerLuigiWebComponent')
       .mockReturnValue(void 0);
 
@@ -73,11 +74,11 @@ describe('Luigi WebComponents Utils', () => {
     };
     const injector = mock<Injector>();
 
-    const getSrcSpy = jest
+    const getSrcSpy = vi
       .spyOn(wc, 'getSrc')
       .mockReturnValue('http://localhost:12345/main.js#component1');
 
-    const registerLuigiWebComponentSpy = jest
+    const registerLuigiWebComponentSpy = vi
       .spyOn(wc, 'registerLuigiWebComponent')
       .mockReturnValue(void 0);
 
@@ -98,8 +99,8 @@ describe('Luigi WebComponents Utils', () => {
   it('should get src', () => {
     const src = 'http://localhost:12345/main.js#component1';
 
-    const getAttribute = jest.fn().mockReturnValue(src);
-    jest
+    const getAttribute = vi.fn().mockReturnValue(src);
+    vi
       .spyOn(document, 'currentScript', 'get')
       .mockReturnValue(mock<HTMLOrSVGScriptElement>({ getAttribute }));
 

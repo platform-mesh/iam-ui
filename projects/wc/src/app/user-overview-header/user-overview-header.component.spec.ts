@@ -1,4 +1,5 @@
 import { UserOverviewHeaderComponent } from './user-overview-header.component';
+import { Mock } from 'vitest';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ILuigiContextTypes } from '@luigi-project/client-support-angular';
@@ -40,7 +41,7 @@ describe('UserOverviewHeaderComponent', () => {
 
   beforeEach(() => {
     mockUserService = {
-      user: jest.fn(),
+      user: vi.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -50,10 +51,10 @@ describe('UserOverviewHeaderComponent', () => {
         { provide: MemberService, useValue: mockUserService },
         MockProvider(IamLuigiContextService, {
           contextObservable: () => luigiContext,
-          setContext: jest.fn(),
+          setContext: vi.fn(),
         }),
         MockProvider(AvatarProviderService, {
-          getAvatarImageUrl: jest.fn().mockResolvedValue(undefined),
+          getAvatarImageUrl: vi.fn().mockResolvedValue(undefined),
         }),
       ],
     });
@@ -65,9 +66,9 @@ describe('UserOverviewHeaderComponent', () => {
 
   it('should call iamLuigiContextService.setContext when context is set', () => {
     const iamLuigiContextServiceSpy = iamLuigiContextService as unknown as {
-      setContext: jest.Mock;
+      setContext: Mock;
     };
-    iamLuigiContextServiceSpy.setContext = jest.fn();
+    iamLuigiContextServiceSpy.setContext = vi.fn();
 
     component.context = mockContext;
 
@@ -79,7 +80,7 @@ describe('UserOverviewHeaderComponent', () => {
   describe('When ngOnInit should call memberService me - reading the user', () => {
     it('should fetch user', () => {
       const user = { userId: 'userId', firstName: 'John' } as User;
-      (mockUserService.user as jest.Mock).mockReturnValue(of(user));
+      (mockUserService.user as Mock).mockReturnValue(of(user));
       component.context = mockContext;
 
       component.ngOnInit();
@@ -115,7 +116,7 @@ describe('UserOverviewHeaderComponent', () => {
 
   describe('When calling chatWithUserViaTeams', () => {
     it('should open correct the window', () => {
-      const openNewWindowSpy = jest
+      const openNewWindowSpy = vi
         .spyOn(window, 'open')
         .mockImplementation(() => null);
 
@@ -131,7 +132,7 @@ describe('UserOverviewHeaderComponent', () => {
 
   describe('When calling callUserViaTeams', () => {
     it('should open correct the window without video by default', () => {
-      const windowOpenSpy = jest
+      const windowOpenSpy = vi
         .spyOn(window, 'open')
         .mockImplementation(() => null);
 
@@ -144,7 +145,7 @@ describe('UserOverviewHeaderComponent', () => {
     });
 
     it('should open correct the window with video', () => {
-      const windowOpenSpy = jest
+      const windowOpenSpy = vi
         .spyOn(window, 'open')
         .mockImplementation(() => null);
 

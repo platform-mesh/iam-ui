@@ -1,4 +1,5 @@
 import { User } from '../../models';
+import { MockedObject } from 'vitest';
 import {
   AvatarProviderService,
   IamLuigiContextService,
@@ -12,24 +13,24 @@ import { AvatarModule } from '@fundamental-ngx/core';
 import { MockModule } from 'ng-mocks';
 import { of } from 'rxjs';
 
-jest.mock('../../services', () => ({
-  AvatarProviderService: jest.fn(),
-  IamLuigiContextService: jest.fn(),
-  LuigiClient: jest.fn(),
+vi.mock('../../services', () => ({
+  AvatarProviderService: vi.fn(),
+  IamLuigiContextService: vi.fn(),
+  LuigiClient: vi.fn(),
 }));
 
 describe('AvatarComponent', () => {
   let component: AvatarComponent;
   let fixture: ComponentFixture<AvatarComponent>;
-  let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
+  let mockAvatarProviderService: MockedObject<AvatarProviderService>;
 
   beforeEach(() => {
     const mockService = {
-      getAvatarImageUrl: jest.fn(),
+      getAvatarImageUrl: vi.fn(),
     };
 
     const mockIamLuigiContextService = {
-      contextObservable: jest.fn().mockReturnValue(
+      contextObservable: vi.fn().mockReturnValue(
         of({
           context: {
             portalContext: {
@@ -41,8 +42,8 @@ describe('AvatarComponent', () => {
     };
 
     const mockLuigiClient = {
-      linkManager: jest.fn().mockReturnValue({
-        navigate: jest.fn(),
+      linkManager: vi.fn().mockReturnValue({
+        navigate: vi.fn(),
       }),
     };
 
@@ -72,7 +73,7 @@ describe('AvatarComponent', () => {
 
     mockAvatarProviderService = TestBed.inject(
       AvatarProviderService,
-    ) as jest.Mocked<AvatarProviderService>;
+    ) as MockedObject<AvatarProviderService>;
     fixture.detectChanges();
   });
 
@@ -91,43 +92,43 @@ describe('AvatarComponent', () => {
     [
       'fetch to get avatar image resolves',
       AvatarMode.Image,
-      { firstName: 'John', userId: 'ICOS', lastName: 'Doe' },
+      { firstName: 'John', userId: 'ICOS', lastName: 'Doe', email: '' },
       'stab',
     ],
     [
       'fetch to get avatar image rejects and user has firstName',
       AvatarMode.Name,
-      { firstName: 'John', userId: 'ICOS', lastName: '' },
+      { firstName: 'John', userId: 'ICOS', lastName: '', email: '' },
       undefined,
     ],
     [
       'fetch to get avatar image rejects and user has lastName',
       AvatarMode.Name,
-      { firstName: '', userId: 'ICOS', lastName: 'Doe' },
+      { firstName: '', userId: 'ICOS', lastName: 'Doe', email: '' },
       undefined,
     ],
     [
       'fetch to get avatar image rejects and user has firstName and lastName',
       AvatarMode.Name,
-      { firstName: 'John', userId: 'ICOS', lastName: 'Doe' },
+      { firstName: 'John', userId: 'ICOS', lastName: 'Doe', email: '' },
       undefined,
     ],
     [
       'fetch to get avatar image rejects and user does not have firstName or lastName',
       AvatarMode.GlyphIcon,
-      { firstName: '', userId: 'ICOS', lastName: '' },
+      { firstName: '', userId: 'ICOS', lastName: '', email: '' },
       undefined,
     ],
     [
       'user does not have id but has firstName or lastName',
       AvatarMode.Name,
-      { firstName: 'John', userId: '', lastName: 'Doe' },
+      { firstName: 'John', userId: '', lastName: 'Doe', email: '' },
       undefined,
     ],
     [
       'user does not have id neither firstName or lastName',
       AvatarMode.GlyphIcon,
-      { firstName: '', userId: '', lastName: '' },
+      { firstName: '', userId: '', lastName: '', email: '' },
       undefined,
     ],
   ])(

@@ -1,5 +1,4 @@
-import { ENV, Environment, NodeContext } from '../../models';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, Signal } from '@angular/core';
 import {
   ILuigiContextTypes,
   LuigiContextService,
@@ -8,6 +7,7 @@ import {
 import deepmerge from 'deepmerge';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ENV, Environment, NodeContext } from '../../models';
 
 export interface IContextMessage {
   contextType: ILuigiContextTypes;
@@ -62,6 +62,10 @@ export class IamLuigiContextService extends LuigiContextService {
           this.env.luigiContextOverwrite as Partial<NodeContext>,
         ),
       );
+  }
+
+  contextSignal(): Signal<IContextMessage | undefined> {
+    throw new Error('Method not implemented.');
   }
 
   contextObservable(): Observable<IContextMessage> {

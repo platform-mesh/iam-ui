@@ -36,6 +36,6 @@ function mockImage() {
     onerror: () => {},
     src: '',
   };
-  global.Image = jest.fn().mockReturnValue(image);
+  global.Image = vi.fn().mockReturnValue(image);
   return image;
 }

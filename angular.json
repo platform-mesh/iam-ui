@@ -106,6 +106,21 @@
               "projects/ui/src/**/*.html"
             ]
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/ui/tsconfig.spec.json",
+            "buildTarget": "ui:build:development",
+            "setupFiles": ["projects/ui/test-setup.ts"],
+            "runnerConfig": "projects/ui/vitest.config.ts"
+          },
+          "configurations": {
+            "coverage": {
+              "coverage": true,
+              "watch": false
+            }
+          }
         }
       }
     },
@@ -179,6 +194,21 @@
           "options": {
             "lintFilePatterns": ["projects/wc/**/*.ts", "projects/wc/**/*.html"]
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/wc/tsconfig.spec.json",
+            "buildTarget": "wc:build:development",
+            "setupFiles": ["projects/wc/test-setup.ts"],
+            "runnerConfig": "projects/wc/vitest.config.ts"
+          },
+          "configurations": {
+            "coverage": {
+              "coverage": true,
+              "watch": false
+            }
+          }
         }
       }
     },
@@ -204,11 +234,18 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "main": "projects/lib/src/test.ts",
             "tsConfig": "projects/lib/tsconfig.spec.json",
-            "karmaConfig": "projects/lib/karma.conf.js"
+            "buildTarget": "lib:build:development",
+            "setupFiles": ["projects/lib/test-setup.ts"],
+            "runnerConfig": "projects/lib/vitest.config.ts"
+          },
+          "configurations": {
+            "coverage": {
+              "coverage": true,
+              "watch": false
+            }
           }
         },
         "lint": {

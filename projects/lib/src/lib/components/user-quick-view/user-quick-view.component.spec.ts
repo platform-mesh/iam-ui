@@ -1,4 +1,5 @@
 import { User } from '../../models';
+import { MockedObject } from 'vitest';
 import {
   AvatarProviderService,
   IamLuigiContextService,
@@ -11,15 +12,15 @@ import { of } from 'rxjs';
 describe('UserQuickViewComponent', () => {
   const luigiClient: LuigiClient = {} as LuigiClient;
   let component: UserQuickViewComponent;
-  let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
+  let mockAvatarProviderService: MockedObject<AvatarProviderService>;
   let fixture: ComponentFixture<UserQuickViewComponent>;
   beforeEach(async () => {
     const mockService = {
-      getAvatarImageUrl: jest.fn(),
+      getAvatarImageUrl: vi.fn(),
     };
 
     const mockIamLuigiContextService = {
-      contextObservable: jest.fn().mockReturnValue(
+      contextObservable: vi.fn().mockReturnValue(
         of({
           context: {
             portalContext: {
@@ -45,7 +46,7 @@ describe('UserQuickViewComponent', () => {
     component = fixture.componentInstance;
     mockAvatarProviderService = TestBed.inject(
       AvatarProviderService,
-    ) as jest.Mocked<AvatarProviderService>;
+    ) as MockedObject<AvatarProviderService>;
   });
 
   describe('getUserAvatarImgUrl', () => {
@@ -85,8 +86,8 @@ describe('UserQuickViewComponent', () => {
   describe('navigateToUserProfile', () => {
     it('should navigate to users profile', () => {
       // given
-      const navigate = jest.fn();
-      luigiClient.linkManager = jest.fn().mockReturnValue({ navigate });
+      const navigate = vi.fn();
+      luigiClient.linkManager = vi.fn().mockReturnValue({ navigate });
 
       // when
       component.navigateToUserProfile('userId');

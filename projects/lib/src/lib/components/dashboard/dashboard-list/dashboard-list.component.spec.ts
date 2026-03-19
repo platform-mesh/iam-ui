@@ -1,4 +1,5 @@
 import { DashboardListComponent } from './dashboard-list.component';
+import { MockInstance } from 'vitest';
 import { ListItem } from './models/list-item';
 import { SvgConfigType } from './models/svg-config-type';
 import { sapIllusDotAvatarAlternate } from './svg/dot-avatar-alternate';
@@ -11,10 +12,10 @@ describe('DashboardListComponent', () => {
   let component: DashboardListComponent;
   let fixture: ComponentFixture<DashboardListComponent>;
   let componentRef: ComponentRef<DashboardListComponent>;
-  let consoleErrorSpy: jest.SpyInstance;
+  let consoleErrorSpy: MockInstance;
 
   beforeAll(() => {
-    consoleErrorSpy = jest
+    consoleErrorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined as any);
   });

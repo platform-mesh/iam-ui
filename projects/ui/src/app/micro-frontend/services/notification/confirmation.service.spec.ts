@@ -3,12 +3,12 @@ import {
   ConfirmationService,
 } from './confirmation.service';
 import { LuigiClient, User } from '@platform-mesh/iam-lib';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 
 describe('ConfirmationService', () => {
   const luigiClientMock = mock<LuigiClient>({
-    uxManager: jest.fn().mockReturnValue({
-      showConfirmationModal: jest
+    uxManager: vi.fn().mockReturnValue({
+      showConfirmationModal: vi
         .fn()
         .mockResolvedValue(ConfirmationDialogDecision.CONFIRMED),
     }),
@@ -19,7 +19,7 @@ describe('ConfirmationService', () => {
   );
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -27,7 +27,7 @@ describe('ConfirmationService', () => {
   });
 
   it('should provide a remove member from project confirmation dialog', async () => {
-    const confirmationModalSpy = jest.spyOn(
+    const confirmationModalSpy = vi.spyOn(
       luigiClientMock.uxManager(),
       'showConfirmationModal',
     );
@@ -46,7 +46,7 @@ describe('ConfirmationService', () => {
   });
 
   it('should provide a leave confirmation dialog', async () => {
-    const confirmationModalSpy = jest.spyOn(
+    const confirmationModalSpy = vi.spyOn(
       luigiClientMock.uxManager(),
       'showConfirmationModal',
     );

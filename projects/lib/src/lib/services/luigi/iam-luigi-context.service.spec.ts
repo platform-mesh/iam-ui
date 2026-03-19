@@ -10,7 +10,7 @@ import {
   ILuigiContextTypes,
   LuigiContextServiceImpl,
 } from '@luigi-project/client-support-angular';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { ReplaySubject } from 'rxjs';
 
@@ -40,7 +40,7 @@ describe('DxpLuigiContextService', () => {
 
     it('should set the context', () => {
       const context = mock<NodeContext>();
-      luigiContextService.addListener = jest.fn();
+      luigiContextService.addListener = vi.fn();
 
       iamLuigiContextService.setContext(context);
 
@@ -52,7 +52,7 @@ describe('DxpLuigiContextService', () => {
 
     it('should provide a context observable', fakeAsync(() => {
       const observable = new ReplaySubject<IContextMessage>();
-      luigiContextService.contextObservable = jest
+      luigiContextService.contextObservable = vi
         .fn()
         .mockReturnValue(observable);
       observable.next(contextMessage);
@@ -65,7 +65,7 @@ describe('DxpLuigiContextService', () => {
     }));
 
     it('should provide a context promise', fakeAsync(() => {
-      luigiContextService.getContextAsync = jest
+      luigiContextService.getContextAsync = vi
         .fn()
         .mockReturnValue(Promise.resolve(contextMessage.context));
 
@@ -77,7 +77,7 @@ describe('DxpLuigiContextService', () => {
     }));
 
     it('should provide a context synchronously', () => {
-      luigiContextService.getContext = jest
+      luigiContextService.getContext = vi
         .fn()
         .mockReturnValue(contextMessage.context);
       const resultContext = iamLuigiContextService.getContext();
@@ -120,7 +120,7 @@ describe('DxpLuigiContextService', () => {
 
     it('should provide a context observable merged with env', fakeAsync(() => {
       const observable = new ReplaySubject<IContextMessage>();
-      luigiContextService.contextObservable = jest
+      luigiContextService.contextObservable = vi
         .fn()
         .mockReturnValue(observable);
       observable.next(contextMessage);
@@ -136,7 +136,7 @@ describe('DxpLuigiContextService', () => {
     }));
 
     it('should provide a context promise merged with env', fakeAsync(() => {
-      luigiContextService.getContextAsync = jest
+      luigiContextService.getContextAsync = vi
         .fn()
         .mockReturnValue(Promise.resolve(contextMessage.context));
 
@@ -148,7 +148,7 @@ describe('DxpLuigiContextService', () => {
     }));
 
     it('should provide a context merged with env synchronously', () => {
-      luigiContextService.getContext = jest
+      luigiContextService.getContext = vi
         .fn()
         .mockReturnValue(contextMessage.context);
 

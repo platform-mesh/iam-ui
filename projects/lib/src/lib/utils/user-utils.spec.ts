@@ -1,6 +1,6 @@
 import { UserUtils } from './user-utils';
 import { User } from '@platform-mesh/iam-lib';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 
 describe('UserUtils', () => {
   describe('when getNameOrId is called', () => {

@@ -1,3 +1,4 @@
+import { MockedObject } from 'vitest';
 import {
   AddMemberDialogComponent,
   DropDownValue,
@@ -18,10 +19,10 @@ import { of, throwError } from 'rxjs';
 
 describe('AddMemberDialogComponent', () => {
   let component: AddMemberDialogComponent;
-  let memberService: jest.Mocked<MemberService>;
-  let notificationService: jest.Mocked<NotificationService>;
-  let luigiClient: jest.Mocked<LuigiClient>;
-  let cdr: jest.Mocked<ChangeDetectorRef>;
+  let memberService: MockedObject<MemberService>;
+  let notificationService: MockedObject<NotificationService>;
+  let luigiClient: MockedObject<LuigiClient>;
+  let cdr: MockedObject<ChangeDetectorRef>;
 
   const mockRoles: Role[] = [
     { id: 'owner', displayName: 'Owner' } as Role,
@@ -50,26 +51,26 @@ describe('AddMemberDialogComponent', () => {
 
   beforeEach(() => {
     memberService = {
-      roles: jest.fn().mockReturnValue(of(mockRoles)),
-      knownUsers: jest.fn().mockReturnValue(of(mockUserConnection)),
-      assignRolesToUser: jest.fn().mockReturnValue(of({})),
+      roles: vi.fn().mockReturnValue(of(mockRoles)),
+      knownUsers: vi.fn().mockReturnValue(of(mockUserConnection)),
+      assignRolesToUser: vi.fn().mockReturnValue(of({})),
     } as any;
 
     notificationService = {
-      openErrorStrip: jest.fn(),
-      openSuccessToast: jest.fn(),
+      openErrorStrip: vi.fn(),
+      openSuccessToast: vi.fn(),
     } as any;
 
     const linkManager = {
-      goBack: jest.fn(),
+      goBack: vi.fn(),
     };
 
     luigiClient = {
-      linkManager: jest.fn().mockReturnValue(linkManager),
+      linkManager: vi.fn().mockReturnValue(linkManager),
     } as any;
 
     cdr = {
-      detectChanges: jest.fn(),
+      detectChanges: vi.fn(),
     } as any;
 
     TestBed.configureTestingModule({
@@ -96,7 +97,7 @@ describe('AddMemberDialogComponent', () => {
 
     it('should setup search input debounce', async () => {
       await component.ngOnInit();
-      jest.spyOn(component, 'filter');
+      vi.spyOn(component, 'filter');
 
       component.searchInput.next('test');
 
@@ -114,7 +115,7 @@ describe('AddMemberDialogComponent', () => {
       } as Member;
       const event = {
         selectedItems: [mockRoles[0], mockRoles[2]],
-        source: { setValue: jest.fn() },
+        source: { setValue: vi.fn() },
       } as unknown as MultiComboboxSelectionChangeEvent;
 
       component.onRoleChange(event, potentialMember);
@@ -129,7 +130,7 @@ describe('AddMemberDialogComponent', () => {
       } as Member;
       const event = {
         selectedItems: [],
-        source: { setValue: jest.fn() },
+        source: { setValue: vi.fn() },
       } as unknown as MultiComboboxSelectionChangeEvent;
 
       component.onRoleChange(event, potentialMember);
@@ -300,7 +301,7 @@ describe('AddMemberDialogComponent', () => {
 
   describe('inputChange', () => {
     it('should update search input with lowercase', () => {
-      jest.spyOn(component.searchInput, 'next');
+      vi.spyOn(component.searchInput, 'next');
 
       component.inputChange('TEST Search');
 
@@ -308,7 +309,7 @@ describe('AddMemberDialogComponent', () => {
     });
 
     it('should handle empty search term', () => {
-      jest.spyOn(component.searchInput, 'next');
+      vi.spyOn(component.searchInput, 'next');
 
       component.inputChange('');
 
@@ -521,7 +522,7 @@ describe('AddMemberDialogComponent', () => {
     });
 
     it('should clear search after item clicked', () => {
-      jest.spyOn(component, 'clearSearch');
+      vi.spyOn(component, 'clearSearch');
       const userValue: DropDownValue = { user: mockUser };
 
       component.itemClicked(userValue);
@@ -541,7 +542,7 @@ describe('AddMemberDialogComponent', () => {
 
   describe('clearSearch', () => {
     it('should clear search input and dropdown', () => {
-      jest.spyOn(component, 'filter');
+      vi.spyOn(component, 'filter');
       component.currentInput = 'test';
 
       component.clearSearch();
@@ -571,7 +572,7 @@ describe('AddMemberDialogComponent', () => {
 
   describe('ngOnDestroy', () => {
     it('should unsubscribe from subscriptions', () => {
-      const unsubscribeSpy = jest.spyOn(
+      const unsubscribeSpy = vi.spyOn(
         component['subscriptions'],
         'unsubscribe',
       );

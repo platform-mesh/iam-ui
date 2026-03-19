@@ -11,22 +11,22 @@ import { IamApolloClientService } from './apollo';
 import { IamLuigiContextService } from './luigi';
 import { MemberService } from './member.service';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 describe('MemberService', () => {
   let service: MemberService;
 
   const mockApollo = {
-    query: jest.fn(),
-    mutate: jest.fn(),
+    query: vi.fn(),
+    mutate: vi.fn(),
   };
 
   const mockApolloClientService = {
-    apollo: jest.fn(() => of(mockApollo)),
+    apollo: vi.fn(() => of(mockApollo)),
   };
 
   const mockLuigiContextService = {
-    contextObservable: jest.fn(() =>
+    contextObservable: vi.fn(() =>
       of({
         context: {
           resourceDefinition: {
@@ -52,147 +52,133 @@ describe('MemberService', () => {
     });
 
     service = TestBed.inject(MemberService);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
-  it('users() should call apollo.query with correct variables', (done) => {
+  it('users() should call apollo.query with correct variables', async () => {
     mockApollo.query.mockReturnValue(
       of({ data: { users: { items: [], total: 0 } } }),
     );
 
-    service.users().subscribe((result) => {
-      expect(result).toEqual({ items: [], total: 0 });
-      expect(mockApollo.query).toHaveBeenCalledWith({
-        query: USERS,
-        variables: {
-          context: {
-            group: 'core.platform-mesh.io',
-            kind: 'Account',
-            resource: { name: 'account1', namespace: 'test-ns' },
-            accountPath: 'root',
-          },
-          roleFilters: undefined,
-          sortBy: undefined,
-          page: undefined,
+    const result = await firstValueFrom(service.users());
+    expect(result).toEqual({ items: [], total: 0 });
+    expect(mockApollo.query).toHaveBeenCalledWith({
+      query: USERS,
+      variables: {
+        context: {
+          group: 'core.platform-mesh.io',
+          kind: 'Account',
+          resource: { name: 'account1', namespace: 'test-ns' },
+          accountPath: 'root',
         },
-        fetchPolicy: 'no-cache',
-      });
-      done();
+        roleFilters: undefined,
+        sortBy: undefined,
+        page: undefined,
+      },
+      fetchPolicy: 'no-cache',
     });
   });
 
-  it('knownUsers() should query known users', (done) => {
+  it('knownUsers() should query known users', async () => {
     mockApollo.query.mockReturnValue(
       of({ data: { knownUsers: { items: [], total: 0 } } }),
     );
 
-    service.knownUsers().subscribe((result) => {
-      expect(result).toEqual({ items: [], total: 0 });
-      expect(mockApollo.query).toHaveBeenCalledWith({
-        query: KNOWN_USERS,
-        variables: {
-          sortBy: undefined,
-          page: undefined,
-        },
-        fetchPolicy: 'no-cache',
-      });
-      done();
+    const result = await firstValueFrom(service.knownUsers());
+    expect(result).toEqual({ items: [], total: 0 });
+    expect(mockApollo.query).toHaveBeenCalledWith({
+      query: KNOWN_USERS,
+      variables: {
+        sortBy: undefined,
+        page: undefined,
+      },
+      fetchPolicy: 'no-cache',
     });
   });
 
-  it('user() should query user by id', (done) => {
+  it('user() should query user by id', async () => {
     mockApollo.query.mockReturnValue(of({ data: { user: { userId: 'u1' } } }));
 
-    service.user('u1').subscribe((result) => {
-      expect(result).toEqual({ userId: 'u1' });
-      expect(mockApollo.query).toHaveBeenCalledWith({
-        query: USER,
-        variables: { userId: 'u1' },
-        fetchPolicy: 'no-cache',
-      });
-      done();
+    const result = await firstValueFrom(service.user('u1'));
+    expect(result).toEqual({ userId: 'u1' });
+    expect(mockApollo.query).toHaveBeenCalledWith({
+      query: USER,
+      variables: { userId: 'u1' },
+      fetchPolicy: 'no-cache',
     });
   });
 
-  it('me() should query current user', (done) => {
+  it('me() should query current user', async () => {
     mockApollo.query.mockReturnValue(of({ data: { me: { userId: 'me' } } }));
 
-    service.me().subscribe((result) => {
-      expect(result).toEqual({ userId: 'me' });
-      expect(mockApollo.query).toHaveBeenCalledWith({
-        query: ME,
-        fetchPolicy: 'no-cache',
-      });
-      done();
+    const result = await firstValueFrom(service.me());
+    expect(result).toEqual({ userId: 'me' });
+    expect(mockApollo.query).toHaveBeenCalledWith({
+      query: ME,
+      fetchPolicy: 'no-cache',
     });
   });
 
-  it('roles() should query roles with context', (done) => {
+  it('roles() should query roles with context', async () => {
     mockApollo.query.mockReturnValue(of({ data: { roles: [] } }));
 
-    service.roles().subscribe((result) => {
-      expect(result).toEqual([]);
-      expect(mockApollo.query).toHaveBeenCalledWith({
-        query: ROLES,
-        variables: {
-          context: {
-            group: 'core.platform-mesh.io',
-            kind: 'Account',
-            resource: { name: 'account1', namespace: 'test-ns' },
-            accountPath: 'root',
-          },
+    const result = await firstValueFrom(service.roles());
+    expect(result).toEqual([]);
+    expect(mockApollo.query).toHaveBeenCalledWith({
+      query: ROLES,
+      variables: {
+        context: {
+          group: 'core.platform-mesh.io',
+          kind: 'Account',
+          resource: { name: 'account1', namespace: 'test-ns' },
+          accountPath: 'root',
         },
-        fetchPolicy: 'no-cache',
-      });
-      done();
+      },
+      fetchPolicy: 'no-cache',
     });
   });
 
-  it('assignRolesToUser() should call mutation', (done) => {
+  it('assignRolesToUser() should call mutation', async () => {
     mockApollo.mutate.mockReturnValue(
       of({ data: { assignRolesToUsers: { success: true } } }),
     );
 
-    service
-      .assignRolesToUser({ changes: [{ roles: ['r1'], userId: 'u1' }] })
-      .subscribe((response) => {
-        expect(response).toEqual({ success: true });
-        expect(mockApollo.mutate).toHaveBeenCalledWith({
-          mutation: ASSIGN_ROLES_TO_USERS,
-          variables: {
-            context: {
-              group: 'core.platform-mesh.io',
-              kind: 'Account',
-              resource: { name: 'account1', namespace: 'test-ns' },
-              accountPath: 'root',
-            },
-            changes: [{ userId: 'u1', roles: ['r1'] }],
-          },
-        });
-        done();
-      });
+    const response = await firstValueFrom(
+      service.assignRolesToUser({ changes: [{ roles: ['r1'], userId: 'u1' }] }),
+    );
+    expect(response).toEqual({ success: true });
+    expect(mockApollo.mutate).toHaveBeenCalledWith({
+      mutation: ASSIGN_ROLES_TO_USERS,
+      variables: {
+        context: {
+          group: 'core.platform-mesh.io',
+          kind: 'Account',
+          resource: { name: 'account1', namespace: 'test-ns' },
+          accountPath: 'root',
+        },
+        changes: [{ userId: 'u1', roles: ['r1'] }],
+      },
+    });
   });
 
-  it('removeRole() should call mutation', (done) => {
+  it('removeRole() should call mutation', async () => {
     mockApollo.mutate.mockReturnValue(
       of({ data: { removeRole: { success: true } } }),
     );
 
-    service.removeRole('u1', 'r1').subscribe((result) => {
-      expect(result).toEqual({ success: true });
-      expect(mockApollo.mutate).toHaveBeenCalledWith({
-        mutation: REMOVE_ROLE,
-        variables: {
-          context: {
-            group: 'core.platform-mesh.io',
-            kind: 'Account',
-            resource: { name: 'account1', namespace: 'test-ns' },
-            accountPath: 'root',
-          },
-          input: { userId: 'u1', role: 'r1' },
+    const result = await firstValueFrom(service.removeRole('u1', 'r1'));
+    expect(result).toEqual({ success: true });
+    expect(mockApollo.mutate).toHaveBeenCalledWith({
+      mutation: REMOVE_ROLE,
+      variables: {
+        context: {
+          group: 'core.platform-mesh.io',
+          kind: 'Account',
+          resource: { name: 'account1', namespace: 'test-ns' },
+          accountPath: 'root',
         },
-      });
-      done();
+        input: { userId: 'u1', role: 'r1' },
+      },
     });
   });
 

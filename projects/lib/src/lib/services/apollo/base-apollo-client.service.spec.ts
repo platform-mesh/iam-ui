@@ -1,4 +1,5 @@
 import { TestUtils } from '../../test';
+import { Mock } from 'vitest';
 import { IamLuigiContextService } from '../luigi';
 import { BaseApolloClientService } from './base-apollo-client.service';
 import { HttpHeaders } from '@angular/common/http';
@@ -8,7 +9,7 @@ import { InMemoryCache } from '@apollo/client/core';
 import { LuigiContextService } from '@luigi-project/client-support-angular';
 import { Apollo, ApolloBase } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 
 class TestingApolloClientService extends BaseApolloClientService {
@@ -59,11 +60,11 @@ describe('BaseApolloClientService', () => {
   let httpLink: HttpLink;
   let injector: Injector;
 
-  let setLink: jest.Mock;
+  let setLink: Mock;
   let apolloClient: ApolloBase;
 
   beforeEach(() => {
-    setLink = jest.fn();
+    setLink = vi.fn();
 
     apolloClient = mock<ApolloBase>({
       client: {
@@ -75,11 +76,11 @@ describe('BaseApolloClientService', () => {
       providers: [
         MockProvider(IamLuigiContextService),
         MockProvider(Apollo, {
-          createNamed: jest.fn(),
-          use: jest.fn().mockReturnValue(apolloClient),
+          createNamed: vi.fn(),
+          use: vi.fn().mockReturnValue(apolloClient),
         }),
         MockProvider(HttpLink, {
-          create: jest.fn().mockReturnValue(link),
+          create: vi.fn().mockReturnValue(link),
         }),
       ],
     });
@@ -92,7 +93,7 @@ describe('BaseApolloClientService', () => {
   it('should return apollo client for correct context', fakeAsync(() => {
     const token = 'foo';
 
-    luigiContextService.getContextAsync = jest.fn().mockResolvedValue({
+    luigiContextService.getContextAsync = vi.fn().mockResolvedValue({
       token: token,
       portalContext: {},
     });
@@ -120,7 +121,7 @@ describe('BaseApolloClientService', () => {
   }));
 
   it('should return no apollo client for incorrect context', fakeAsync(() => {
-    luigiContextService.getContextAsync = jest.fn().mockResolvedValue({});
+    luigiContextService.getContextAsync = vi.fn().mockResolvedValue({});
 
     const service = new TestingApolloClientService(injector);
     tick();

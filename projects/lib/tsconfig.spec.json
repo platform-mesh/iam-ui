@@ -3,8 +3,8 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "outDir": "../../out-tsc/spec",
-    "types": ["@types/jest", "@types/node", "@angular/localize"]
+    "types": ["vitest/globals", "@types/node", "@angular/localize"]
   },
-  "files": ["src/polyfills.ts"],
+  "files": ["src/polyfills.ts", "../../shared-test-setup.ts"],
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
 }

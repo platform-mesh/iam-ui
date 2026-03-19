@@ -11,7 +11,7 @@ describe('DashboardSidebarComponent', () => {
   describe('handle closing', () => {
     it('should emit close event', () => {
       // given
-      const closeSpy = jest.spyOn(component.closeSidebar, 'emit');
+      const closeSpy = vi.spyOn(component.closeSidebar, 'emit');
 
       // when
       component.close();
