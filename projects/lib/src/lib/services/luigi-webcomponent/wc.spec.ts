@@ -97,4 +97,48 @@ describe('Luigi WebComponents Utils', () => {
     expect(getAttribute).toHaveBeenCalledWith('src');
     expect(result).toEqual(src);
   });
+
+  it('should throw when currentScript has no src', () => {
+    const getAttribute = vi.fn().mockReturnValue(null);
+    vi
+      .spyOn(document, 'currentScript', 'get')
+      .mockReturnValue(mock<HTMLOrSVGScriptElement>({ getAttribute }));
+
+    expect(() => wc.getSrc()).toThrow(
+      'src of currentScript is not defined. Contact the support team.',
+    );
+  });
+
+  it('registerLuigiWebComponents should do nothing when hash does not match component', () => {
+    const component1 = mock<Type<any>>();
+    const components = { component1 };
+    const injector = mock<Injector>();
+    const src = 'http://localhost:12345/main.js#unknown';
+
+    wc.registerLuigiWebComponents(components, injector, src);
+
+    expect(angularElements.createCustomElement).not.toHaveBeenCalled();
+  });
+
+  it('registerLuigiWebComponent should use getSrc() when no source given', () => {
+    const component = mock<Type<any>>();
+    const injector = mock<Injector>();
+    const src = 'http://localhost:12345/main.js#cmp';
+
+    const getAttribute = vi.fn().mockReturnValue(src);
+    vi
+      .spyOn(document, 'currentScript', 'get')
+      .mockReturnValue(mock<HTMLOrSVGScriptElement>({ getAttribute }));
+
+    const element = mock<angularElements.NgElementConstructor<any>>();
+    (
+      angularElements.createCustomElement as MockedFunction<
+        typeof angularElements.createCustomElement
+      >
+    ).mockReturnValue(element);
+
+    wc.registerLuigiWebComponent(component, injector);
+
+    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
+  });
 });

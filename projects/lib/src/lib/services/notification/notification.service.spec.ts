@@ -22,6 +22,22 @@ describe('NotificationService', () => {
         type: 'error',
       });
     });
+
+    it('should capitalize first letter of error message', () => {
+      service.openErrorStrip('something failed');
+      expect(luigiClient.uxManager().showAlert).toHaveBeenCalledWith({
+        text: 'Something failed',
+        type: 'error',
+      });
+    });
+
+    it('should pass empty string unchanged', () => {
+      service.openErrorStrip('');
+      expect(luigiClient.uxManager().showAlert).toHaveBeenCalledWith({
+        text: '',
+        type: 'error',
+      });
+    });
   });
 
   describe('openSuccessToast', () => {

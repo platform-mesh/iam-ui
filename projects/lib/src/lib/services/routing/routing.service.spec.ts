@@ -40,5 +40,10 @@ describe('RoutingService', () => {
 
       expect(mockNavigate).toHaveBeenCalledWith('abc');
     });
+
+    it('should navigate to empty string when no link url provided', () => {
+      routingService.openLink({ displayName: 'foo' });
+      expect(mockNavigate).toHaveBeenCalledWith('');
+    });
   });
 });

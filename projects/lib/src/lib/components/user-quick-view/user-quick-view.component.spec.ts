@@ -96,4 +96,83 @@ describe('UserQuickViewComponent', () => {
       expect(navigate).toHaveBeenCalledWith('/users/userId/overview');
     });
   });
+
+  describe('getGithubURL', () => {
+    it('should return github url for user', () => {
+      fixture.componentRef.setInput('user', { userId: 'testUser' } as User);
+      expect(component.getGithubURL()).toBe('https://github.tools.sap/testUser');
+    });
+  });
+
+  describe('callUserViaTeams', () => {
+    it('should open teams call url in new window', () => {
+      window.open = vi.fn();
+      component.callUserViaTeams('user@test.com');
+      expect(window.open).toHaveBeenCalledWith(
+        'msteams:/l/call/0/0?users=user@test.com&withVideo=false',
+        '_blank',
+      );
+    });
+
+    it('should open teams call url with video', () => {
+      window.open = vi.fn();
+      component.callUserViaTeams('user@test.com', true);
+      expect(window.open).toHaveBeenCalledWith(
+        'msteams:/l/call/0/0?users=user@test.com&withVideo=true',
+        '_blank',
+      );
+    });
+  });
+
+  describe('chatWithUserViaTeams', () => {
+    it('should open teams chat url in new window', () => {
+      window.open = vi.fn();
+      component.chatWithUserViaTeams('user@test.com');
+      expect(window.open).toHaveBeenCalledWith(
+        'msteams:/l/chat/0/0?users=user@test.com',
+        '_blank',
+      );
+    });
+  });
+
+  describe('emailUser', () => {
+    it('should set location href to mailto', () => {
+      const hrefSetter = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      vi.spyOn(window, 'location', 'get').mockReturnValue({
+        ...window.location,
+        set href(value: string) { hrefSetter(value); },
+      } as unknown as Location);
+      component.emailUser('user@test.com');
+      expect(hrefSetter).toHaveBeenCalledWith('mailto:user@test.com');
+    });
+  });
+
+  describe('isOpenChange', () => {
+    it('should focus first tabbable element when opened', () => {
+      vi.useFakeTimers();
+      const focusFn = vi.fn();
+      const popoverBody = { _focusFirstTabbableElement: focusFn } as any;
+      vi.spyOn(component, 'popover').mockReturnValue(popoverBody);
+
+      component.isOpenChange(true);
+      vi.runAllTimers();
+
+      expect(focusFn).toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+
+    it('should do nothing when closed', () => {
+      vi.useFakeTimers();
+      const focusFn = vi.fn();
+      const popoverBody = { _focusFirstTabbableElement: focusFn } as any;
+      vi.spyOn(component, 'popover').mockReturnValue(popoverBody);
+
+      component.isOpenChange(false);
+      vi.runAllTimers();
+
+      expect(focusFn).not.toHaveBeenCalled();
+      vi.useRealTimers();
+    });
+  });
 });

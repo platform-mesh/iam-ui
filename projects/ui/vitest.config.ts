@@ -8,6 +8,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
+      exclude: [
+        '**/*.html',
+        '**/test-setup.ts',
+        '**/*.spec.ts',
+        '**/index.ts',
+        '**/*.d.ts',
+        'projects/lib/**',
+      ],
       thresholds: {
         branches: 70,
         lines: 75,
