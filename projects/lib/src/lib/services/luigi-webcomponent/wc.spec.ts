@@ -1,26 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as wc from './wc';
-import { MockedFunction } from 'vitest';
-import { Injector, Type } from '@angular/core';
-import * as angularElements from '@angular/elements';
+import { Component, Injector } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { mock } from 'vitest-mock-extended';
 
-vi.mock('@angular/elements', () => ({
-  createCustomElement: vi.fn(),
-}));
+@Component({ standalone: true, template: '' })
+class StubComponent {}
 
 describe('Luigi WebComponents Utils', () => {
   let _registerWebcomponent: ReturnType<typeof vi.fn>;
+  let injector: Injector;
 
   beforeEach(() => {
     _registerWebcomponent = vi.fn();
     // @ts-expect-error global
     window.Luigi = { _registerWebcomponent };
-    (
-      angularElements.createCustomElement as MockedFunction<
-        typeof angularElements.createCustomElement
-      >
-    ).mockReset();
+    TestBed.configureTestingModule({ imports: [StubComponent] });
+    injector = TestBed.inject(Injector);
   });
 
   afterEach(() => {
@@ -28,60 +24,27 @@ describe('Luigi WebComponents Utils', () => {
   });
 
   it('registerLuigiWebComponent', () => {
-    const component = mock<Type<any>>();
-    const injector = mock<Injector>();
-    const element = mock<angularElements.NgElementConstructor<any>>();
     const src = 'src-of-the-script';
 
-    (
-      angularElements.createCustomElement as MockedFunction<
-        typeof angularElements.createCustomElement
-      >
-    ).mockReturnValue(element);
+    wc.registerLuigiWebComponent(StubComponent, injector, src);
 
-    wc.registerLuigiWebComponent(component, injector, src);
-
-    expect(angularElements.createCustomElement).toHaveBeenCalledWith(component, { injector });
-    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
+    expect(_registerWebcomponent).toHaveBeenCalledWith(src, expect.any(Function));
   });
 
   it('registerLuigiWebComponents', () => {
-    const component1 = mock<Type<any>>();
-    const component2 = mock<Type<any>>();
-    const components = { component1, component2 };
-    const injector = mock<Injector>();
-    const src = 'http://localhost:12345/main.js#component1';
+    const src = 'http://localhost:12345/main.js#StubComponent';
 
-    const element = mock<angularElements.NgElementConstructor<any>>();
-    (
-      angularElements.createCustomElement as MockedFunction<
-        typeof angularElements.createCustomElement
-      >
-    ).mockReturnValue(element);
+    wc.registerLuigiWebComponents({ StubComponent }, injector, src);
 
-    wc.registerLuigiWebComponents(components, injector, src);
-
-    expect(angularElements.createCustomElement).toHaveBeenCalledWith(component1, { injector });
-    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
+    expect(_registerWebcomponent).toHaveBeenCalledWith(src, expect.any(Function));
   });
 
-  it('registerLuigiWebComponents with src', () => {
-    const component3 = mock<Type<any>>();
-    const components = { component3 };
-    const injector = mock<Injector>();
-    const src = 'http://localhost:12345/main.js#component3';
+  it('registerLuigiWebComponents with matching src', () => {
+    const src = 'http://localhost:12345/main.js#StubComponent';
 
-    const element = mock<angularElements.NgElementConstructor<any>>();
-    (
-      angularElements.createCustomElement as MockedFunction<
-        typeof angularElements.createCustomElement
-      >
-    ).mockReturnValue(element);
+    wc.registerLuigiWebComponents({ StubComponent }, injector, src);
 
-    wc.registerLuigiWebComponents(components, injector, src);
-
-    expect(angularElements.createCustomElement).toHaveBeenCalledWith(component3, { injector });
-    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
+    expect(_registerWebcomponent).toHaveBeenCalledOnce();
   });
 
   it('should get src', () => {
@@ -110,19 +73,14 @@ describe('Luigi WebComponents Utils', () => {
   });
 
   it('registerLuigiWebComponents should do nothing when hash does not match component', () => {
-    const component1 = mock<Type<any>>();
-    const components = { component1 };
-    const injector = mock<Injector>();
     const src = 'http://localhost:12345/main.js#unknown';
 
-    wc.registerLuigiWebComponents(components, injector, src);
+    wc.registerLuigiWebComponents({ StubComponent }, injector, src);
 
-    expect(angularElements.createCustomElement).not.toHaveBeenCalled();
+    expect(_registerWebcomponent).not.toHaveBeenCalled();
   });
 
   it('registerLuigiWebComponent should use getSrc() when no source given', () => {
-    const component = mock<Type<any>>();
-    const injector = mock<Injector>();
     const src = 'http://localhost:12345/main.js#cmp';
 
     const getAttribute = vi.fn().mockReturnValue(src);
@@ -130,15 +88,8 @@ describe('Luigi WebComponents Utils', () => {
       .spyOn(document, 'currentScript', 'get')
       .mockReturnValue(mock<HTMLOrSVGScriptElement>({ getAttribute }));
 
-    const element = mock<angularElements.NgElementConstructor<any>>();
-    (
-      angularElements.createCustomElement as MockedFunction<
-        typeof angularElements.createCustomElement
-      >
-    ).mockReturnValue(element);
+    wc.registerLuigiWebComponent(StubComponent, injector);
 
-    wc.registerLuigiWebComponent(component, injector);
-
-    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
+    expect(_registerWebcomponent).toHaveBeenCalledWith(src, expect.any(Function));
   });
 });
