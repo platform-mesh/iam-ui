@@ -4,13 +4,14 @@ import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   AvatarProviderService,
+  DashboardSidebarItemComponent,
   IamLuigiContextService,
   LuigiClient,
   MemberService,
   User,
 } from '@platform-mesh/iam-lib';
-import { MockService } from 'ng-mocks';
-import { of } from 'rxjs';
+import { MockComponent, MockService } from 'ng-mocks';
+import { EMPTY, of } from 'rxjs';
 
 describe('MembersSidebarComponent', () => {
   let component: MembersSidebarComponent;
@@ -21,7 +22,9 @@ describe('MembersSidebarComponent', () => {
   let mockAvatarProviderService: MockedObject<AvatarProviderService>;
 
   beforeEach(async () => {
-    luigiContextService = MockService(IamLuigiContextService);
+    luigiContextService = MockService(IamLuigiContextService, {
+      contextObservable: vi.fn().mockReturnValue(EMPTY),
+    });
 
     memberService = MockService(MemberService, {
       users: vi.fn().mockReturnValue(of([])),
@@ -52,7 +55,12 @@ describe('MembersSidebarComponent', () => {
         { provide: MemberService, useValue: memberService },
         { provide: ChangeDetectorRef, useValue: cdr },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(MembersSidebarComponent, {
+        remove: { imports: [DashboardSidebarItemComponent] },
+        add: { imports: [MockComponent(DashboardSidebarItemComponent)] },
+      })
+      .compileComponents();
 
     const fixture = TestBed.createComponent(MembersSidebarComponent);
     component = fixture.componentInstance;
@@ -87,6 +95,7 @@ describe('MembersSidebarComponent', () => {
   it('should retrieve users and stop showing loading spinner', () => {
     const expectedUsers: User = {
       userId: 'foo',
+      email: '',
     };
     memberService.users = vi
       .fn()

@@ -13,12 +13,6 @@ import { AvatarModule } from '@fundamental-ngx/core';
 import { MockModule } from 'ng-mocks';
 import { of } from 'rxjs';
 
-vi.mock('../../services', () => ({
-  AvatarProviderService: vi.fn(),
-  IamLuigiContextService: vi.fn(),
-  LuigiClient: vi.fn(),
-}));
-
 describe('AvatarComponent', () => {
   let component: AvatarComponent;
   let fixture: ComponentFixture<AvatarComponent>;

@@ -16,7 +16,7 @@
     "lint:fix": "npm run build:lib && ng lint --fix",
     "lint:ui": "npm run build:lib && ng lint lib && ng lint ui",
     "lint:wc": "npm run build:lib && ng lint lib && ng lint wc",
-    "test": "ng test lib --no-watch && ng test ui --no-watch && ng test wc --no-watch",
+    "test": "ng test lib --configuration=coverage && ng test ui --configuration=coverage && ng test wc --configuration=coverage",
     "test:cov": "ng test lib --configuration=coverage && ng test ui --configuration=coverage && ng test wc --configuration=coverage",
     "e2e:ci": "echo 'There are no e2e tests'",
     "e2e:wc:ci": "echo 'There are no e2e tests'",

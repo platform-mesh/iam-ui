@@ -92,8 +92,9 @@ describe('UserOverviewHeaderComponent', () => {
 
   describe('When calling getFirstLastNameOrUserId', () => {
     it('should return the user name and id if the user name is available', () => {
-      const user = {
+      const user: User = {
         userId: 'D123456',
+        email: '',
         firstName: 'John',
         lastName: 'Doe',
       };
@@ -104,8 +105,9 @@ describe('UserOverviewHeaderComponent', () => {
     });
 
     it('should return the user id if the user name is not available', () => {
-      const user = {
+      const user: User = {
         userId: 'D123456',
+        email: '',
       };
 
       const name = component.getFirstLastNameOrUserId(user);

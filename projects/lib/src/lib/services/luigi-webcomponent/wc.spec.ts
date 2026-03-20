@@ -10,6 +10,19 @@ vi.mock('@angular/elements', () => ({
 }));
 
 describe('Luigi WebComponents Utils', () => {
+  let _registerWebcomponent: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    _registerWebcomponent = vi.fn();
+    // @ts-expect-error global
+    window.Luigi = { _registerWebcomponent };
+    (
+      angularElements.createCustomElement as MockedFunction<
+        typeof angularElements.createCustomElement
+      >
+    ).mockReset();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -20,80 +33,55 @@ describe('Luigi WebComponents Utils', () => {
     const element = mock<angularElements.NgElementConstructor<any>>();
     const src = 'src-of-the-script';
 
-    const createCustomElementSpy = (
+    (
       angularElements.createCustomElement as MockedFunction<
         typeof angularElements.createCustomElement
       >
     ).mockReturnValue(element);
-    const _registerWebcomponent = vi.fn();
-    // @ts-expect-error global
-    window.Luigi = { _registerWebcomponent };
 
-    const getSrcSpy = vi.spyOn(wc, 'getSrc').mockReturnValue(src);
+    wc.registerLuigiWebComponent(component, injector, src);
 
-    wc.registerLuigiWebComponent(component, injector);
-
-    expect(createCustomElementSpy).toHaveBeenCalledWith(component, {
-      injector,
-    });
-    expect(getSrcSpy).toHaveBeenCalled();
+    expect(angularElements.createCustomElement).toHaveBeenCalledWith(component, { injector });
     expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
   });
 
   it('registerLuigiWebComponents', () => {
     const component1 = mock<Type<any>>();
     const component2 = mock<Type<any>>();
-    const components = {
-      component1,
-      component2,
-    };
+    const components = { component1, component2 };
     const injector = mock<Injector>();
+    const src = 'http://localhost:12345/main.js#component1';
 
-    const getSrcSpy = vi
-      .spyOn(wc, 'getSrc')
-      .mockReturnValue('http://localhost:12345/main.js#component1');
+    const element = mock<angularElements.NgElementConstructor<any>>();
+    (
+      angularElements.createCustomElement as MockedFunction<
+        typeof angularElements.createCustomElement
+      >
+    ).mockReturnValue(element);
 
-    const registerLuigiWebComponentSpy = vi
-      .spyOn(wc, 'registerLuigiWebComponent')
-      .mockReturnValue(void 0);
+    wc.registerLuigiWebComponents(components, injector, src);
 
-    wc.registerLuigiWebComponents(components, injector);
-
-    expect(getSrcSpy).toHaveBeenCalled();
-    expect(registerLuigiWebComponentSpy).toHaveBeenCalledWith(
-      component1,
-      injector,
-      'http://localhost:12345/main.js#component1',
-    );
+    expect(angularElements.createCustomElement).toHaveBeenCalledWith(component1, { injector });
+    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
   });
 
   it('registerLuigiWebComponents with src', () => {
     const component3 = mock<Type<any>>();
-    const components = {
-      component3,
-    };
+    const components = { component3 };
     const injector = mock<Injector>();
+    const src = 'http://localhost:12345/main.js#component3';
 
-    const getSrcSpy = vi
-      .spyOn(wc, 'getSrc')
-      .mockReturnValue('http://localhost:12345/main.js#component1');
+    const element = mock<angularElements.NgElementConstructor<any>>();
+    (
+      angularElements.createCustomElement as MockedFunction<
+        typeof angularElements.createCustomElement
+      >
+    ).mockReturnValue(element);
 
-    const registerLuigiWebComponentSpy = vi
-      .spyOn(wc, 'registerLuigiWebComponent')
-      .mockReturnValue(void 0);
+    wc.registerLuigiWebComponents(components, injector, src);
 
-    wc.registerLuigiWebComponents(
-      components,
-      injector,
-      'http://localhost:12345/main.js#component3',
-    );
-
-    expect(getSrcSpy).not.toHaveBeenCalled();
-    expect(registerLuigiWebComponentSpy).toHaveBeenCalledWith(
-      component3,
-      injector,
-      'http://localhost:12345/main.js#component3',
-    );
+    expect(angularElements.createCustomElement).toHaveBeenCalledWith(component3, { injector });
+    expect(_registerWebcomponent).toHaveBeenCalledWith(src, element);
   });
 
   it('should get src', () => {

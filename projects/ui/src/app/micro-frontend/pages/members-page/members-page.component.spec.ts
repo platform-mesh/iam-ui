@@ -491,7 +491,7 @@ describe('MembersPageComponent', () => {
 
   describe('callUserViaTeams', () => {
     it('should open Teams call without video', () => {
-      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation();
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       component.callUserViaTeams(mockUser, false);
 
@@ -504,7 +504,7 @@ describe('MembersPageComponent', () => {
     });
 
     it('should open Teams call with video', () => {
-      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation();
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       component.callUserViaTeams(mockUser, true);
 
@@ -519,7 +519,7 @@ describe('MembersPageComponent', () => {
 
   describe('chatWithUserViaTeams', () => {
     it('should open Teams chat', () => {
-      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation();
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       component.chatWithUserViaTeams(mockUser);
 

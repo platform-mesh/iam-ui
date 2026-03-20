@@ -1,10 +1,9 @@
 import { ENV, Environment, NodeContext } from '../../models';
-import { TestUtils } from '../../test';
 import {
   IContextMessage,
   IamLuigiContextService,
 } from './iam-luigi-context.service';
-import { TestBed, fakeAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Context } from '@luigi-project/client';
 import {
   ILuigiContextTypes,
@@ -13,6 +12,7 @@ import {
 import { mock } from 'vitest-mock-extended';
 import { MockProvider } from 'ng-mocks';
 import { ReplaySubject } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 describe('DxpLuigiContextService', () => {
   let iamLuigiContextService: IamLuigiContextService;
@@ -50,31 +50,29 @@ describe('DxpLuigiContextService', () => {
       );
     });
 
-    it('should provide a context observable', fakeAsync(() => {
+    it('should provide a context observable', async () => {
       const observable = new ReplaySubject<IContextMessage>();
       luigiContextService.contextObservable = vi
         .fn()
         .mockReturnValue(observable);
       observable.next(contextMessage);
 
-      const resultContext = TestUtils.getLastValue(
+      const resultContext = await firstValueFrom(
         iamLuigiContextService.contextObservable(),
       );
 
       expect(resultContext).toEqual(contextMessage);
-    }));
+    });
 
-    it('should provide a context promise', fakeAsync(() => {
+    it('should provide a context promise', async () => {
       luigiContextService.getContextAsync = vi
         .fn()
         .mockReturnValue(Promise.resolve(contextMessage.context));
 
-      const resultContext = TestUtils.getLastValue(
-        iamLuigiContextService.getContextAsync(),
-      );
+      const resultContext = await iamLuigiContextService.getContextAsync();
 
       expect(resultContext).toEqual(contextMessage.context);
-    }));
+    });
 
     it('should provide a context synchronously', () => {
       luigiContextService.getContext = vi
@@ -118,14 +116,14 @@ describe('DxpLuigiContextService', () => {
       luigiContextService = TestBed.inject(LuigiContextServiceImpl);
     });
 
-    it('should provide a context observable merged with env', fakeAsync(() => {
+    it('should provide a context observable merged with env', async () => {
       const observable = new ReplaySubject<IContextMessage>();
       luigiContextService.contextObservable = vi
         .fn()
         .mockReturnValue(observable);
       observable.next(contextMessage);
 
-      const resultContext = TestUtils.getLastValue(
+      const resultContext = await firstValueFrom(
         iamLuigiContextService.contextObservable(),
       );
 
@@ -133,19 +131,17 @@ describe('DxpLuigiContextService', () => {
         ...contextMessage,
         context: expectedContext,
       });
-    }));
+    });
 
-    it('should provide a context promise merged with env', fakeAsync(() => {
+    it('should provide a context promise merged with env', async () => {
       luigiContextService.getContextAsync = vi
         .fn()
         .mockReturnValue(Promise.resolve(contextMessage.context));
 
-      const resultContext = TestUtils.getLastValue(
-        iamLuigiContextService.getContextAsync(),
-      );
+      const resultContext = await iamLuigiContextService.getContextAsync();
 
       expect(resultContext).toEqual(expectedContext);
-    }));
+    });
 
     it('should provide a context merged with env synchronously', () => {
       luigiContextService.getContext = vi

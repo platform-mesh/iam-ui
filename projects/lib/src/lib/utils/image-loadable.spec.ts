@@ -1,41 +1,34 @@
 import { imageLoadable } from './image-loadable';
 
-describe('isValidImgUrl', () => {
-  it('should return true on good image url', async () => {
-    const url = 'valid';
-    const image = mockImage();
+describe('imageLoadable', () => {
+  let image: { src: string; onload: () => void; onerror: () => void };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const originalImage = (global as any).Image;
 
-    const promise = imageLoadable(url);
-
-    expect(image.src).toEqual(url);
-
-    image.onload();
-
-    expect(await promise).toEqual(true);
+  beforeEach(() => {
+    image = { src: '', onload: () => {}, onerror: () => {} };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).Image = function () { return image; };
   });
 
-  it('should return false on bad image url', async () => {
-    const url = 'invalid';
-    const image = mockImage();
+  afterEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).Image = originalImage;
+  });
 
-    const promise = imageLoadable(url);
+  it('should return false when url is undefined', async () => {
+    expect(await imageLoadable(undefined)).toBe(false);
+  });
 
-    expect(image.src).toEqual(url);
+  it('should return true when image loads successfully', async () => {
+    const promise = imageLoadable('valid');
+    image.onload();
+    expect(await promise).toBe(true);
+  });
 
+  it('should return false when image fails to load', async () => {
+    const promise = imageLoadable('invalid');
     image.onerror();
-
-    expect(await promise).toEqual(false);
+    expect(await promise).toBe(false);
   });
 });
-
-function mockImage() {
-  const image = {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onload: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onerror: () => {},
-    src: '',
-  };
-  global.Image = vi.fn().mockReturnValue(image);
-  return image;
-}
