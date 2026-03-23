@@ -1,3 +1,4 @@
+import { MockedObject } from 'vitest';
 import { ConfirmationMessagesService } from '../../services/confirmation-messages/confirmation-messages.service';
 import {
   ConfirmationDialogDecision,
@@ -25,14 +26,14 @@ import { of, throwError } from 'rxjs';
 
 describe('MembersPageComponent', () => {
   let component: MembersPageComponent;
-  let memberService: jest.Mocked<MemberService>;
-  let notificationService: jest.Mocked<NotificationService>;
-  let confirmationService: jest.Mocked<ConfirmationService>;
-  let luigiClient: jest.Mocked<LuigiClient>;
-  let luigiContextService: jest.Mocked<IamLuigiContextService>;
-  let claimEntityService: jest.Mocked<ClaimEntityService>;
-  let confirmationMessagesService: jest.Mocked<ConfirmationMessagesService>;
-  let routingService: jest.Mocked<RoutingService>;
+  let memberService: MockedObject<MemberService>;
+  let notificationService: MockedObject<NotificationService>;
+  let confirmationService: MockedObject<ConfirmationService>;
+  let luigiClient: MockedObject<LuigiClient>;
+  let luigiContextService: MockedObject<IamLuigiContextService>;
+  let claimEntityService: MockedObject<ClaimEntityService>;
+  let confirmationMessagesService: MockedObject<ConfirmationMessagesService>;
+  let routingService: MockedObject<RoutingService>;
 
   const mockContext: NodeContext = {
     entityName: 'test-entity',
@@ -69,47 +70,47 @@ describe('MembersPageComponent', () => {
 
   beforeEach(() => {
     memberService = {
-      roles: jest.fn().mockReturnValue(of(mockRoles)),
-      users: jest.fn().mockReturnValue(of(mockUserConnection)),
-      removeRole: jest.fn().mockReturnValue(of({})),
-      assignRolesToUser: jest.fn().mockReturnValue(of({})),
-      me: jest.fn().mockReturnValue(of({ userId: 'user-123' })),
+      roles: vi.fn().mockReturnValue(of(mockRoles)),
+      users: vi.fn().mockReturnValue(of(mockUserConnection)),
+      removeRole: vi.fn().mockReturnValue(of({})),
+      assignRolesToUser: vi.fn().mockReturnValue(of({})),
+      me: vi.fn().mockReturnValue(of({ userId: 'user-123' })),
     } as any;
 
     notificationService = {
-      openSuccessToast: jest.fn(),
-      openErrorStrip: jest.fn(),
+      openSuccessToast: vi.fn(),
+      openErrorStrip: vi.fn(),
     } as any;
 
     confirmationService = {
-      showRemoveMemberDialog: jest.fn(),
-      showLeaveScopeDialog: jest.fn(),
+      showRemoveMemberDialog: vi.fn(),
+      showLeaveScopeDialog: vi.fn(),
     } as any;
 
     const linkManager = {
-      fromParent: jest.fn().mockReturnThis(),
-      openAsModal: jest.fn().mockResolvedValue(undefined),
+      fromParent: vi.fn().mockReturnThis(),
+      openAsModal: vi.fn().mockResolvedValue(undefined),
     };
 
     luigiClient = {
-      linkManager: jest.fn().mockReturnValue(linkManager),
-      clearFrameCache: jest.fn(),
+      linkManager: vi.fn().mockReturnValue(linkManager),
+      clearFrameCache: vi.fn(),
     } as any;
 
     luigiContextService = {
-      getContextAsync: jest.fn().mockResolvedValue(mockContext),
+      getContextAsync: vi.fn().mockResolvedValue(mockContext),
     } as any;
 
     claimEntityService = {
-      claim: jest.fn(),
+      claim: vi.fn(),
     } as any;
 
     confirmationMessagesService = {
-      getAddedMembersMessage: jest.fn().mockReturnValue('Members added'),
+      getAddedMembersMessage: vi.fn().mockReturnValue('Members added'),
     } as any;
 
     routingService = {
-      openLink: jest.fn(),
+      openLink: vi.fn(),
     } as any;
 
     TestBed.configureTestingModule({
@@ -370,7 +371,7 @@ describe('MembersPageComponent', () => {
   describe('saveMember', () => {
     const mockEvent = {
       selectedItems: [mockRoles[0]],
-      source: { setValue: jest.fn() },
+      source: { setValue: vi.fn() },
     } as unknown as MultiComboboxSelectionChangeEvent;
 
     it('should save member roles successfully', async () => {
@@ -401,7 +402,7 @@ describe('MembersPageComponent', () => {
       } as Member;
       const event = {
         selectedItems: [mockRoles[0]],
-        source: { setValue: jest.fn() },
+        source: { setValue: vi.fn() },
       } as unknown as MultiComboboxSelectionChangeEvent;
 
       component.saveMember(event, member);
@@ -413,7 +414,7 @@ describe('MembersPageComponent', () => {
       await component.ngOnInit();
       const event = {
         selectedItems: [],
-        source: { setValue: jest.fn() },
+        source: { setValue: vi.fn() },
       } as unknown as MultiComboboxSelectionChangeEvent;
 
       component.saveMember(event, mockMember);
@@ -431,7 +432,7 @@ describe('MembersPageComponent', () => {
       } as Member;
       const event = {
         selectedItems: [mockRoles[1]],
-        source: { setValue: jest.fn() },
+        source: { setValue: vi.fn() },
       } as unknown as MultiComboboxSelectionChangeEvent;
 
       component.saveMember(event, currentUserMember);
@@ -490,7 +491,7 @@ describe('MembersPageComponent', () => {
 
   describe('callUserViaTeams', () => {
     it('should open Teams call without video', () => {
-      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       component.callUserViaTeams(mockUser, false);
 
@@ -503,7 +504,7 @@ describe('MembersPageComponent', () => {
     });
 
     it('should open Teams call with video', () => {
-      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       component.callUserViaTeams(mockUser, true);
 
@@ -518,7 +519,7 @@ describe('MembersPageComponent', () => {
 
   describe('chatWithUserViaTeams', () => {
     it('should open Teams chat', () => {
-      const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+      const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
       component.chatWithUserViaTeams(mockUser);
 

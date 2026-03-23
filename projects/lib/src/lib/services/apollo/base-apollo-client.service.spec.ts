@@ -1,22 +1,23 @@
-import { TestUtils } from '../../test';
+import { Mock } from 'vitest';
 import { IamLuigiContextService } from '../luigi';
 import { BaseApolloClientService } from './base-apollo-client.service';
 import { HttpHeaders } from '@angular/common/http';
 import { Injector } from '@angular/core';
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { InMemoryCache } from '@apollo/client/core';
 import { LuigiContextService } from '@luigi-project/client-support-angular';
 import { Apollo, ApolloBase } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 import { MockProvider } from 'ng-mocks';
+import { firstValueFrom } from 'rxjs';
 
 class TestingApolloClientService extends BaseApolloClientService {
   constructor(injector: Injector) {
     super(injector, apolloClientName);
   }
 
-  protected getApiUrl(luigiContext: any): string {
+  protected getApiUrl(_luigiContext: any): string {
     return url;
   }
 }
@@ -59,11 +60,11 @@ describe('BaseApolloClientService', () => {
   let httpLink: HttpLink;
   let injector: Injector;
 
-  let setLink: jest.Mock;
+  let setLink: Mock;
   let apolloClient: ApolloBase;
 
   beforeEach(() => {
-    setLink = jest.fn();
+    setLink = vi.fn();
 
     apolloClient = mock<ApolloBase>({
       client: {
@@ -75,11 +76,11 @@ describe('BaseApolloClientService', () => {
       providers: [
         MockProvider(IamLuigiContextService),
         MockProvider(Apollo, {
-          createNamed: jest.fn(),
-          use: jest.fn().mockReturnValue(apolloClient),
+          createNamed: vi.fn(),
+          use: vi.fn().mockReturnValue(apolloClient),
         }),
         MockProvider(HttpLink, {
-          create: jest.fn().mockReturnValue(link),
+          create: vi.fn().mockReturnValue(link),
         }),
       ],
     });
@@ -89,18 +90,18 @@ describe('BaseApolloClientService', () => {
     injector = TestBed.inject(Injector);
   });
 
-  it('should return apollo client for correct context', fakeAsync(() => {
+  it('should return apollo client for correct context', async () => {
     const token = 'foo';
 
-    luigiContextService.getContextAsync = jest.fn().mockResolvedValue({
+    luigiContextService.getContextAsync = vi.fn().mockResolvedValue({
       token: token,
       portalContext: {},
     });
 
     const service = new TestingApolloClientService(injector);
-    tick();
+    await Promise.resolve();
 
-    const result = TestUtils.getLastValue(service.apollo());
+    const result = await firstValueFrom(service.apollo());
 
     expect(apollo.createNamed).toHaveBeenCalledWith(
       apolloClientName,
@@ -117,16 +118,19 @@ describe('BaseApolloClientService', () => {
 
     expect(apollo.use).toHaveBeenCalledWith(apolloClientName);
     expect(result).toEqual(apolloClient);
-  }));
+  });
 
-  it('should return no apollo client for incorrect context', fakeAsync(() => {
-    luigiContextService.getContextAsync = jest.fn().mockResolvedValue({});
+  it('should return no apollo client for incorrect context', async () => {
+    luigiContextService.getContextAsync = vi.fn().mockResolvedValue({});
 
     const service = new TestingApolloClientService(injector);
-    tick();
+    await Promise.resolve();
 
-    const result = TestUtils.getLastValue(service.apollo());
+    let emitted = false;
+    service.apollo().subscribe(() => {
+      emitted = true;
+    });
 
-    expect(result).toBeUndefined();
-  }));
+    expect(emitted).toBe(false);
+  });
 });

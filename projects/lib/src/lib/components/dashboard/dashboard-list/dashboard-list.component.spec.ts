@@ -1,20 +1,40 @@
 import { DashboardListComponent } from './dashboard-list.component';
+import { MockInstance } from 'vitest';
 import { ListItem } from './models/list-item';
 import { SvgConfigType } from './models/svg-config-type';
 import { sapIllusDotAvatarAlternate } from './svg/dot-avatar-alternate';
 import { sapIllusDotNoApplicationsAlternate } from './svg/dot-no-applications-alternate';
-import { ComponentRef, NO_ERRORS_SCHEMA } from '@angular/core';
+import {
+  ComponentRef,
+  Directive,
+  NO_ERRORS_SCHEMA,
+  OnInit,
+  TemplateRef,
+  ViewContainerRef,
+} from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+
+@Directive({ selector: '[requiredPolicies]', standalone: true })
+class RequiredPoliciesDirectiveStub implements OnInit {
+  constructor(
+    private template: TemplateRef<unknown>,
+    private viewContainer: ViewContainerRef,
+  ) {}
+
+  ngOnInit(): void {
+    this.viewContainer.createEmbeddedView(this.template);
+  }
+}
 
 describe('DashboardListComponent', () => {
   let component: DashboardListComponent;
   let fixture: ComponentFixture<DashboardListComponent>;
   let componentRef: ComponentRef<DashboardListComponent>;
-  let consoleErrorSpy: jest.SpyInstance;
+  let consoleErrorSpy: MockInstance;
 
   beforeAll(() => {
-    consoleErrorSpy = jest
+    consoleErrorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined as any);
   });
@@ -27,7 +47,11 @@ describe('DashboardListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [DashboardListComponent],
       schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+    })
+      .overrideComponent(DashboardListComponent, {
+        add: { imports: [RequiredPoliciesDirectiveStub], schemas: [NO_ERRORS_SCHEMA] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(DashboardListComponent);
     component = fixture.componentInstance;

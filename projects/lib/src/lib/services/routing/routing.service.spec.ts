@@ -1,18 +1,19 @@
 import { LuigiClient } from '../luigi';
+import { Mock } from 'vitest';
 import { RoutingService } from './routing.service';
 import { TestBed } from '@angular/core/testing';
 import { MockProvider } from 'ng-mocks';
 
 describe('RoutingService', () => {
   let routingService: RoutingService;
-  let mockNavigate: jest.Mock;
+  let mockNavigate: Mock;
 
   beforeEach(() => {
-    mockNavigate = jest.fn();
+    mockNavigate = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         MockProvider(LuigiClient, {
-          linkManager: jest.fn().mockReturnValue({ navigate: mockNavigate }),
+          linkManager: vi.fn().mockReturnValue({ navigate: mockNavigate }),
         }),
       ],
     });
@@ -21,7 +22,7 @@ describe('RoutingService', () => {
 
   describe('openLink', () => {
     it('should open in new tab', () => {
-      window.open = jest.fn();
+      window.open = vi.fn();
 
       routingService.openLink({
         displayName: 'foo',
@@ -38,6 +39,11 @@ describe('RoutingService', () => {
       });
 
       expect(mockNavigate).toHaveBeenCalledWith('abc');
+    });
+
+    it('should navigate to empty string when no link url provided', () => {
+      routingService.openLink({ displayName: 'foo' });
+      expect(mockNavigate).toHaveBeenCalledWith('');
     });
   });
 });

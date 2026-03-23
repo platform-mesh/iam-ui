@@ -1,15 +1,17 @@
 import { MembersSidebarComponent } from './members-sidebar.component';
+import { MockedObject } from 'vitest';
 import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   AvatarProviderService,
+  DashboardSidebarItemComponent,
   IamLuigiContextService,
   LuigiClient,
   MemberService,
   User,
 } from '@platform-mesh/iam-lib';
-import { MockService } from 'ng-mocks';
-import { of } from 'rxjs';
+import { MockComponent, MockService } from 'ng-mocks';
+import { EMPTY, of } from 'rxjs';
 
 describe('MembersSidebarComponent', () => {
   let component: MembersSidebarComponent;
@@ -17,31 +19,33 @@ describe('MembersSidebarComponent', () => {
   let memberService: MemberService;
   let cdr: ChangeDetectorRef;
   let luigiClient: LuigiClient;
-  let mockAvatarProviderService: jest.Mocked<AvatarProviderService>;
+  let mockAvatarProviderService: MockedObject<AvatarProviderService>;
 
   beforeEach(async () => {
-    luigiContextService = MockService(IamLuigiContextService);
+    luigiContextService = MockService(IamLuigiContextService, {
+      contextObservable: vi.fn().mockReturnValue(EMPTY),
+    });
 
     memberService = MockService(MemberService, {
-      users: jest.fn().mockReturnValue(of([])),
-      user: jest.fn().mockReturnValue(of([])),
+      users: vi.fn().mockReturnValue(of([])),
+      user: vi.fn().mockReturnValue(of([])),
     } as any);
 
     cdr = MockService(ChangeDetectorRef, {
-      detectChanges: jest.fn(),
+      detectChanges: vi.fn(),
     });
 
     luigiClient = MockService(LuigiClient, {
-      linkManager: jest.fn().mockReturnValue({
-        fromClosestContext: jest.fn().mockReturnValue({
-          navigate: jest.fn(),
+      linkManager: vi.fn().mockReturnValue({
+        fromClosestContext: vi.fn().mockReturnValue({
+          navigate: vi.fn(),
         }),
-        navigate: jest.fn(),
+        navigate: vi.fn(),
       }),
     });
 
     const mockAvatarService = {
-      getAvatarImageUrl: jest.fn(),
+      getAvatarImageUrl: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -51,24 +55,29 @@ describe('MembersSidebarComponent', () => {
         { provide: MemberService, useValue: memberService },
         { provide: ChangeDetectorRef, useValue: cdr },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(MembersSidebarComponent, {
+        remove: { imports: [DashboardSidebarItemComponent] },
+        add: { imports: [MockComponent(DashboardSidebarItemComponent)] },
+      })
+      .compileComponents();
 
     const fixture = TestBed.createComponent(MembersSidebarComponent);
     component = fixture.componentInstance;
     component.LuigiClient = luigiClient as any;
     mockAvatarProviderService = TestBed.inject(
       AvatarProviderService,
-    ) as jest.Mocked<AvatarProviderService>;
+    ) as MockedObject<AvatarProviderService>;
   });
 
   it('should get members on init', () => {
-    const spy = jest.spyOn(component, 'getUsersOfEntity').mockReturnValue();
+    const spy = vi.spyOn(component, 'getUsersOfEntity').mockReturnValue();
     component.ngOnInit();
     expect(spy).toHaveBeenCalled();
   });
 
   it('should navigate to user', () => {
-    const spy = jest.spyOn(
+    const spy = vi.spyOn(
       component.LuigiClient.linkManager().fromClosestContext(),
       'navigate',
     );
@@ -78,7 +87,7 @@ describe('MembersSidebarComponent', () => {
   });
 
   it('should navigate to members', () => {
-    const spy = jest.spyOn(component.LuigiClient.linkManager(), 'navigate');
+    const spy = vi.spyOn(component.LuigiClient.linkManager(), 'navigate');
     component.navigateToUser('123');
     expect(spy).toHaveBeenCalledWith('/users/123/overview');
   });
@@ -86,13 +95,14 @@ describe('MembersSidebarComponent', () => {
   it('should retrieve users and stop showing loading spinner', () => {
     const expectedUsers: User = {
       userId: 'foo',
+      email: '',
     };
-    memberService.users = jest
+    memberService.users = vi
       .fn()
       .mockReturnValue(of({ users: [{ user: expectedUsers }] }));
     component.loading = true;
 
-    const detectChangesSpy = jest.spyOn(component['cdr'], 'detectChanges');
+    const detectChangesSpy = vi.spyOn(component['cdr'], 'detectChanges');
     component.getUsersOfEntity();
 
     expect(component.loading).toBe(false);

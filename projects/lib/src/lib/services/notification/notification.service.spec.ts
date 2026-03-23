@@ -4,21 +4,37 @@ import {
 } from './notification.service';
 import { UxManager } from '@luigi-project/client';
 import { LuigiClient } from '@platform-mesh/iam-lib';
-import { mock } from 'jest-mock-extended';
+import { mock } from 'vitest-mock-extended';
 
 describe('NotificationService', () => {
-  const showAlertMock = jest.fn();
+  const showAlertMock = vi.fn();
   const luigiClient = mock<LuigiClient>({
     uxManager: () => mock<UxManager>({ showAlert: showAlertMock }),
   });
   const service = new NotificationService(luigiClient);
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => vi.resetAllMocks());
   describe('openErrorStrip', () => {
     it('should open error message strip', () => {
       const errorMessage = 'Some error occurred';
       service.openErrorStrip(errorMessage);
       expect(luigiClient.uxManager().showAlert).toHaveBeenCalledWith({
         text: errorMessage,
+        type: 'error',
+      });
+    });
+
+    it('should capitalize first letter of error message', () => {
+      service.openErrorStrip('something failed');
+      expect(luigiClient.uxManager().showAlert).toHaveBeenCalledWith({
+        text: 'Something failed',
+        type: 'error',
+      });
+    });
+
+    it('should pass empty string unchanged', () => {
+      service.openErrorStrip('');
+      expect(luigiClient.uxManager().showAlert).toHaveBeenCalledWith({
+        text: '',
         type: 'error',
       });
     });
