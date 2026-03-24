@@ -220,7 +220,7 @@
             name="actions"
           >
             <fdp-table-cell *fdpCellDef="let member">
-              @if (isUserMember(member)) {
+              @if (this.ownersCount() > 1) {
                 @if (!isCurrentUser(member) && currentUserIsOwner) {
                   <button
                     fd-button

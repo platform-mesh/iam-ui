@@ -76,6 +76,7 @@ import {
   UserSortField,
   UserUtils,
 } from '@platform-mesh/iam-lib';
+import { finalize, forkJoin } from 'rxjs';
 
 export interface AddMembersData {
   error?: string;
@@ -126,6 +127,7 @@ export class MembersPageComponent implements OnInit {
   private lockView = false;
 
   members = signal<Member[]>([]);
+  ownersCount = signal<number>(0);
   rolesForEntity = signal<Role[]>([]);
   totalItems = signal<number>(10);
   searchTerm = '';
@@ -236,6 +238,7 @@ export class MembersPageComponent implements OnInit {
           }
 
           this.members.set(members.users);
+          this.ownersCount.set(members.ownersCount ?? 0);
           this.totalItems.set(members.pageInfo.totalCount || 0);
           this.currentUser = (members.users || []).find(
             (m) => m.user.userId === this.currentUserId,
@@ -244,7 +247,7 @@ export class MembersPageComponent implements OnInit {
             (r) => r.id === 'owner',
           );
         },
-        error: (error) => {
+        error: (_error) => {
           this.isLoading.set(false);
         },
       });
@@ -261,41 +264,53 @@ export class MembersPageComponent implements OnInit {
       });
   }
 
-  private openSuccessToast(addMembersData: AddMembersData): void {
-    const successMessage =
-      this.confirmationMessagesService.getAddedMembersMessage(
-        addMembersData,
-        this.currentEntity,
-      );
-    this.notificationService.openSuccessToast(successMessage);
-  }
-
-  private openErrorToast(reason: string): void {
-    this.notificationService.openErrorStrip(
-      $localize`Could not add new members. Reason: ` + reason.toString(),
-    );
-  }
-
   openRemoveMemberDialog(member: Member): void {
     this.confirmationService
       .showRemoveMemberDialog(member.user)
       .then((confirmation) => {
-        if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.memberService
-            .removeRole(member.user.userId, 'member')
-            .subscribe({
-              next: () => {
-                this.removeMemberSuccessNotification(member.user);
-                this.readMembers();
-              },
-              error: (error: Error) => {
-                this.removeMemberErrorNotification(error);
-              },
-            });
-        }
+        if (confirmation !== ConfirmationDialogDecision.CONFIRMED) return;
+
+        const removals$ = member.roles.map((role) =>
+          this.memberService.removeRole(member.user.userId, role.id),
+        );
+
+        forkJoin(removals$).subscribe({
+          next: () => {
+            this.removeMemberSuccessNotification(member.user);
+            this.readMembers();
+          },
+          error: (error: Error) => {
+            this.removeMemberErrorNotification(error);
+          },
+        });
       })
       .catch((error: Error) => {
         this.removeMemberErrorNotification(error);
+      });
+  }
+
+  openLeaveDialog(): void {
+    this.confirmationService
+      .showLeaveScopeDialog(this.scopeDisplayName ?? '')
+      .then((confirmation) => {
+        if (confirmation !== ConfirmationDialogDecision.CONFIRMED) return;
+
+        const removals$ = (this.currentUser?.roles ?? []).map((role) =>
+          this.memberService.removeRole(this.currentUserId, role.id),
+        );
+
+        forkJoin(removals$).subscribe({
+          next: () => {
+            this.leaveSuccessNotification();
+            this.readMembers();
+          },
+          error: (error: Error) => {
+            this.leaveErrorNotification(error);
+          },
+        });
+      })
+      .catch((error: Error) => {
+        this.leaveErrorNotification(error);
       });
   }
 
@@ -311,28 +326,6 @@ export class MembersPageComponent implements OnInit {
       $localize`Could not remove user from ${this.currentEntity}. Reason: ` +
         reason.toString(),
     );
-  }
-
-  openLeaveDialog(): void {
-    this.confirmationService
-      .showLeaveScopeDialog(this.scopeDisplayName ?? '')
-      .then((confirmation) => {
-        if (confirmation === ConfirmationDialogDecision.CONFIRMED) {
-          this.memberService
-            .removeRole(this.currentUserId, 'member')
-            .subscribe({
-              next: () => {
-                this.leaveSuccessNotification();
-              },
-              error: (error: Error) => {
-                this.leaveErrorNotification(error);
-              },
-            });
-        }
-      })
-      .catch((error: Error) => {
-        this.leaveErrorNotification(error);
-      });
   }
 
   private leaveSuccessNotification(): void {
@@ -353,9 +346,10 @@ export class MembersPageComponent implements OnInit {
     event: MultiComboboxSelectionChangeEvent,
     member: Member,
   ): void {
+    const selectedItems = event.selectedItems as Role[];
     const sortByRoleTechnicalName = (a: Role, b: Role) =>
       a.id?.localeCompare(b.id, 'en');
-    const selectedSortedRoles = [...(event.selectedItems as Role[])].sort(
+    const selectedSortedRoles = [...selectedItems].sort(
       sortByRoleTechnicalName,
     );
     const memberSortedRoles = [...member.roles].sort(sortByRoleTechnicalName);
@@ -368,24 +362,28 @@ export class MembersPageComponent implements OnInit {
       return;
     }
 
-    if ((event.selectedItems as Role[]).length === 0) {
+    if (selectedItems.length === 0) {
       this.notificationService.openErrorStrip(
         ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
       );
       event.source.setValue(member.roles);
+      this.members.set([...this.members()]);
       return;
     }
 
     // if the user is the owner, he cannot remove himself from the owner role
-    const ownerRoleRemains = (event.selectedItems as Role[]).find(
-      (role) => role.id === 'owner',
-    );
+    const ownerRoleRemains = selectedItems.find((role) => role.id === 'owner');
 
-    if (this.isCurrentUser(member) && !ownerRoleRemains) {
+    if (
+      this.isCurrentUser(member) &&
+      !ownerRoleRemains &&
+      this.ownersCount() === 1
+    ) {
       this.notificationService.openErrorStrip(
         ERROR_MUST_HAVE_AT_LEAST_ONE_OWNER,
       );
       event.source.setValue(member.roles);
+      this.members.set([...this.members()]);
       return;
     }
 
@@ -394,33 +392,56 @@ export class MembersPageComponent implements OnInit {
     }
     this.lockView = true;
 
-    this.memberService
-      .assignRolesToUser({
-        changes: [
-          {
-            userId: member.user.userId,
-            roles: (event.selectedItems as Role[]).map((r) => r.id),
-          },
-        ],
-      })
-      .subscribe({
-        next: () => {
-          this.lockView = false;
-          if (member.user.userId === this.currentUserId) {
-            this.luigiClient.clearFrameCache();
-          }
-          this.notificationService.openSuccessToast(
-            SUCCESS_CHANGING_MEMBERS_ROLE,
-          );
-          this.readMembers();
-        },
-        error: (error) => {
-          console.error(error);
-          this.lockView = false;
-          this.notificationService.openErrorStrip(ERROR_CHANGING_MEMBERS_ROLE);
-          this.readMembers();
-        },
+    if (selectedItems.length < member.roles.length) {
+      member.roles.forEach((role) => {
+        const includedInSelection = selectedItems
+          .map((r) => r.id)
+          .includes(role.id);
+
+        if (!includedInSelection) {
+          this.memberService
+            .removeRole(member.user.userId, role.id)
+            .pipe(finalize(() => (this.lockView = false)))
+            .subscribe({
+              next: () => {
+                this.readMembers();
+              },
+              error: (error: Error) => {
+                this.removeMemberErrorNotification(error);
+              },
+            });
+        }
       });
+    } else {
+      this.memberService
+        .assignRolesToUser({
+          changes: [
+            {
+              userId: member.user.userId,
+              roles: (event.selectedItems as Role[]).map((r) => r.id),
+            },
+          ],
+        })
+        .pipe(finalize(() => (this.lockView = false)))
+        .subscribe({
+          next: () => {
+            if (member.user.userId === this.currentUserId) {
+              this.luigiClient.clearFrameCache();
+            }
+            this.notificationService.openSuccessToast(
+              SUCCESS_CHANGING_MEMBERS_ROLE,
+            );
+            this.readMembers();
+          },
+          error: (error) => {
+            console.error(error);
+            this.notificationService.openErrorStrip(
+              ERROR_CHANGING_MEMBERS_ROLE,
+            );
+            this.readMembers();
+          },
+        });
+    }
   }
 
   selectedRoles(member: Member): Role[] {
@@ -479,7 +500,7 @@ export class MembersPageComponent implements OnInit {
     this.readMembers();
   }
 
-  sortChange(event: TableSortChangeEvent): void {
+  sortChange(_event: TableSortChangeEvent): void {
     // gkr todo
     this.sortBy = {
       field: UserSortField.userId,
