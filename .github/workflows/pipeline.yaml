@@ -19,3 +19,4 @@ jobs:
     with:
       imageTagName: ghcr.io/platform-mesh/iam-ui
       componentVersionKey: iam-ui
+      node_version: '24.14'
