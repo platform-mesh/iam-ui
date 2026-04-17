@@ -1,6 +1,9 @@
 {
   "name": "iam-ui",
   "version": "1.1.304",
+  "engines": {
+    "node": "24.14"
+  },
   "scripts": {
     "preinstall": "npx only-allow npm",
     "ng": "ng",

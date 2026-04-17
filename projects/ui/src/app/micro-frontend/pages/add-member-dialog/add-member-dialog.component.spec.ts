@@ -338,7 +338,8 @@ describe('AddMemberDialogComponent', () => {
       memberService.knownUsers.mockReturnValue(
         of({
           users: [],
-          pageInfo: { totalCount: 0, ownerCount: 0 },
+          ownersCount: 0,
+          pageInfo: { totalCount: 0 },
         } as UserConnection),
       );
 
@@ -357,7 +358,8 @@ describe('AddMemberDialogComponent', () => {
       memberService.knownUsers.mockReturnValue(
         of({
           users: [],
-          pageInfo: { totalCount: 0, ownerCount: 0 },
+          ownersCount: 0,
+          pageInfo: { totalCount: 0 },
         } as UserConnection),
       );
 
