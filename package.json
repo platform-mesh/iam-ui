@@ -75,7 +75,7 @@
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "24.12.2",
     "@vitest/coverage-v8": "^4.1.0",
-    "angular-eslint": "^20.5.0",
+    "angular-eslint": "^21.0.0",
     "concurrently": "^9.2.0",
     "eslint": "^9.21.0",
     "eslint-config-prettier": "^10.0.2",
