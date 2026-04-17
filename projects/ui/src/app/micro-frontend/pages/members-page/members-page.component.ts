@@ -274,15 +274,16 @@ export class MembersPageComponent implements OnInit {
           this.memberService.removeRole(member.user.userId, role.id),
         );
 
-        forkJoin(removals$).subscribe({
-          next: () => {
-            this.removeMemberSuccessNotification(member.user);
-            this.readMembers();
-          },
-          error: (error: Error) => {
-            this.removeMemberErrorNotification(error);
-          },
-        });
+        forkJoin(removals$)
+          .pipe(finalize(() => this.readMembers()))
+          .subscribe({
+            next: () => {
+              this.removeMemberSuccessNotification(member.user);
+            },
+            error: (error: Error) => {
+              this.removeMemberErrorNotification(error);
+            },
+          });
       })
       .catch((error: Error) => {
         this.removeMemberErrorNotification(error);
