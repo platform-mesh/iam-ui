@@ -51,7 +51,7 @@
     "@luigi-project/client-support-angular": "^21.1.0",
     "@ngrx/effects": "21.0.1",
     "@sap-theming/theming-base-content": "~11.32.2",
-    "@sentry/angular": "10.45.0",
+    "@sentry/angular": "10.48.0",
     "apollo-angular": "^13.0.0",
     "deep-equal": "2.2.3",
     "deepmerge": "4.3.1",
