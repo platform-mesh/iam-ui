@@ -15,22 +15,22 @@ concurrency:
 jobs:
   test:
     uses: platform-mesh/.github/.github/workflows/job-node-test.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
 
   create-version:
     uses: platform-mesh/.github/.github/workflows/job-create-version.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     permissions:
-      contents: write
+      contents: write # Needed to create the GitHub release for the tag
 
   docker-build-push:
     needs: [create-version, test]
     uses: platform-mesh/.github/.github/workflows/job-docker-build-push.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     permissions:
-      contents: write
-      packages: write
-      id-token: write
+      contents: write # Needed to create the GitHub release for the tag
+      packages: write # Needed to push the versioned image to GHCR
+      id-token: write # Needed for keyless (OIDC) cosign signing
     with:
       imageTagName: ghcr.io/platform-mesh/iam-ui
       version: ${{ needs.create-version.outputs.version }}
@@ -39,7 +39,7 @@ jobs:
   update-version:
     needs: [create-version, docker-build-push]
     uses: platform-mesh/.github/.github/workflows/job-chart-version-update.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     with:
       appVersion: ${{ needs.create-version.outputs.version }}
       chart: iam-ui
@@ -49,18 +49,18 @@ jobs:
     needs: [create-version, docker-build-push]
     uses: platform-mesh/.github/.github/workflows/job-sbom.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
     permissions:
-      contents: read
-      packages: read
+      contents: read # Needed for actions/checkout in the reusable
+      packages: read # Needed to pull the image to scan
     with:
       imageReference: ghcr.io/platform-mesh/iam-ui:${{ needs.create-version.outputs.version }}
 
   image-ocm:
     needs: [create-version, docker-build-push, sbom]
     uses: platform-mesh/.github/.github/workflows/job-image-ocm.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
     permissions:
-      contents: read
-      packages: write
+      contents: read # Needed for actions/checkout in the reusable
+      packages: write # Needed to push the OCM component to GHCR
     with:
       imageReference: ghcr.io/platform-mesh/iam-ui:${{ needs.create-version.outputs.version }}
       appVersion: ${{ needs.create-version.outputs.version }}
@@ -71,8 +71,8 @@ jobs:
     needs: [create-version, docker-build-push, sbom, image-ocm]
     uses: platform-mesh/.github/.github/workflows/job-trivy-sbom.yml@75f52df7bff585bcb2d794a7bbeec132354933fb # main
     permissions:
-      contents: read
-      packages: read
-      security-events: write
+      contents: read # Needed for actions/checkout in the reusable
+      packages: read # Needed to pull the image to scan
+      security-events: write # Needed to upload Trivy results to code scanning
     with:
       componentVersion: ${{ needs.create-version.outputs.version }}
