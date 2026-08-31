@@ -262,7 +262,7 @@ describe('MembersPageComponent', () => {
     const makeEvent = (selectedItems: Role[]) =>
       ({
         selectedItems,
-        source: { setValue: vi.fn() } as any,
+        source: { selectedItems, setValue: vi.fn() } as any,
       }) as MultiComboboxSelectionChangeEvent;
 
     beforeEach(() => {
@@ -276,12 +276,32 @@ describe('MembersPageComponent', () => {
       expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
     });
 
-    it('shows error when no roles selected', () => {
+    it('shows error when no roles selected', async () => {
       const event = makeEvent([]);
       component.saveMember(event, mockMember);
+
+      await Promise.resolve();
+
       expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
         ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
       );
+      expect(event.source.setValue).toHaveBeenCalledWith(mockMember.roles);
+      expect(memberService.removeRole).not.toHaveBeenCalled();
+      expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
+    });
+
+    it('ignores a transient empty selection during combobox initialization', async () => {
+      const event = makeEvent([]);
+
+      component.saveMember(event, mockMember);
+      event.source.selectedItems = mockMember.roles;
+
+      await Promise.resolve();
+
+      expect(notificationService.openErrorStrip).not.toHaveBeenCalled();
+      expect(event.source.setValue).not.toHaveBeenCalled();
+      expect(memberService.removeRole).not.toHaveBeenCalled();
+      expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
     });
 
     it('shows error when current user tries to remove only owner', () => {
