@@ -36,6 +36,7 @@ export class MemberService {
   users(
     cfg: {
       roleFilters?: string[];
+      countRoleFilters?: string[];
       sortBy?: SortByInput;
       page?: PageInput;
     } = {},
@@ -50,6 +51,7 @@ export class MemberService {
           variables: {
             context: this.getResourceContext(ctx.context),
             roleFilters: cfg.roleFilters,
+            countRoleFilters: cfg.countRoleFilters,
             sortBy: cfg.sortBy,
             page: cfg.page,
           },

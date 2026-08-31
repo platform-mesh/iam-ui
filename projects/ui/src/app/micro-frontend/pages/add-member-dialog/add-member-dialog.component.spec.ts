@@ -44,6 +44,7 @@ describe('AddMemberDialogComponent', () => {
 
   const mockUserConnection: UserConnection = {
     users: [mockMember],
+    roleCounts: [],
     pageInfo: {
       totalCount: 1,
     },
@@ -338,7 +339,7 @@ describe('AddMemberDialogComponent', () => {
       memberService.knownUsers.mockReturnValue(
         of({
           users: [],
-          ownersCount: 0,
+          roleCounts: [],
           pageInfo: { totalCount: 0 },
         } as UserConnection),
       );
@@ -358,7 +359,7 @@ describe('AddMemberDialogComponent', () => {
       memberService.knownUsers.mockReturnValue(
         of({
           users: [],
-          ownersCount: 0,
+          roleCounts: [],
           pageInfo: { totalCount: 0 },
         } as UserConnection),
       );
