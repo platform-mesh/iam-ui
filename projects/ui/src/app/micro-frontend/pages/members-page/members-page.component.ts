@@ -228,6 +228,7 @@ export class MembersPageComponent implements OnInit {
       .users({
         page: { page: this.currentPage, limit: this.itemsPerPage },
         roleFilters: this.selectedFilterRoleIds,
+        countRoleFilters: ['owner'],
         sortBy: this.sortBy,
       })
       .subscribe({
@@ -238,7 +239,10 @@ export class MembersPageComponent implements OnInit {
           }
 
           this.members.set(members.users);
-          this.ownersCount.set(members.ownersCount ?? 0);
+          this.ownersCount.set(
+            members.roleCounts.find(({ roleId }) => roleId === 'owner')
+              ?.count ?? 0,
+          );
           this.totalItems.set(members.pageInfo.totalCount || 0);
           this.currentUser = (members.users || []).find(
             (m) => m.user.userId === this.currentUserId,

@@ -60,7 +60,7 @@ describe('MembersPageComponent', () => {
 
   const mockUserConnection: UserConnection = {
     users: [mockMember],
-    ownersCount: 1,
+    roleCounts: [{ roleId: 'owner', count: 1 }],
     pageInfo: { totalCount: 1 },
   };
 
@@ -160,6 +160,9 @@ describe('MembersPageComponent', () => {
 
     it('sets ownersCount', () => {
       expect(component.ownersCount()).toBe(1);
+      expect(memberService.users).toHaveBeenCalledWith(
+        expect.objectContaining({ countRoleFilters: ['owner'] }),
+      );
     });
 
     it('sets currentUser', () => {
