@@ -364,11 +364,18 @@ export class MembersPageComponent implements OnInit {
     }
 
     if (selectedItems.length === 0) {
-      this.notificationService.openErrorStrip(
-        ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
-      );
-      event.source.setValue(member.roles);
-      this.members.set([...this.members()]);
+      // Defer validation to ignore the transient empty selection emitted during initialization.
+      queueMicrotask(() => {
+        if (event.source.selectedItems.length > 0) {
+          return;
+        }
+
+        this.notificationService.openErrorStrip(
+          ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
+        );
+        event.source.setValue(member.roles);
+        this.members.set([...this.members()]);
+      });
       return;
     }
 
