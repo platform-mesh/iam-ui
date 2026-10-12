@@ -64,16 +64,22 @@ export class MemberService {
 
   knownUsers(
     cfg: {
-      roleFilters?: string[];
+      search?: string;
       sortBy?: SortByInput;
       page?: PageInput;
     } = {},
   ): Observable<UserConnection | undefined> {
-    return this.apolloClientService.apollo().pipe(
-      mergeMap((apollo) =>
+    return combineLatest([
+      this.apolloClientService.apollo(),
+      this.luigiContextService.contextObservable(),
+    ]).pipe(
+      first(),
+      mergeMap(([apollo, ctx]) =>
         apollo.query<{ knownUsers: UserConnection }>({
           query: KNOWN_USERS,
           variables: {
+            context: this.getResourceContext(ctx.context),
+            search: cfg.search,
             sortBy: cfg.sortBy,
             page: cfg.page,
           },

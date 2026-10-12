@@ -238,7 +238,7 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.memberService.knownUsers().subscribe({
+    this.memberService.knownUsers({ search: searchTerm }).subscribe({
       next: (response) => {
         this.filteredUsersCollectionLength = response?.pageInfo.totalCount;
         if (response && response.users?.length > 0) {

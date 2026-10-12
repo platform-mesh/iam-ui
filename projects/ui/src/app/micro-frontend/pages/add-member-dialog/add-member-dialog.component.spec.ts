@@ -329,7 +329,9 @@ describe('AddMemberDialogComponent', () => {
     it('should filter users by search term', () => {
       component.filter('test');
 
-      expect(memberService.knownUsers).toHaveBeenCalled();
+      expect(memberService.knownUsers).toHaveBeenCalledWith({
+        search: 'test',
+      });
       expect(component.dropDownValues).toHaveLength(1);
       expect(component.dropDownValues[0]).toEqual({ user: mockUser });
     });
