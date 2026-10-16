@@ -9,6 +9,7 @@ import {
   ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
   SUCCESS_CHANGING_MEMBERS_ROLE,
 } from './string-variables';
+import { sceneUnsuccessfulAuth } from './svg/scene-unsuccessful-auth';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import {
   ChangeDetectionStrategy,
@@ -16,6 +17,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { CombinedGraphQLErrors } from '@apollo/client';
 import {
   FormItemComponent,
   FormLabelComponent,
@@ -117,8 +119,8 @@ export interface AddMembersData {
   ],
   templateUrl: './members-page.component.html',
   styleUrl: './members-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ConfirmationService, ConfirmationMessagesService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MembersPageComponent implements OnInit {
   public scopeDisplayName?: string;
@@ -141,6 +143,16 @@ export class MembersPageComponent implements OnInit {
   currentPage = 1;
   itemsPerPageOptions: number[] = [5, 10, 15];
   isLoading = signal<boolean>(true);
+  /**
+   * Becomes `true` when the `users` GraphQL query fails with an error whose
+   * message is exactly `"unauthorized"` (case-insensitive) as detected via
+   * Apollo Client v4's `CombinedGraphQLErrors.is()` check.
+   *
+   * While `true` the page renders an illustrated "You are not authorized to
+   * access this content." message and hides the Add button and Search field.
+   * It is reset to `false` at the start of every `readMembers()` call.
+   */
+  isUnauthorized = signal<boolean>(false);
 
   svgConfig = {
     scene: {
@@ -163,10 +175,17 @@ export class MembersPageComponent implements OnInit {
       id: 'sapIllus-Dialog-NoSearchResults',
     },
   };
+
+  unauthorizedConfig = {
+    scene: {
+      file: sceneUnsuccessfulAuth,
+      id: 'tnt-Scene-UnsuccessfulAuth',
+    },
+  };
   context!: NodeContext;
   currentUserId!: string;
   currentUser: Member | undefined;
-  currentUserIsOwner: boolean = false;
+  currentUserIsOwner = false;
 
   constructor(
     private memberService: MemberService,
@@ -192,7 +211,9 @@ export class MembersPageComponent implements OnInit {
     });
 
     this.memberService.roles().subscribe({
-      next: (roles) => this.rolesForEntity.set(roles || []),
+      next: (roles) => {
+        this.rolesForEntity.set(roles || []);
+      },
     });
 
     this.readMembers();
@@ -223,7 +244,21 @@ export class MembersPageComponent implements OnInit {
     return `${userName}${postFix}`;
   }
 
+  /**
+   * Fetches the current page of members from the GraphQL API.
+   *
+   * Always resets `isUnauthorized` to `false` before issuing the request so
+   * that a subsequent successful load clears any prior error state.
+   *
+   * On error, uses Apollo Client v4's `CombinedGraphQLErrors.is()` to
+   * distinguish GraphQL-level errors from network failures. When the error
+   * list contains an entry whose `message` is `"unauthorized"` (matched
+   * case-insensitively), `isUnauthorized` is set to `true` and the template
+   * renders the illustrated authorization-error state rather than the normal
+   * empty-state or busy indicator.
+   */
   readMembers(): void {
+    this.isUnauthorized.set(false);
     this.memberService
       .users({
         page: { page: this.currentPage, limit: this.itemsPerPage },
@@ -247,8 +282,16 @@ export class MembersPageComponent implements OnInit {
             (r) => r.id === 'owner',
           );
         },
-        error: (_error) => {
+        error: (error: unknown) => {
           this.isLoading.set(false);
+          if (
+            CombinedGraphQLErrors.is(error) &&
+            error.errors.some(
+              (e) => e.message?.toLowerCase() === 'unauthorized',
+            )
+          ) {
+            this.isUnauthorized.set(true);
+          }
         },
       });
   }
@@ -275,7 +318,11 @@ export class MembersPageComponent implements OnInit {
         );
 
         forkJoin(removals$)
-          .pipe(finalize(() => this.readMembers()))
+          .pipe(
+            finalize(() => {
+              this.readMembers();
+            }),
+          )
           .subscribe({
             next: () => {
               this.removeMemberSuccessNotification(member.user);
@@ -364,11 +411,18 @@ export class MembersPageComponent implements OnInit {
     }
 
     if (selectedItems.length === 0) {
-      this.notificationService.openErrorStrip(
-        ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
-      );
-      event.source.setValue(member.roles);
-      this.members.set([...this.members()]);
+      // Defer validation to ignore the transient empty selection emitted during initialization.
+      queueMicrotask(() => {
+        if (event.source.selectedItems.length > 0) {
+          return;
+        }
+
+        this.notificationService.openErrorStrip(
+          ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
+        );
+        event.source.setValue(member.roles);
+        this.members.set([...this.members()]);
+      });
       return;
     }
 

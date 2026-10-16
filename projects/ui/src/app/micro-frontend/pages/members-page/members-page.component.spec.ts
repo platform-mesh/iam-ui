@@ -25,7 +25,8 @@ import {
   ConfirmationService,
 } from '../../services/notification/confirmation.service';
 import { ConfirmationMessagesService } from '../../services/confirmation-messages/confirmation-messages.service';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { CombinedGraphQLErrors } from '@apollo/client';
 
 const errorObservable = (msg = 'fail') =>
   new Observable<never>((s) => s.error(new Error(msg)));
@@ -262,7 +263,7 @@ describe('MembersPageComponent', () => {
     const makeEvent = (selectedItems: Role[]) =>
       ({
         selectedItems,
-        source: { setValue: vi.fn() } as any,
+        source: { selectedItems, setValue: vi.fn() } as any,
       }) as MultiComboboxSelectionChangeEvent;
 
     beforeEach(() => {
@@ -276,12 +277,32 @@ describe('MembersPageComponent', () => {
       expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
     });
 
-    it('shows error when no roles selected', () => {
+    it('shows error when no roles selected', async () => {
       const event = makeEvent([]);
       component.saveMember(event, mockMember);
+
+      await Promise.resolve();
+
       expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
         ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
       );
+      expect(event.source.setValue).toHaveBeenCalledWith(mockMember.roles);
+      expect(memberService.removeRole).not.toHaveBeenCalled();
+      expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
+    });
+
+    it('ignores a transient empty selection during combobox initialization', async () => {
+      const event = makeEvent([]);
+
+      component.saveMember(event, mockMember);
+      event.source.selectedItems = mockMember.roles;
+
+      await Promise.resolve();
+
+      expect(notificationService.openErrorStrip).not.toHaveBeenCalled();
+      expect(event.source.setValue).not.toHaveBeenCalled();
+      expect(memberService.removeRole).not.toHaveBeenCalled();
+      expect(memberService.assignRolesToUser).not.toHaveBeenCalled();
     });
 
     it('shows error when current user tries to remove only owner', () => {
@@ -354,6 +375,71 @@ describe('MembersPageComponent', () => {
     it('does not throw when members is undefined', () => {
       memberService.users.mockReturnValue(of(undefined));
       expect(() => component.readMembers()).not.toThrow();
+    });
+
+    it('sets isUnauthorized to true and isLoading to false when users() errors with an unauthorized CombinedGraphQLErrors', () => {
+      const unauthorizedError = new CombinedGraphQLErrors({
+        errors: [{ message: 'Unauthorized' }],
+      });
+      memberService.users.mockReturnValue(throwError(() => unauthorizedError));
+
+      component.readMembers();
+
+      expect(CombinedGraphQLErrors.is(unauthorizedError)).toBe(true);
+      expect(component.isUnauthorized()).toBe(true);
+      expect(component.isLoading()).toBe(false);
+    });
+
+    it('keeps isUnauthorized false when users() errors with a non-unauthorized CombinedGraphQLErrors', () => {
+      const otherGraphQLError = new CombinedGraphQLErrors({
+        errors: [{ message: 'Some other error' }],
+      });
+      memberService.users.mockReturnValue(throwError(() => otherGraphQLError));
+
+      component.readMembers();
+
+      expect(component.isUnauthorized()).toBe(false);
+      expect(component.isLoading()).toBe(false);
+    });
+
+    it('keeps isUnauthorized false when users() errors with a generic Error', () => {
+      memberService.users.mockReturnValue(
+        throwError(() => new Error('network error')),
+      );
+
+      component.readMembers();
+
+      expect(component.isUnauthorized()).toBe(false);
+      expect(component.isLoading()).toBe(false);
+    });
+
+    it('resets isUnauthorized to false at the start of a new readMembers call', () => {
+      // Simulate a previous unauthorized state
+      const unauthorizedError = new CombinedGraphQLErrors({
+        errors: [{ message: 'unauthorized' }],
+      });
+      memberService.users.mockReturnValueOnce(
+        throwError(() => unauthorizedError),
+      );
+      component.readMembers();
+      expect(component.isUnauthorized()).toBe(true);
+
+      // Next call succeeds — isUnauthorized must be reset
+      memberService.users.mockReturnValue(of(mockUserConnection));
+      component.readMembers();
+
+      expect(component.isUnauthorized()).toBe(false);
+    });
+
+    it('matches "unauthorized" case-insensitively', () => {
+      const uppercaseError = new CombinedGraphQLErrors({
+        errors: [{ message: 'UNAUTHORIZED' }],
+      });
+      memberService.users.mockReturnValue(throwError(() => uppercaseError));
+
+      component.readMembers();
+
+      expect(component.isUnauthorized()).toBe(true);
     });
   });
 

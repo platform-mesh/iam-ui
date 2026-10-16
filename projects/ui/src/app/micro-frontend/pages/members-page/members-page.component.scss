@@ -1,3 +1,17 @@
+.unauthorized-state {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 24rem;
+  width: 100%;
+
+  figure {
+    max-width: 42rem;
+    width: 100%;
+  }
+}
+
 .action-column-alignment {
   text-align: right;
 }
