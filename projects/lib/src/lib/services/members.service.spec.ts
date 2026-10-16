@@ -79,16 +79,23 @@ describe('MemberService', () => {
     });
   });
 
-  it('knownUsers() should query known users', async () => {
+  it('knownUsers() should query known users with context and search', async () => {
     mockApollo.query.mockReturnValue(
       of({ data: { knownUsers: { items: [], total: 0 } } }),
     );
 
-    const result = await firstValueFrom(service.knownUsers());
+    const result = await firstValueFrom(service.knownUsers({ search: 'anna' }));
     expect(result).toEqual({ items: [], total: 0 });
     expect(mockApollo.query).toHaveBeenCalledWith({
       query: KNOWN_USERS,
       variables: {
+        context: {
+          group: 'core.platform-mesh.io',
+          kind: 'Account',
+          resource: { name: 'account1', namespace: 'test-ns' },
+          accountPath: 'root',
+        },
+        search: 'anna',
         sortBy: undefined,
         page: undefined,
       },
