@@ -1,4 +1,4 @@
-import { MockedObject } from 'vitest';
+import { ERROR_LOADING_USERS } from '../members-page/string-variables';
 import {
   AddMemberDialogComponent,
   DropDownValue,
@@ -15,7 +15,8 @@ import {
   User,
   UserConnection,
 } from '@platform-mesh/iam-lib';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
+import { MockedObject } from 'vitest';
 
 describe('AddMemberDialogComponent', () => {
   let component: AddMemberDialogComponent;
@@ -368,6 +369,39 @@ describe('AddMemberDialogComponent', () => {
       component.filter('nonexistent');
 
       expect(component.dropDownValues).toEqual([{ noData: true }]);
+    });
+
+    it('should ignore a response for an older search term', () => {
+      const olderResponse = new Subject<UserConnection>();
+      const newerResponse = new Subject<UserConnection>();
+      memberService.knownUsers
+        .mockReturnValueOnce(olderResponse)
+        .mockReturnValueOnce(newerResponse);
+
+      component.filter('jo');
+      component.filter('john');
+      newerResponse.next(mockUserConnection);
+      olderResponse.next({
+        users: [],
+        ownersCount: 0,
+        pageInfo: { totalCount: 0 },
+      } as UserConnection);
+
+      expect(component.dropDownValues).toEqual([{ user: mockUser }]);
+    });
+
+    it('should show an error and clear the dropdown when the search fails', () => {
+      memberService.knownUsers.mockReturnValue(
+        throwError(() => new Error('unauthorized')),
+      );
+
+      component.filter('john');
+
+      expect(component.dropDownValues).toEqual([]);
+      expect(component.filteredUsersCollectionLength).toBe(0);
+      expect(notificationService.openErrorStrip).toHaveBeenCalledWith(
+        ERROR_LOADING_USERS,
+      );
     });
   });
 
