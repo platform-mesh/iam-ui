@@ -358,6 +358,14 @@ describe('MembersPageComponent', () => {
       memberService.users.mockReturnValue(of(undefined));
       expect(() => component.readMembers()).not.toThrow();
     });
+
+    it('sets ownersCount to 0 when the owner count is missing', () => {
+      memberService.users.mockReturnValue(
+        of({ ...mockUserConnection, roleCounts: [] }),
+      );
+      component.readMembers();
+      expect(component.ownersCount()).toBe(0);
+    });
   });
 
   describe('newPageClicked', () => {
