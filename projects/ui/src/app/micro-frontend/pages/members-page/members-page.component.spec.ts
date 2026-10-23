@@ -60,7 +60,7 @@ describe('MembersPageComponent', () => {
 
   const mockUserConnection: UserConnection = {
     users: [mockMember],
-    roleCounts: [{ roleId: 'owner', count: 1 }],
+    roleCounts: [{ role: mockRoles[0], count: 1 }],
     pageInfo: { totalCount: 1 },
   };
 

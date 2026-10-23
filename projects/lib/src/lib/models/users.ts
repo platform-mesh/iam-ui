@@ -1,8 +1,9 @@
 import { Member } from './member';
 import { PageInfo } from './page-info';
+import { Role } from './role';
 
 export interface RoleCount {
-  roleId: string;
+  role: Role;
   count: number;
 }
 

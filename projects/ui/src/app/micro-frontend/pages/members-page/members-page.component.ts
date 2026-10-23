@@ -242,7 +242,7 @@ export class MembersPageComponent implements OnInit {
           this.members.set(members.users);
           this.ownersCount.set(
             members.roleCounts.find(
-              ({ roleId }) => roleId === (RolesTechnicalName.OWNER as string),
+              ({ role }) => role.id === (RolesTechnicalName.OWNER as string),
             )?.count ?? 0,
           );
           this.totalItems.set(members.pageInfo.totalCount || 0);
