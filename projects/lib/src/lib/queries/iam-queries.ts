@@ -45,7 +45,11 @@ export const USERS = gql`
         hasPreviousPage
       }
       roleCounts {
-        roleId
+        role {
+          id
+          displayName
+          description
+        }
         count
       }
     }
