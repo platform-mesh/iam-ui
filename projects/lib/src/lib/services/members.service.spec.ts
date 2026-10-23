@@ -60,7 +60,9 @@ describe('MemberService', () => {
       of({ data: { users: { items: [], total: 0 } } }),
     );
 
-    const result = await firstValueFrom(service.users());
+    const result = await firstValueFrom(
+      service.users({ countRoleFilters: ['owner'] }),
+    );
     expect(result).toEqual({ items: [], total: 0 });
     expect(mockApollo.query).toHaveBeenCalledWith({
       query: USERS,
@@ -72,6 +74,7 @@ describe('MemberService', () => {
           accountPath: 'root',
         },
         roleFilters: undefined,
+        countRoleFilters: ['owner'],
         sortBy: undefined,
         page: undefined,
       },
