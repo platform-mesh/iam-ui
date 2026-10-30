@@ -38,7 +38,7 @@ jobs:
 
   update-version:
     needs: [create-version, docker-build-push]
-    uses: platform-mesh/.github/.github/workflows/job-chart-version-update.yml@70ae2b114f3e2b2c4c4eff8d32f86efb01a532fa # main
+    uses: platform-mesh/.github/.github/workflows/job-chart-version-update.yml@627a7ad1cb190ad102455c74e97e98e72574bcf9 # main
     secrets: inherit # zizmor: ignore[secrets-inherit]
     with:
       appVersion: ${{ needs.create-version.outputs.version }}
