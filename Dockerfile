@@ -7,7 +7,7 @@ RUN npm ci
 
 RUN npm run build
 
-FROM nginx:alpine@sha256:785835ea65db4bba6f021acc0f3be91b0fef76a53fe41f8588c6698d2aed0606
+FROM nginx:alpine-slim@sha256:f45171d36c76a8b2f5ef97108a3a8a2294248a6578a0a180edc2d78f7d2edc26
 COPY --from=build /app/dist-ui /usr/share/nginx/html/ui/iam/ui
 COPY --from=build /app/dist-wc /usr/share/nginx/html/ui/iam/wc
 COPY nginx.conf /etc/nginx/nginx.conf
