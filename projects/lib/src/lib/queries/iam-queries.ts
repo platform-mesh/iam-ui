@@ -48,8 +48,18 @@ export const USERS = gql`
 `;
 
 export const KNOWN_USERS = gql`
-  query knownUsers($sortBy: SortByInput, $page: PageInput) {
-    knownUsers(sortBy: $sortBy, page: $page) {
+  query knownUsers(
+    $context: ResourceContext!
+    $search: String
+    $sortBy: SortByInput
+    $page: PageInput
+  ) {
+    knownUsers(
+      context: $context
+      search: $search
+      sortBy: $sortBy
+      page: $page
+    ) {
       users {
         user {
           userId
