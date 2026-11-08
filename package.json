@@ -73,7 +73,7 @@
     "@openmfp/eslint-config-typescript": "0.7.15",
     "@openmfp/gha-cache": "0.5.40",
     "@trivago/prettier-plugin-sort-imports": "6.0.2",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "@vitest/coverage-v8": "4.1.12",
     "angular-eslint": "22.6.0",
     "concurrently": "10.0.6",
