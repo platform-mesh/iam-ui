@@ -70,6 +70,7 @@ import {
   NodeContext,
   NotificationService,
   Role,
+  RolesTechnicalName,
   RoutingService,
   SortByInput,
   SortDirection,
@@ -263,6 +264,7 @@ export class MembersPageComponent implements OnInit {
       .users({
         page: { page: this.currentPage, limit: this.itemsPerPage },
         roleFilters: this.selectedFilterRoleIds,
+        countRoleFilters: [RolesTechnicalName.OWNER],
         sortBy: this.sortBy,
       })
       .subscribe({
@@ -273,13 +275,17 @@ export class MembersPageComponent implements OnInit {
           }
 
           this.members.set(members.users);
-          this.ownersCount.set(members.ownersCount ?? 0);
+          this.ownersCount.set(
+            members.roleCounts.find(
+              ({ role }) => role.id === (RolesTechnicalName.OWNER as string),
+            )?.count ?? 0,
+          );
           this.totalItems.set(members.pageInfo.totalCount || 0);
           this.currentUser = (members.users || []).find(
             (m) => m.user.userId === this.currentUserId,
           );
           this.currentUserIsOwner = !!this.currentUser?.roles.some(
-            (r) => r.id === 'owner',
+            (r) => r.id === (RolesTechnicalName.OWNER as string),
           );
         },
         error: (error: unknown) => {
@@ -427,7 +433,9 @@ export class MembersPageComponent implements OnInit {
     }
 
     // if the user is the owner, he cannot remove himself from the owner role
-    const ownerRoleRemains = selectedItems.find((role) => role.id === 'owner');
+    const ownerRoleRemains = selectedItems.find(
+      (role) => role.id === (RolesTechnicalName.OWNER as string),
+    );
 
     if (
       this.isCurrentUser(member) &&
