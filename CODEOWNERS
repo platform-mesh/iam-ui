@@ -1,5 +1,6 @@
 * @platform-mesh/node-maintainers
 
 # ownerless so renovate can auto-merge updates
-go.mod
-go.sum
+package.json
+package-lock.json
+projects/lib/package.json
