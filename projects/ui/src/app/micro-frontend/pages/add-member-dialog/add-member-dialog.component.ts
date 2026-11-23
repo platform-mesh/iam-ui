@@ -1,4 +1,7 @@
-import { ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE } from '../members-page/string-variables';
+import {
+  ERROR_LOADING_USERS,
+  ERROR_MUST_HAVE_AT_LEAST_ONE_ROLE,
+} from '../members-page/string-variables';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import {
   ChangeDetectionStrategy,
@@ -64,9 +67,7 @@ import {
 import { BehaviorSubject, Subscription, debounceTime } from 'rxjs';
 
 export type DropDownValue =
-  | { user: User }
-  | { email: string }
-  | { noData: true };
+  { user: User } | { email: string } | { noData: true };
 
 export const MAX_USERS_SHOWN = 5;
 
@@ -123,6 +124,7 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
   emailDomains: string[] = [];
   currentEntity?: string;
   private subscriptions = new Subscription();
+  private searchSubscription?: Subscription;
 
   constructor(
     private luigiClient: LuigiClient,
@@ -231,6 +233,9 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
       return { user: member.user };
     };
 
+    // A response for an older term must not replace the results of a newer one.
+    this.searchSubscription?.unsubscribe();
+
     if (!searchTerm || searchTerm.length === 0) {
       this.dropDownValues = [];
       this.filteredUsersCollectionLength = 0;
@@ -238,30 +243,38 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.memberService.knownUsers().subscribe({
-      next: (response) => {
-        this.filteredUsersCollectionLength = response?.pageInfo.totalCount;
-        if (response && response.users?.length > 0) {
-          if (this.isEmail(searchTerm)) {
-            const emailMatches = response?.users.filter(
-              (member) => member.user.email === searchTerm,
-            );
-            this.filteredUsersCollectionLength = emailMatches?.length;
-            this.dropDownValues =
-              emailMatches?.length === 0
-                ? [{ email: searchTerm }]
-                : emailMatches?.map(mapUser) || [];
+    this.searchSubscription = this.memberService
+      .knownUsers({ search: searchTerm })
+      .subscribe({
+        next: (response) => {
+          this.filteredUsersCollectionLength = response?.pageInfo.totalCount;
+          if (response && response.users?.length > 0) {
+            if (this.isEmail(searchTerm)) {
+              const emailMatches = response?.users.filter(
+                (member) => member.user.email === searchTerm,
+              );
+              this.filteredUsersCollectionLength = emailMatches?.length;
+              this.dropDownValues =
+                emailMatches?.length === 0
+                  ? [{ email: searchTerm }]
+                  : emailMatches?.map(mapUser) || [];
+            } else {
+              this.dropDownValues = response?.users.map(mapUser) || [];
+            }
+          } else if (this.isEmail(searchTerm)) {
+            this.dropDownValues = [{ email: searchTerm }];
           } else {
-            this.dropDownValues = response?.users.map(mapUser) || [];
+            this.dropDownValues = [{ noData: true }];
           }
-        } else if (this.isEmail(searchTerm)) {
-          this.dropDownValues = [{ email: searchTerm }];
-        } else {
-          this.dropDownValues = [{ noData: true }];
-        }
-        this.cdr.detectChanges();
-      },
-    });
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.dropDownValues = [];
+          this.filteredUsersCollectionLength = 0;
+          this.notificationService.openErrorStrip(ERROR_LOADING_USERS);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   isEmail(email: string): boolean {
@@ -352,6 +365,7 @@ export class AddMemberDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.searchSubscription?.unsubscribe();
   }
 
   hasError() {
