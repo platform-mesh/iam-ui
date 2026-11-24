@@ -14,12 +14,14 @@ export const USERS = gql`
   query users(
     $context: ResourceContext!
     $roleFilters: [String!]
+    $countRoleFilters: [String!]
     $sortBy: SortByInput
     $page: PageInput
   ) {
     users(
       context: $context
       roleFilters: $roleFilters
+      countRoleFilters: $countRoleFilters
       sortBy: $sortBy
       page: $page
     ) {
@@ -42,7 +44,14 @@ export const USERS = gql`
         hasNextPage
         hasPreviousPage
       }
-      ownersCount
+      roleCounts {
+        role {
+          id
+          displayName
+          description
+        }
+        count
+      }
     }
   }
 `;
