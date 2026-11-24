@@ -14,18 +14,18 @@ concurrency:
 
 jobs:
   test:
-    uses: platform-mesh/.github/.github/workflows/job-node-test.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
+    uses: platform-mesh/.github/.github/workflows/job-node-test.yml@15b291d550257bc590a89917bfbbe0e30bf08895 # main
     secrets: inherit # zizmor: ignore[secrets-inherit]
 
   create-version:
-    uses: platform-mesh/.github/.github/workflows/job-create-version.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
+    uses: platform-mesh/.github/.github/workflows/job-create-version.yml@15b291d550257bc590a89917bfbbe0e30bf08895 # main
     secrets: inherit # zizmor: ignore[secrets-inherit]
     permissions:
       contents: write # Needed to create the GitHub release for the tag
 
   docker-build-push:
     needs: [create-version, test]
-    uses: platform-mesh/.github/.github/workflows/job-docker-build-push.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
+    uses: platform-mesh/.github/.github/workflows/job-docker-build-push.yml@15b291d550257bc590a89917bfbbe0e30bf08895 # main
     secrets: inherit # zizmor: ignore[secrets-inherit]
     permissions:
       contents: write # Needed to create the GitHub release for the tag
@@ -38,7 +38,7 @@ jobs:
 
   update-version:
     needs: [create-version, docker-build-push]
-    uses: platform-mesh/.github/.github/workflows/job-chart-version-update.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
+    uses: platform-mesh/.github/.github/workflows/job-chart-version-update.yml@15b291d550257bc590a89917bfbbe0e30bf08895 # main
     secrets: inherit # zizmor: ignore[secrets-inherit]
     with:
       appVersion: ${{ needs.create-version.outputs.version }}
@@ -47,7 +47,7 @@ jobs:
 
   sbom:
     needs: [create-version, docker-build-push]
-    uses: platform-mesh/.github/.github/workflows/job-sbom.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
+    uses: platform-mesh/.github/.github/workflows/job-sbom.yml@15b291d550257bc590a89917bfbbe0e30bf08895 # main
     permissions:
       contents: read # Needed for actions/checkout in the reusable
       packages: read # Needed to pull the image to scan
@@ -56,20 +56,23 @@ jobs:
 
   image-ocm:
     needs: [create-version, docker-build-push, sbom]
-    uses: platform-mesh/.github/.github/workflows/job-image-ocm.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
-    secrets: inherit # zizmor: ignore[secrets-inherit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read # Needed for actions/checkout in the reusable
       packages: write # Needed to push the OCM component to GHCR
-    with:
-      imageReference: ghcr.io/platform-mesh/iam-ui:${{ needs.create-version.outputs.version }}
-      appVersion: ${{ needs.create-version.outputs.version }}
-      repoName: iam-ui
-      commit: ${{ github.sha }}
+      id-token: write # Needed for keyless (OIDC) signing of the OCM component
+    steps:
+      - uses: platform-mesh/.github/.github/actions/image-ocm@15b291d550257bc590a89917bfbbe0e30bf08895 # main
+        with:
+          imageReference: ghcr.io/platform-mesh/iam-ui:${{ needs.create-version.outputs.version }}
+          appVersion: ${{ needs.create-version.outputs.version }}
+          repoName: iam-ui
+          commit: ${{ github.sha }}
 
   scan-sbom:
     needs: [create-version, docker-build-push, sbom, image-ocm]
-    uses: platform-mesh/.github/.github/workflows/job-trivy-sbom.yml@bc940c04f874cb46be445b421b8f6f1622ab61c2 # main
+    uses: platform-mesh/.github/.github/workflows/job-trivy-sbom.yml@15b291d550257bc590a89917bfbbe0e30bf08895 # main
     permissions:
       contents: read # Needed for actions/checkout in the reusable
       packages: read # Needed to pull the image to scan
